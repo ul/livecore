@@ -1,0 +1,21 @@
+#!/bin/sh
+
+# This script is just for the development, it assumes that the session changes
+# are only for testing other code changes and don't need to be preserved.
+
+# In the session code we want as much performance as possible.
+NIM_FLAGS="--gc:arc -d:danger --passC:-ffast-math"
+# dlopen tries really hard to reuse shared objects. The simplest way I've found
+# to workaround it on macOS is to build the library with a different name each
+# time. Just "double-buffer" copying as clive does didn't work, I assume because
+# not only the filename/inode is checked but LC_ID_DYLIB baked into the file
+# too. We also have to "triple-buffer" the naming and remove unloaded libs to
+# make it work.
+SO_VERSION=0
+
+nim c $NIM_FLAGS --app:lib -o:target/session.so.$((SO_VERSION++ % 3)) src/session.nim
+
+fswatch -o src | while read num
+do
+  nim c $NIM_FLAGS --app:lib -o:target/session.so.$((SO_VERSION++ % 3)) src/session.nim
+done

@@ -1,0 +1,16 @@
+#!/bin/sh
+
+# This should minimize overhead of the write_callback's glue code.
+NIM_FLAGS="--gc:arc -d:danger --passC:-ffast-math"
+
+# Loop is an attempt to minimize disruption to the performance caused by
+# crashing the server. There will be a silent gap, and state is lost
+# but at least we can focus on correcting the session code rather than
+# on restarting server manually.
+while true
+do
+  # $1 is output device index, defaults to the system's one.
+  # Server lists indexed devices upon start.
+  nim c $NIM_FLAGS -r -o:target/livecore src/server.nim $1
+  sleep 1
+done
