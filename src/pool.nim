@@ -31,6 +31,7 @@ type
     long_delay: array[small_pool, Delay[30.seconds]]
     maygate: array[medium_pool, MayGate]
     metro: array[medium_pool, Metro]
+    peaklim: array[medium_pool, PeakLimiter]
     pink_noise: array[medium_pool, PinkNoise]
     rline: array[medium_pool, RLine]
     sample: array[medium_pool, float]
@@ -57,6 +58,7 @@ type
       long_delay,
       maygate,
       metro,
+      peaklim,
       pink_noise,
       rline,
       sequence,
@@ -143,6 +145,7 @@ def3(diode)
 def3(fm)
 def3(gaussian, sample)
 def4(autowah)
+def4(peaklim)
 def5(adsr)
 def5(compressor)
 

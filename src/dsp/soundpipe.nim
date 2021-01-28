@@ -68,6 +68,17 @@ template spi_lift(name, T, a, b) =
     sp_compute(name, s, x)
   lift3(name, T)
 
+template spi_lift(name, T, a, b, c) =
+  ## Lift SP module generated with input expected.
+  sp_t(name, T)
+  proc name*(x, a, b, c: float, s: var T): float =
+    sp_init(name, s)
+    s.p.a = a
+    s.p.b = b
+    s.p.c = c
+    sp_compute(name, s, x)
+  lift4(name, T)
+
 template spf_lift(name, T, a) =
   ## Lift SP module generated from Faust.
   ## The difference is that parameters are float pointers rather than floats.
@@ -138,6 +149,11 @@ spi_lift(diode, Diode, freq, res)
 spi_lift(jcrev, JCRev)
 # input is a trigger
 spi_lift(maygate, MayGate, prob)
+
+# atk: Attack time, in seconds, try 0.01
+# rel: Release time, in seconds, try 0.1
+# thresh: Threshold, in dB
+spi_lift(peaklim, PeakLimiter, atk, rel, thresh)
 
 # bigverb is one of the rare stereo modules in SP, doesn't warrant template yet
 
