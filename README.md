@@ -60,6 +60,10 @@ To render a specific session duration in a non-interactive mode to a file:
 $ ./render <duration in seconds> <path/to/output.wav>
 ```
 
+## Examples
+
+Peek into `src/session.nim` in `session/*` branches.
+
 ## FAQ
 
 ### Why Nim?
