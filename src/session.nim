@@ -12,7 +12,9 @@ type
 
 proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
   s.pool.init
-  0.1 * (220.0.osc + 220.0.osc(s.phase1))
+  let
+    mix = 220.osc
+  mix.simple_saturator
 
 # A place for heavy init logic, like reading tables from the disk.
 # Beware access to the state is not guarded and may happen simultaneously with `process`.
