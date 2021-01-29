@@ -20,7 +20,10 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       .midi2freq
       .fm(3, 1/2) *
       bt(20.0).adsr(0.1, 0.1, 0.8, 0.25)
-    t2 = @45
+    t2 = [33.0, 45.0]
+      .sequence(bt(60.0))
+      .tline(0.05)
+      .midi2freq
       .bltriangle
       .mul(@33.osc)
       .mul(bt(40.0)
