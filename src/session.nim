@@ -49,7 +49,7 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       .adsr(0.05, 0.2, 0.6, 0.5)
     t2 = [69.0, 81.0, 93].choose(bt(30.0))
       .tline(0.05)
-      .sub([12.0, 24.0].choose(bt(30.0)))
+      .sub([12.0, 24.0, 36.0].choose(bt(30.0)))
       .midi2freq
       .bltriangle
       .mul(bt(40.0).maytrig(0.5).gaussian(0.1, 1.osc.biscale(0.1, 0.2)))
