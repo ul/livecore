@@ -48,8 +48,8 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       .midi2freq
     t2 = f
       # changing oscillator here is a good way to add dynamics during the performance
-      .blsquare((1.30).osc.biscale(0.01, 0.5)).bi
-      # .bltriangle.bi
+      # .blsquare((1.30).osc.biscale(0.01, 0.5)).bi
+      .bltriangle.bi
       # .osc
       .mul(f.osc)
       .mul(e)
