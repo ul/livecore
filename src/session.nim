@@ -70,7 +70,7 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
 proc load*(s: var State) {.nimcall, exportc, dynlib.} =
   const MB = 1024^2
   echo "State: ", int(State.size_of/MB) , "MB / Pool: ", int(Pool.size_of/MB), "MB" 
-  # s.pool.addr.zero_mem(Pool.size_of)
+  s.pool.addr.zero_mem(Pool.size_of)
   # s.addr.zero_mem(State.size_of)
   sp_create()
 
