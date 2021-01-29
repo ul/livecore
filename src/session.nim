@@ -38,7 +38,7 @@ type
 
 proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
   s.pool.init
-  let clk = [2.0, 3.0, 4.0].choose(20.dmetro).bpm2freq.saw
+  let clk = [2.0, 3.0, 4.0].choose(20.dmetro).tline(20).bpm2freq.saw
   template bt(n: float): float = clk.phsclk(n)
   let
     t1 = [39.0, 42, 45, 48, 51].choose(bt(30.0))
