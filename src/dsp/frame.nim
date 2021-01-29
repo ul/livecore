@@ -145,11 +145,11 @@ lift1(sqrt)
 lift1(exp)
 
 proc project*(x, a, b, c, d: float): float = (d - c) * (x - a) / (b - a) + c
-proc range*(x, a, b: float): float = x.project(-1.0, 1.0, a, b)
-proc to*(x, a, b: float): float = x.range(a, b)
-proc circle*(x: float): float = x.range(-PI, PI)
-proc unit*(x: float): float = x.range(0.0, 1.0)
-proc bi*(x: float): float = x.project(0.0, 1.0, -1.0, 1.0)
+proc scale*(x, a, b: float): float = x.project(0.0, 1.0, a, b)
+proc biscale*(x, a, b: float): float = x.project(-1.0, 1.0, a, b)
+proc circle*(x: float): float = x.biscale(-PI, PI)
+proc uni*(x: float): float = x.biscale(0.0, 1.0)
+proc bi*(x: float): float = x.scale(-1.0, 1.0)
 
 proc db2amp*(x: float): float = 20.0 * x.log10
 proc amp2db*(x: float): float = 10.0.pow(x / 20.0)
@@ -163,10 +163,10 @@ proc step*(x, step: float): float = x.quantize(step)
 proc recip*(x: float): float = 1.0 / x
 
 lift5(project)
-lift3(range)
-lift3(to)
+lift3(scale)
+lift3(biscale)
 lift1(circle)
-lift1(unit)
+lift1(uni)
 lift1(bi)
 lift1(db2amp)
 lift1(amp2db)

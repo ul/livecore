@@ -32,11 +32,16 @@ type
     maygate: array[medium_pool, MayGate]
     metro: array[medium_pool, Metro]
     peaklim: array[medium_pool, PeakLimiter]
+    phaser: array[small_pool, Phaser]
     pink_noise: array[medium_pool, PinkNoise]
+    pshift: array[medium_pool, PShift]
     rline: array[medium_pool, RLine]
     sample: array[medium_pool, float]
+    saturator: array[medium_pool, Saturator]
     sequence: array[medium_pool, int]
     transition: array[medium_pool, Transition]
+    wpkorg35: array[medium_pool, WPKorg35]
+    zitarev: array[medium_pool, ZitaRev]
   Index = object
     sample,
       adsr,
@@ -59,10 +64,15 @@ type
       maygate,
       metro,
       peaklim,
+      phaser,
       pink_noise,
+      pshift,
       rline,
+      saturator,
       sequence,
-      transition : int
+      transition,
+      wpkorg35,
+      zitarev: int
   Pool* = object
     data: Data
     index: Index
@@ -126,6 +136,7 @@ def1(jcrev)
 def1(osc, sample)
 def1(metro)
 def1(rline)
+def1(saturator)
 def1(saw, sample)
 def1(tri, sample)
 def2(blsquare)
@@ -146,10 +157,12 @@ def3(fm)
 def3(gaussian, sample)
 def4(autowah)
 def4(peaklim)
+def4(pshift)
+def4(wpkorg35)
 def5(adsr)
 def5(compressor)
 
-proc bigverb*(x, feedback, lpfreq: Frame): Frame =
+proc bigverb*(x: Frame, feedback, lpfreq: float): Frame =
   result = bigverb(x, feedback, lpfreq, pool.data.bigverb[pool.index.bigverb])
   pool.index.bigverb += 1
 
@@ -180,3 +193,59 @@ proc sequence*(seq: openArray[float], t: float): float =
 proc sequence*(seq: openArray[Frame], t: Frame): Frame =
   for i in 0..<CHANNELS:
     result[i] = sequence(seq[i], t[i])
+
+proc phaser*(
+  x: Frame,
+  MaxNotch1Freq: float = 800,
+  MinNotch1Freq: float = 100,
+  Notch_width: float = 1000,
+  NotchFreq: float = 1.5,
+  VibratoMode: float = 1,
+  depth: float = 1,
+  feedback_gain: float = 0,
+  invert: float = 0,
+  level: float = 0,
+  lfobpm: float = 30): Frame =
+  result = phaser(
+    x,
+    MaxNotch1Freq,
+    MinNotch1Freq,
+    Notch_width,
+    NotchFreq,
+    VibratoMode,
+    depth,
+    feedback_gain,
+    invert,
+    level,
+    lfobpm,
+    pool.data.phaser[pool.index.phaser])
+  pool.index.phaser += 1
+
+proc zitarev*(
+  x: Frame,
+  in_delay: float = 60,
+  lf_x: float = 200,
+  rt60_low: float = 3,
+  rt60_mid: float = 2,
+  hf_damping: float = 6000,
+  eq1_freq: float = 315,
+  eq1_level: float = 0,
+  eq2_freq: float = 1500,
+  eq2_level: float = 0,
+  mix: float = 1,
+  level: float = -20): Frame =
+  result = zitarev(
+    x,
+    in_delay,
+    lf_x,
+    rt60_low,
+    rt60_mid,
+    hf_damping,
+    eq1_freq,
+    eq1_level,
+    eq2_freq,
+    eq2_level,
+    mix,
+    level,
+    pool.data.zitarev[pool.index.zitarev])
+  pool.index.zitarev += 1

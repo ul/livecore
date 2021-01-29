@@ -23,7 +23,7 @@ lift1(dmetro, Metro)
 
 proc phsclk*(x, n: float, s: var float): float =
   ## https://pbat.ch/sndkit/phsclk/
-  let x = x.unit
+  let x = x.uni
   if likely(x < 1.0):
     let
       p = s * n

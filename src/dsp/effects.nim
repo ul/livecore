@@ -2,5 +2,5 @@
 
 import frame, math
 
-proc saturator*(x: float): float = x / (1.0 + x*x).sqrt
-lift1(saturator)
+proc simple_saturator*(x: float): float = x / (1.0 + x*x).sqrt
+lift1(simple_saturator)

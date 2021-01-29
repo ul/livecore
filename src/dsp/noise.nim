@@ -2,7 +2,7 @@
 
 import frame, random
 
-proc white_noise*(): float = rand(-1.0..1.0)
+proc white_noise*(): float = rand(0.0..1.0)
 lift0(white_noise)
 
 type ChaosNoise* = object
