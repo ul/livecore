@@ -11,7 +11,7 @@ type
 
 proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
   s.pool.init
-  let clk = 0.5.bpm2freq.saw
+  let clk = 1.bpm2freq.saw
   template bt(n: float): float = clk.phsclk(n)
   let
     t1 = [39.0, 42, 45, 48, 51][white_noise().sh(bt(30.0)).mul(5).int]
