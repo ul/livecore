@@ -12,6 +12,13 @@ type
 proc choose(xs: openArray[float], t: float): float =
   xs[white_noise().sh(t).mul(xs.len.float).int]
 
+proc maytrig(t, p: float): float =
+  if unlikely(t != 0.0):
+    if white_noise() < p:
+      return t
+  return 0.0
+lift2(maytrig)
+
 proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
   s.pool.init
   let clk = [0.5, 1.0, 2.0].choose(20.dmetro).bpm2freq.saw
