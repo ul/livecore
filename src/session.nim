@@ -29,7 +29,7 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       .long_fb(20, 0.7071)
       .fb(2.tri.biscale(0.1, 0.101), 0.2)
       .wpkorg35(@93, 1.0, 0.0)
-    mix = t1.zitarev(level=0.3) + 0.3*t2
+    mix = 0.0*t1.zitarev(level=0.3) + 0.3*t2
   mix.bqhpf(30.0, 0.7071).compressor(200.0, -12.0, 0.1, 0.1).simple_saturator
 
 # A place for heavy init logic, like reading tables from the disk.
