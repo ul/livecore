@@ -26,6 +26,7 @@ type
     compressor: array[small_pool, Compressor]
     delay: array[medium_pool, Delay[1.seconds]]
     diode: array[medium_pool, Diode]
+    hpf: array[medium_pool, HPF]
     fm: array[medium_pool, FM]
     jcrev: array[small_pool, JCRev]
     long_delay: array[small_pool, Delay[30.seconds]]
@@ -58,6 +59,7 @@ type
       compressor,
       delay,
       diode,
+      hpf,
       fm,
       jcrev,
       long_delay,
@@ -141,9 +143,12 @@ def1(saw, sample)
 def1(tri, sample)
 def2(blsquare)
 def2(chaos_noise)
+def2(hpf)
 def2(impulse, sample)
+def2(lpf, sample)
 def2(maygate)
 def2(phsclk, sample)
+def2(sh, sample)
 def2(square, sample)
 def2(tline, transition)
 def2(tquad, transition)
