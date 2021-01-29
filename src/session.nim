@@ -28,8 +28,8 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       .midi2freq
       .bltriangle
       .mul(bt(80.0).impulse(0.01))
-      .long_fb(20, 0.7071)
       .pshift((1/60).osc.mul(2.0), 256, 64)
+      .long_fb(20, 0.7071)
     mix = t1.zitarev(level=0.3) + 0.1*t2
   mix.compressor(200.0, -12.0, 0.1, 0.1).simple_saturator
 
