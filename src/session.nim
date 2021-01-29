@@ -27,7 +27,7 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       .mul(bt(80.0).impulse(0.01))
       .pshift((1/60).osc.mul(2.0).step(1/2), 256, 64)
       .long_fb(20, 0.7071)
-      .fb(12.tri.biscale(1/16, 1/12), 0.2)
+      .fb(12.tri.biscale(1/16, 1/12), 0.5)
       .wpkorg35(@93, 1.0, 0.0)
     mix = 0.0*t1.zitarev(level=0.3) + 0.3*t2
   mix.bqhpf(30.0, 0.7071).compressor(200.0, -12.0, 0.1, 0.1).simple_saturator
