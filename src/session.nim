@@ -47,7 +47,7 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       .sub([12.0, 24.0, 36.0].choose(bt(30.0)))
       .midi2freq
     t2 = f
-      .blsquare((1/30).osc.biscale(0.1, 0.5))
+      .blsquare((1/30).osc.biscale(0.01, 0.5))
       .mul((0.5*f).osc)
       .mul(e)
       .pan((1/60).osc.mul(1/4))
