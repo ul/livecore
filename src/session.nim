@@ -52,7 +52,7 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       .bltriangle.bi
       # .osc
       # ...and waveshaping here
-      .circle.sin.simple_saturator
+      .circle.sin
       # .mul(f.osc)
       .mul(e)
       .pan((1/60).osc.mul(1/4))
