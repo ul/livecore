@@ -12,7 +12,7 @@ type
 proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
   s.pool.init
   let
-    clk = 60.bpm2freq.saw
+    clk = 30.bpm2freq.saw
     t1 = 220.osc * clk.phsclk(2.0).adsr(0.1, 0.01, 0.8, 0.05)
     mix = t1.zitarev
   mix.simple_saturator
