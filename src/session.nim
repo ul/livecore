@@ -22,14 +22,12 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       bt(20.0)
       .maygate(white_noise().scale(1/4, 1/2))
       .adsr(0.1, 0.1, 0.8, 0.25)
-    t2 = [33.0, 45.0]
+    t2 = [69.0, 81.0]
       .sequence(bt(60.0))
       .tline(0.05)
       .midi2freq
       .bltriangle
-      .mul(@33.osc)
-      .mul(bt(40.0).impulse(0.1))
-      .fb((1/4).tri.biscale(1/32, 1/8), 0.7)
+      .mul(bt(80.0).impulse(0.01))
       .long_fb(20, 0.5)
     mix = t1.zitarev(level=0.5) + 0.1*t2
   mix.simple_saturator
