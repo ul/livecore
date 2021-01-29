@@ -19,7 +19,7 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       .midi2freq
       .fm(3, 1/2) *
       clk.phsclk(20.0).adsr(0.1, 0.1, 0.8, 0.25)
-    mix = t1.zitarev
+    mix = t1.zitarev(level=0)
   mix.simple_saturator
 
 # A place for heavy init logic, like reading tables from the disk.
