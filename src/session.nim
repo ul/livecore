@@ -9,18 +9,21 @@ type
   State* = object
     pool: Pool
 
+proc choose(xs: openArray[float], t: float): float =
+  xs[white_noise().sh(t).mul(xs.len.float).int]
+
 proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
   s.pool.init
-  let clk = 1.bpm2freq.saw
+  let clk = [0.5, 1.0, 2.0].choose(20.dmetro).bpm2freq.saw
   template bt(n: float): float = clk.phsclk(n)
   let
-    t1 = [39.0, 42, 45, 48, 51][white_noise().sh(bt(30.0)).mul(5).int]
+    t1 = [39.0, 42, 45, 48, 51].choose(bt(30.0))
       .tline(0.05)
       .fm(3/2, 3/4) *
       bt(20.0)
       .maygate(0.5)
       .adsr(0.05, 0.2, 0.6, 0.5)
-    t2 = [69.0, 81.0, 93][white_noise().sh(bt(30.0)).mul(3).int]
+    t2 = [69.0, 81.0, 93].choose(bt(30.0))
       .tline(0.05)
       .sub(24)
       .midi2freq
