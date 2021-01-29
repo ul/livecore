@@ -52,7 +52,7 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       .midi2freq
       .bltriangle
       .mul(bt(40.0).maytrig(0.5).gaussian(0.1, 1.osc.biscale(0.1, 0.2)))
-      .decim(0.001)
+      .decim(0.01)
       .fb((1/12).tri.biscale(1/11, 1/10), 0.5)
       .long_fb(20, 0.7071)
       .wpkorg35(5.osc.biscale(@54, @69), 2.osc.biscale(0.5, 1.0), 0.0)
