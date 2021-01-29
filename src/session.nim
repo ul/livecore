@@ -26,7 +26,7 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       .midi2freq
       .bltriangle
       .mul(bt(80.0).impulse(0.01))
-      .pshift((1/60).osc.mul(2.0), 256, 64)
+      .pshift((1/60).osc.mul(2.0).step(1/2), 256, 64)
       .long_fb(20, 0.7071)
       .wpkorg35(@93, 1.0, 0.0)
     mix = t1.zitarev(level=0.3) + 0.3*t2
