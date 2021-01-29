@@ -38,7 +38,7 @@ type
 
 proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
   s.pool.init
-  let clk = [0.5, 1.0, 2.0].choose(20.dmetro).bpm2freq.saw
+  let clk = [2.0, 3.0, 4.0].choose(20.dmetro).bpm2freq.saw
   template bt(n: float): float = clk.phsclk(n)
   let
     t1 = [39.0, 42, 45, 48, 51].choose(bt(30.0))
@@ -53,12 +53,12 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       .midi2freq
       .bltriangle
       .mul(bt(40.0).maytrig(0.5).gaussian(0.1, 1.osc.biscale(0.1, 0.2)))
-      .fb((1/12).tri.biscale(1/11, 1/10), 0.5)
-      .long_fb(20, 0.7071)
       .conv([white_noise().lpf(1.0)*0.1, white_noise().lpf(1.0)*0.2, 0.99], s.cnv)
+      .fb((1/12).tri.biscale(1/11, 1/10), 0.5)
+      .long_fb(20.0, 0.7071)
       .zitarev(level=0)
-      .wpkorg35(10000.0, 1.0, 0.0)
       .long_fb(30.0, 0.5)
+      .wpkorg35(10000.0, 1.0, 0.0)
     mix = 0.0*t1.zitarev(level=0) + 0.3*t2
   mix.bqhpf(30.0, 0.7071).compressor(200.0, -12.0, 0.1, 0.1).simple_saturator
 
