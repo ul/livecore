@@ -53,7 +53,6 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       .midi2freq
       .bltriangle
       .mul(bt(40.0).maytrig(0.5).gaussian(0.1, 1.osc.biscale(0.1, 0.2)))
-      .decim(0.01)
       .fb((1/12).tri.biscale(1/11, 1/10), 0.5)
       .long_fb(20, 0.7071)
       .conv([white_noise().lpf(1.0)*0.1, white_noise().lpf(1.0)*0.2, 0.99], s.cnv)
