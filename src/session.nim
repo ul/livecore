@@ -13,7 +13,7 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
   s.pool.init
   let
     clk = 1.bpm2freq.saw
-    t1 = 220.fm(3, 1/2) * clk.phsclk(20.0).adsr(0.1, 0.01, 0.8, 0.25)
+    t1 = 220.fm(3, 1/2) * clk.phsclk(20.0).adsr(0.1, 0.1, 0.8, 0.25)
     mix = t1.zitarev
   mix.simple_saturator
 
