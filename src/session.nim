@@ -56,7 +56,7 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       .decim(0.01)
       .fb((1/12).tri.biscale(1/11, 1/10), 0.5)
       .long_fb(20, 0.7071)
-      .conv([white_noise()*0.01, white_noise()*0.05, 0.99], s.cnv)
+      .conv([white_noise().lpf(1.0)*0.1, white_noise().lpf(1.0)*0.2, 0.99], s.cnv)
       .zitarev(level=0)
       .wpkorg35(10000.0, 1.0, 0.0)
       .long_fb(30.0, 0.5)
