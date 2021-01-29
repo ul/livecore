@@ -18,7 +18,7 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       .sequence(bt(30.0))
       .tline(0.05)
       .midi2freq
-      .fm(3, 1/2) *
+      .fm(3/2, 1/2) *
       bt(20.0)
       .maygate(white_noise().scale(1/4, 1/2))
       .adsr(0.1, 0.1, 0.8, 0.25)
