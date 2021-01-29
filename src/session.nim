@@ -42,10 +42,10 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
   template bt(n: float): float = clk.phsclk(n)
   let
     e = bt(40.0).maytrig(0.5).gaussian(0.05, 55.osc.biscale(0.05, 0.1))
-    f = [69.0, 75.0, 81.0].choose(bt(30.0))
+    f = [4.0, 5.0, 6.0].choose(bt(30.0))
       .tline(0.005)
-      .sub([12.0, 24.0, 36.0].choose(bt(30.0)))
-      .midi2freq
+      .mul([0.25, 0.5, 1.0].choose(bt(30.0)))
+      .mul(@45)
     t2 = f
       # changing oscillator here is a good way to add dynamics during the performance
       # .blsquare((1.30).osc.biscale(0.01, 0.5)).bi
