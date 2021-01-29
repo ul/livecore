@@ -29,6 +29,7 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       .bltriangle
       .mul(bt(80.0).impulse(0.01))
       .long_fb(20, 0.7071)
+      .phaser()
     mix = t1.zitarev(level=0.5) + 0.1*t2
   mix.simple_saturator
 
