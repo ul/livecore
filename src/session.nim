@@ -52,7 +52,7 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       .tline(0.05)
       .sub([12.0, 24.0, 36.0].choose(bt(30.0)))
       .midi2freq
-      .fm(2, 1/2)
+      .fm(8, 1/2)
       .mul(e)
       .pan((1/60).osc.mul(1/4))
       .conv([white_noise().lpf(1.0)*0.1, white_noise().lpf(1.0)*0.2, 0.99], s.cnv)
