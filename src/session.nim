@@ -31,7 +31,7 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       .long_fb(20, 0.7071)
       .wpkorg35(@93, 1.0, 0.0)
     mix = t1.zitarev(level=0.3) + 0.3*t2
-  mix.compressor(200.0, -12.0, 0.1, 0.1).simple_saturator
+  mix.bqhpf(30.0, 0.7071).compressor(200.0, -12.0, 0.1, 0.1).simple_saturator
 
 # A place for heavy init logic, like reading tables from the disk.
 # Beware access to the state is not guarded and may happen simultaneously with `process`.
