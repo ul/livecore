@@ -15,7 +15,7 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
     clk = 1.bpm2freq.saw
     t1 = [45.0, 48, 51]
       .sequence(clk.phsclk(30.0))
-      .tline(0.5)
+      .tline(0.05)
       .midi2freq
       .fm(3, 1/2) *
       clk.phsclk(20.0).adsr(0.1, 0.1, 0.8, 0.25)
