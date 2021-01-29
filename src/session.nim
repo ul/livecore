@@ -59,7 +59,7 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       .conv([1110.osc, 1111.osc, 1112.osc], s.cnv)
       .zitarev(level=0)
       .wpkorg35(10000.0, 1.0, 0.0)
-    mix = t1.zitarev(level= -10) + 0.3*t2
+    mix = t1.zitarev(level=0) + 0.3*t2
   mix.bqhpf(30.0, 0.7071).compressor(200.0, -12.0, 0.1, 0.1).simple_saturator
 
 # A place for heavy init logic, like reading tables from the disk.
