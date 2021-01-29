@@ -8,12 +8,13 @@ import
 type
   State* = object
     pool: Pool
-    phase1: float
 
 proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
   s.pool.init
   let
-    mix = 220.osc
+    clk = 60.bpm2freq.saw
+    t1 = 220.osc * clk.phsclk(1.0).adsr(0.1, 0.01, 0.8, 0.05)
+    mix = t1
   mix.simple_saturator
 
 # A place for heavy init logic, like reading tables from the disk.
