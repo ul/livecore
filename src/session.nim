@@ -50,7 +50,7 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       .mul(e)
       .pan((1/60).osc.mul(1/4))
       .conv([white_noise().lpf(1.0)*0.1, white_noise().lpf(1.0)*0.2, 0.99], s.cnv)
-      .fb((1/12).tri.biscale(1/11, 1/10), 0.5)
+      # .fb((1/12).tri.biscale(1/11, 1/10), 0.5)
       .long_fb(20.0, 0.7071)
       .zitarev(level=0)
       .long_fb(30.0, 0.5)
