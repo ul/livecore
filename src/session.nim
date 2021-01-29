@@ -42,7 +42,7 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
   template bt(n: float): float = clk.phsclk(n)
   let
     e = bt(40.0).maytrig(0.5).gaussian(0.05, 55.osc.biscale(0.05, 0.1))
-    t2 = [69.0, 81.0, 93].choose(bt(30.0))
+    t2 = [69.0, 75.0, 81.0].choose(bt(30.0))
       .tline(0.05)
       .sub([12.0, 24.0, 36.0].choose(bt(30.0)))
       .midi2freq
