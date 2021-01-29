@@ -14,8 +14,7 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
   let clk = (1/10).bpm2freq.osc.biscale(1, 1/2).bpm2freq.saw
   template bt(n: float): float = clk.phsclk(n)
   let
-    t1 = [45.0, 48, 51]
-      .sequence(bt(30.0))
+    t1 = [45.0, 48, 51][white_noise().sh(bt(30.0)).mul(3).int]
       .tline(0.05)
       .midi2freq
       .fm(7/3, 3/4) *
