@@ -20,7 +20,7 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       .midi2freq
       .fm(3, 1/2) *
       bt(20.0).adsr(0.1, 0.1, 0.8, 0.25)
-    t2 = @33.bltriangle.mul(bt(40.0).impulse(0.1)).fb(1/16, 0.7)
+    t2 = @33.bltriangle.mul(@33.osc).mul(bt(40.0).impulse(0.1)).fb(1/16, 0.7)
     mix = t1.zitarev(level=0.5) + 0.1*t2
   mix.simple_saturator
 
