@@ -20,7 +20,7 @@ proc maytrig(t, p: float): float =
 lift2(maytrig)
 
 proc decim(x, p: float): float =
-  if white_noise() < p: x else: 0.0
+  if white_noise() < p: 0.0 else: x
 lift2(decim)
 
 proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
@@ -43,7 +43,7 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       .fb((1/12).tri.biscale(1/11, 1/10), 0.5)
       .long_fb(20, 0.7071)
       .wpkorg35(5.osc.biscale(@54, @69), 2.osc.biscale(0.5, 1.0), 0.0)
-      .decim(0.999)
+      .decim(0.001)
     mix = 0.0*t1.zitarev(level= -10) + 0.3*t2
   mix.bqhpf(30.0, 0.7071).compressor(200.0, -12.0, 0.1, 0.1).simple_saturator
 
