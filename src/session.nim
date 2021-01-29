@@ -41,12 +41,6 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
   let clk = [2.0, 3.0].choose(20.dmetro).bpm2freq.blsaw.lpf(1/20)
   template bt(n: float): float = clk.phsclk(n)
   let
-    t1 = [39.0, 42, 45, 48, 51].choose(bt(30.0))
-      .tline(0.05)
-      .fm(3/2, 3/4) *
-      bt(20.0)
-      .maygate(0.5)
-      .adsr(0.05, 0.2, 0.6, 0.5)
     e = bt(40.0).maytrig(0.5).gaussian(0.05, 55.osc.biscale(0.05, 0.1))
     t2 = [69.0, 81.0, 93].choose(bt(30.0))
       .tline(0.05)
@@ -62,7 +56,7 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       .long_fb(30.0, 0.5)
       .wpkorg35(10000.0, 1.0, 0.0)
       .bqhpf(110.osc.biscale(@30, @60), 0.7071)
-    mix = 0.0*t1.zitarev(level=0) + 0.3*t2
+    mix = 0.3*t2
   mix.bqhpf(30.0, 0.7071).compressor(200.0, -12.0, 0.1, 0.1).simple_saturator
 
 # A place for heavy init logic, like reading tables from the disk.
