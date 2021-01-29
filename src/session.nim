@@ -11,15 +11,17 @@ type
 
 proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
   s.pool.init
+  let clk = 1.bpm2freq.saw
+  template bt(n: float): float = clk.phsclk(n)
   let
-    clk = 1.bpm2freq.saw
     t1 = [45.0, 48, 51]
-      .sequence(clk.phsclk(30.0))
+      .sequence(bt(30.0))
       .tline(0.05)
       .midi2freq
       .fm(3, 1/2) *
-      clk.phsclk(20.0).adsr(0.1, 0.1, 0.8, 0.25)
-    mix = t1.zitarev(level=0)
+      bt(20.0).adsr(0.1, 0.1, 0.8, 0.25)
+    t2 = @69.bltriangle * bt(40.0).impulse(0.1)
+    mix = t1.zitarev(level=0.5) + 0.3*t2
   mix.simple_saturator
 
 # A place for heavy init logic, like reading tables from the disk.
