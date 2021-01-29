@@ -29,7 +29,7 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       .bltriangle
       .mul(bt(80.0).impulse(0.01))
       .long_fb(20, 0.7071)
-    mix = t1.zitarev(level=0.5) + 0.1*t2
+    mix = t1.zitarev(level=0.3) + 0.1*t2
   mix.phaser.simple_saturator
 
 # A place for heavy init logic, like reading tables from the disk.
