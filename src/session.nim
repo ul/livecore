@@ -51,7 +51,7 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       # .blsquare((1.30).osc.biscale(0.01, 0.5)).bi
       .bltriangle.bi
       # .osc
-      .mul(f.osc)
+      .circle.sin
       .mul(e)
       .pan((1/60).osc.mul(1/4))
       .conv([white_noise().lpf(1/20)*0.1, white_noise().lpf(1/20)*0.2, 0.99], s.cnv)
