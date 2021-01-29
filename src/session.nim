@@ -21,7 +21,7 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       .fm(7/3, 3/4) *
       bt(20.0)
       .maygate(white_noise().scale(1/4, 1/2))
-      .adsr(0.1, 0.1, 0.8, 0.25)
+      .adsr(0.1, 0.1, 0.6, 0.25)
     t2 = [69.0, 81.0, 93]
       .sequence(bt(60.0))
       .tline(0.05)
