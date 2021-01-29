@@ -20,11 +20,11 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       bt(20.0)
       .maygate(0.5)
       .adsr(0.05, 0.2, 0.6, 0.5)
-    t2 = [69.0, 81.0, 93][white_noise().sh(bt(60.0)).mul(3).int]
+    t2 = [69.0, 81.0, 93][white_noise().sh(bt(30.0)).mul(3).int]
       .tline(0.05)
       .midi2freq
       .bltriangle
-      .mul(bt(80.0).impulse(0.01))
+      .mul(bt(40.0).gaussian(0.1, 0.1))
       .pshift((1/60).osc.mul(2.0).step(1/2), 256, 64)
       .long_fb(20, 0.7071)
       .fb(12.tri.biscale(1/16, 1/12), 0.5)
