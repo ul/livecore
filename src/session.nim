@@ -5,10 +5,6 @@ import
         noise, osc, soundpipe, stereo ],
   math, pool
 
-type
-  State* = object
-    pool: Pool
-
 proc choose(xs: openArray[float], t: float): float =
   xs[white_noise().sh(t).mul(xs.len.float).int]
 
@@ -22,6 +18,22 @@ lift2(maytrig)
 proc decim(x, p: float): float =
   if white_noise() < p: 0.0 else: x
 lift2(decim)
+
+type Conv = array[2, float]
+
+proc conv(x: float, kernel: array[3, float], s: var Conv): float =
+  result = kernel[0] * s[0] + kernel[1] * s[1] + kernel[2] * x
+  s[0] = s[1]
+  s[1] = x
+
+proc conv(x: Frame, kernel: array[3, Frame], s: var array[CHANNELS, Conv]): Frame =
+  for i in 0..<CHANNELS:
+    result[i] = conv(x[i], [kernel[0][i], kernel[1][i], kernel[2][i]], s[i])
+
+type
+  State* = object
+    pool: Pool
+    cnv: Conv
 
 proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
   s.pool.init
@@ -40,10 +52,10 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       .midi2freq
       .bltriangle
       .mul(bt(40.0).maytrig(0.5).gaussian(0.1, 1.osc.biscale(0.1, 0.2)))
+      .decim(0.001)
       .fb((1/12).tri.biscale(1/11, 1/10), 0.5)
       .long_fb(20, 0.7071)
       .wpkorg35(5.osc.biscale(@54, @69), 2.osc.biscale(0.5, 1.0), 0.0)
-      .decim(0.001)
     mix = 0.0*t1.zitarev(level= -10) + 0.3*t2
   mix.bqhpf(30.0, 0.7071).compressor(200.0, -12.0, 0.1, 0.1).simple_saturator
 
