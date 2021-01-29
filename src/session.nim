@@ -25,7 +25,7 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       .mul(@33.osc)
       .mul(bt(40.0)
       .impulse(0.1))
-      .fb((1/16).tri.biscale(1/32, 1/8), 0.7)
+      .fb((1/4).tri.biscale(1/32, 1/8), 0.7)
       .long_fb(20, 0.5)
       .wpkorg35(@45.0, 1.0, 0.0)
     mix = t1.zitarev(level=0.5) + 0.1*t2
