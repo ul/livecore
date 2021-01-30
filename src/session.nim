@@ -5,53 +5,9 @@ import
         noise, osc, soundpipe, stereo ],
   math, pool
 
-proc choose[T](xs: openArray[T], t: float): T =
-  xs[white_noise().sh(t).mul(xs.len.float).int]
-
-proc choose[T](xs: openArray[T], t: float, ps: openArray[float]): T =
-  var r = white_noise().sh(t) 
-  var z = 0.0
-  for p in ps: z += p
-  var i = 0
-  while i < xs.len and i < ps.len:
-    let p = ps[i] / z
-    if p >= r: return xs[i]
-    i += 1
-    r -= p
-  xs[xs.high]
-
-type WS = proc(freq: float): float  
-
-template ws(body): WS = (proc(x {.inject.}: float): float = body)
-
-proc maytrig(t, p: float): float =
-  if unlikely(t > 0.0):
-    if white_noise() < p:
-      return t
-  return 0.0
-lift2(maytrig)
-
-proc decim(x, p: float): float =
-  if white_noise() < p: 0.0 else: x
-lift2(decim)
-
-type Conv = array[2, float]
-
-proc conv(x: float, kernel: array[3, float], s: var Conv): float =
-  result = kernel[0] * s[0] + kernel[1] * s[1] + kernel[2] * x
-  s[0] = s[1]
-  s[1] = x
-
-proc conv(x: Frame, kernel: array[3, Frame], s: var array[CHANNELS, Conv]): Frame =
-  for i in 0..<CHANNELS:
-    result[i] = conv(x[i], [kernel[0][i], kernel[1][i], kernel[2][i]], s[i])
-
 type
   State* = object
     pool: Pool
-    cnv: array[2, Conv]
-    cnv2: array[2, Conv]
-    cnv3: array[2, Conv]
 
 proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
   s.pool.init
@@ -63,16 +19,12 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       .tline(0.025)
       .mul([0.25, 0.5, 1.0].choose(bt(30.0)))
       .mul(@33)
-    sss = f.osc
-    t1 = [
-      ws(x.blsaw),
-      ws(x.bltriangle),
-      ws(x.osc)
-      ].choose(7.dmetro, [1.0, 2.0, 3.0])(f)
+    t1 = [f.blsaw, f.bltriangle, f.osc]
+      .choose(7.dmetro, [1.0, 2.0, 3.0])
       .mul(e)
       .pan((1/60).osc.mul(1/4))
       .fb((1/4).tri.biscale(0.04, 0.05), 0.2)
-      .conv([white_noise().bi.lpf(1/20)*0.1, white_noise().bi.lpf(1/20)*0.2, 0.9], s.cnv)
+      .conv(white_noise().bi.lpf(1/20)*0.1, white_noise().bi.lpf(1/20)*0.2, 0.9)
       .fb(1/2,  0.5)
       .bqnotch((1/8).osc.biscale(11, 22).osc.biscale(@33, @69), 0.7071)
       .long_fb(7.0, 0.5)
@@ -80,8 +32,8 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       .long_fb(21.0, 0.5)
       .long_fb(30.0, 0.5)
       .wpkorg35(@81, 1.0, 0.0)
-      .conv([white_noise().bi.lpf(1/20)*0.1, white_noise().bi.lpf(1/20)*0.2, 0.9], s.cnv2)
-      .conv([white_noise().bi.lpf(1/20)*0.1, white_noise().bi.lpf(1/20)*0.2, 0.9], s.cnv3)
+      .conv(white_noise().bi.lpf(1/20)*0.1, white_noise().bi.lpf(1/20)*0.2, 0.9)
+      .conv(white_noise().bi.lpf(1/20)*0.1, white_noise().bi.lpf(1/20)*0.2, 0.9)
       .fb((1/8).tri.biscale(0.1, 0.2), 0.2)
       .zitarev(level=0)
     mix = 0.3*t1
