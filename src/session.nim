@@ -20,9 +20,9 @@ proc choose[T](xs: openArray[T], t: float, ps: openArray[float]): T =
     r -= p
   xs[xs.high]
 
-type Osc = proc(freq: float): float  
+type WS = proc(freq: float): float  
 
-template ooo(body): Osc = (proc(freq {.inject.}: float): float = body)
+template ws(body): WS = (proc(x {.inject.}: float): float = body)
 
 proc maytrig(t, p: float): float =
   if unlikely(t > 0.0):
@@ -63,9 +63,9 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       .mul([0.25, 0.5, 1.0].choose(bt(30.0)))
       .mul(@33)
     t1 = [
-      ooo(freq.blsaw),
-      ooo(freq.bltriangle),
-      ooo(freq.osc)
+      ws(x.blsaw),
+      ws(x.bltriangle),
+      ws(x.osc)
       ].choose(7.dmetro, [1.0, 2.0, 3.0])(f)
       .mul(e)
       .pan((1/60).osc.mul(1/4))
