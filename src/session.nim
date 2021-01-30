@@ -64,7 +64,6 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       .mul([0.25, 0.5, 1.0].choose(bt(30.0)))
       .mul(@33)
     sss = f.osc
-    w = [ws(x.sin), ws(x.mul(sss)), ws(x)].choose(3.dmetro, [1.0, 2.0, 3.0])
     t1 = [
       ws(x.blsaw),
       ws(x.bltriangle),
