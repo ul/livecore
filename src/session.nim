@@ -71,7 +71,6 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       ws(x.osc)
       ].choose(7.dmetro, [1.0, 2.0, 3.0])(f)
       .mul(e)
-      .w
       .pan((1/60).osc.mul(1/4))
       .fb((1/4).tri.biscale(0.04, 0.05), 0.2)
       .conv([white_noise().bi.lpf(1/20)*0.1, white_noise().bi.lpf(1/20)*0.2, 0.9], s.cnv)
