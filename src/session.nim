@@ -61,7 +61,7 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
     f = [4.0, 5.0, 6.0].choose(bt(30.0))
       .tline(0.005)
       .mul([0.25, 0.5, 1.0].choose(bt(30.0)))
-      .mul(@45)
+      .mul(@33)
     t1 = [
       ooo(freq.blsaw),
       ooo(freq.bltriangle),
