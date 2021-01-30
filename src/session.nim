@@ -80,7 +80,7 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       .long_fb(30.0, 0.5)
       .wpkorg35(@81, 1.0, 0.0)
       .conv([white_noise().bi.lpf(1/20)*0.1, white_noise().bi.lpf(1/20)*0.2, 0.9], s.cnv2)
-      .fb((1/16).tri.biscale(0.04, 0.08), 0.2)
+      .fb((1/2).tri.biscale(0.04, 0.08), 0.2)
     mix = 0.3*t1
   mix.bqhpf(30.0, 0.7071).compressor(20.0, -12.0, 0.1, 0.1).simple_saturator
 
