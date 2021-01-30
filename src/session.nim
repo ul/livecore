@@ -54,7 +54,7 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       .mul([0.25, 0.5, 1.0].choose(bt(30.0)))
       .mul(@45)
     t2 = [
-      ooo(freq.blsquare((1.30).osc.biscale(0.01, 0.5)).bi),
+      ooo(freq.blsaw.bi),
       ooo(freq.bltriangle.bi),
       ooo(freq.osc)
       ].choose(5.dmetro)(f)
