@@ -1,4 +1,4 @@
-## Delay lines with feedback.
+## Feedback delay lines.
 
 import frame, math
 
@@ -48,11 +48,6 @@ proc delay*[N: static[Natural]](x, dt: float, s: var Delay[N]): float =
 proc delay_stereo*[N: static[Natural]](x, dt: Frame, s: var array[CHANNELS, Delay[N]]): Frame =
   for i in 0..<CHANNELS:
     result[i] = delay[N](x[i], dt[i], s[i])
-
-proc feedback*(x, k: float, s: var float): float =
-  result = x + k*s
-  s = result
-lift2(feedback, float)
 
 proc prime*(x: float, s: var float): float =
   result = s

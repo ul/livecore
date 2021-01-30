@@ -81,7 +81,7 @@ proc choose*[T](xs: openArray[T], t: float, ps: openArray[float], s: var Choose)
         break
   xs[s.min(xs.high)]
 
-proc maytrig(t, p: float): float =
+proc maytrig*(t, p: float): float =
   if unlikely(t > 0.0):
     if rand(1.0) < p:
       return t
