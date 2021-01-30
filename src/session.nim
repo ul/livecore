@@ -9,8 +9,11 @@ proc choose(xs: openArray[float], t: float): float =
   xs[white_noise().sh(t).mul(xs.len.float).int]
 
 type Osc = proc(freq: float): float  
+
 proc choose(xs: openArray[Osc], t: float): Osc =
   xs[white_noise().sh(t).mul(xs.len.float).int]
+
+template ooo(body): Osc = (proc(freq {.inject.}: float): float = body)
 
 proc maytrig(t, p: float): float =
   if unlikely(t > 0.0):
@@ -50,10 +53,13 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       .tline(0.005)
       .mul([0.25, 0.5, 1.0].choose(bt(30.0)))
       .mul(@45)
-    t2 = f
+    t2 = [
+      ooo(freq.bltriangle.bi),
+      ooo(freq.bltriangle.bi)
+      ].choose(5.dmetro)(f)
       # changing oscillator here is a good way to add dynamics during the performance
       # .blsquare((1.30).osc.biscale(0.01, 0.5)).bi
-      .bltriangle.bi
+      # .bltriangle.bi
       # .osc
       # ...and waveshaping here
       # .circle.sin
