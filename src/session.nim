@@ -78,6 +78,7 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       .wpkorg35(@81, 1.0, 0.0)
       .conv([white_noise().bi.lpf(1/20)*0.1, white_noise().bi.lpf(1/20)*0.2, 0.9], s.cnv2)
       .zitarev(level=0)
+      .bigverb(0.5, @81)
     mix = 0.1*t1.peaklim(0.01, 0.1, 0.0)
   mix.bqhpf(30.0, 0.7071).compressor(200.0, -12.0, 0.1, 0.1).simple_saturator
 
