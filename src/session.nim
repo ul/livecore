@@ -57,7 +57,7 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
   let clk = (1/2).bpm2freq.saw
   template bt(n: float): float = clk.phsclk(n)
   let
-    e = bt(40.0).maytrig(0.5).gaussian(0.2, 11.osc.biscale(0.1, 0.2))
+    e = bt(40.0).maytrig(0.5).gaussian(0.1, 11.osc.biscale(0.05, 0.15))
     f = [4.0, 5.0, 6.0].choose(bt(30.0))
       .tline(0.025)
       .mul([0.25, 0.5, 1.0].choose(bt(30.0)))
@@ -76,7 +76,7 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       .long_fb(30.0, 0.5)
       .wpkorg35(@81, 1.0, 0.0)
       .conv([white_noise().bi.lpf(1/20)*0.1, white_noise().bi.lpf(1/20)*0.2, 0.9], s.cnv2)
-    mix = 0.5*t1
+    mix = 0.3*t1
   mix.bqhpf(30.0, 0.7071).compressor(20.0, -12.0, 0.1, 0.1).simple_saturator
 
 # A place for heavy init logic, like reading tables from the disk.
