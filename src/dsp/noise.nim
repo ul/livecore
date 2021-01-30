@@ -2,7 +2,7 @@
 
 import frame, random
 
-proc white_noise*(): float = rand(0.0..1.0)
+proc white_noise*(): float = rand(1.0)
 lift0(white_noise)
 
 type ChaosNoise* = object
@@ -18,5 +18,5 @@ proc chaos_noise*(rate, chaos: float, s: var ChaosNoise): float =
     let y = abs(chaos * s.y[0] - s.y[1] - 0.05)
     s.y[1] = s.y[0]
     s.y[0] = y
-  result = s.y[0].bi
+  result = s.y[0]
 lift2(chaos_noise, ChaosNoise)

@@ -1,4 +1,4 @@
-import parseopt, session, strutils, times, dsp/frame, ffi/sndfile
+import math, parseopt, session, strutils, times, dsp/frame, ffi/sndfile
 
 let t0 = epoch_time()
 
@@ -40,6 +40,9 @@ const frames_chunk = 60 * SAMPLE_RATE_INT
 let buffer = alloc(frames_chunk * CHANNELS * cdouble.sizeof)
 
 var frames_left = frames
+const bar_len = 40
+stdout.write("[" & " ".repeat(bar_len) & "]")
+stdout.flushFile
 while frames_left > 0:
   var frames_to_write = min(frames_left, frames_chunk)
   for frame in 0..<frames_to_write:
@@ -48,9 +51,14 @@ while frames_left > 0:
       let i = (channel + frame * CHANNELS).int
       let offset = cast[int](buffer) + i * cdouble.sizeof
       cast[ptr cdouble](offset)[] = data[channel]
+    if frame mod SAMPLE_RATE_INT == 0:
+      let left = (bar_len*(frames_left-frame)/frames).ceil.int
+      stdout.write("\r[" & "#".repeat(bar_len-left) & ">" & " ".repeat(left-1) & "]")
+      stdout.flushFile
   discard h.sf_writef_double(cast[ptr cdouble](buffer), frames_to_write)
   frames_left -= frames_to_write
-  stdout.write(".")
+stdout.write("\r[" & "#".repeat(bar_len) & "]")
+stdout.flushFile
 
 discard h.sf_close
 state.unload

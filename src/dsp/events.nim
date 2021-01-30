@@ -1,7 +1,7 @@
 ## Anything reacting to triggers to produce something discrete/stable.
 ## This module needs a better name.
 
-import frame, delays
+import frame, delays, random
 
 proc sample_and_hold*(x, t: float, y: var float): float =
   ## Smooth version of sample & hold borrowed from Faust.
@@ -59,3 +59,31 @@ proc sequence*(seq: openArray[Frame], t: Frame, s: var array[2, int]): Frame =
     if unlikely(s[ch] > seq.high):
       s[ch] = 0
     result[ch] = seq[s[ch]][ch]
+
+type Choose* = int
+
+proc choose*[T](xs: openArray[T], t: float, s: var Choose): T =
+  if unlikely(t > 0.0):
+    s = rand(xs.high)
+  xs[s.min(xs.high)]
+
+proc choose*[T](xs: openArray[T], t: float, ps: openArray[float], s: var Choose): T =
+  if unlikely(t > 0.0):
+    var r = rand(1.0)
+    var z = 0.0
+    for p in ps: z += p
+    for i in 0..min(xs.high, ps.high):
+      let p = ps[i] / z
+      if p < r:
+        r -= p
+      else:
+        s = i
+        break
+  xs[s.min(xs.high)]
+
+proc maytrig(t, p: float): float =
+  if unlikely(t > 0.0):
+    if rand(1.0) < p:
+      return t
+  return 0.0
+lift2(maytrig)
