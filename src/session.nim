@@ -69,14 +69,14 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       ].choose(5.dmetro, [1.0, 2.0, 3.0])(f)
       .mul(e)
       .pan((1/60).osc.mul(1/4))
-      .conv([white_noise().bi.lpf(1/20)*0.1, white_noise().bi.lpf(1/20)*0.2, 0.7], s.cnv)
+      .conv([white_noise().bi.lpf(1/20)*0.1, white_noise().bi.lpf(1/20)*0.2, 0.9], s.cnv)
       .fb(1/2,  0.5)
       .bqnotch((1/8).osc.biscale(22, 33).osc.biscale(@45, @69), 1.osc.biscale(0.5, 1.5))
       .long_fb(20.0, 0.7071)
       .zitarev(level=0)
       .long_fb(30.0, 0.5)
       .wpkorg35(@81, 1.0, 0.0)
-      .conv([white_noise().bi.lpf(1/20)*0.1, white_noise().bi.lpf(1/20)*0.2, 0.7], s.cnv2)
+      .conv([white_noise().bi.lpf(1/20)*0.1, white_noise().bi.lpf(1/20)*0.2, 0.9], s.cnv2)
     mix = 0.3*t1
   mix.bqhpf(30.0, 0.7071).compressor(200.0, -12.0, 0.1, 0.1).simple_saturator
 
