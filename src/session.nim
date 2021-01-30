@@ -66,7 +66,7 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       ooo(freq.blsaw.bi),
       ooo(freq.bltriangle.bi),
       ooo(freq.osc)
-      ].choose(5.dmetro)(f)
+      ].choose(5.dmetro, [1.0, 2.0, 3.0])(f)
       # ...and waveshaping here
       # .circle.sin
       # .mul(f.osc)
