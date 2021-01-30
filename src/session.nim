@@ -5,13 +5,10 @@ import
         noise, osc, soundpipe, stereo ],
   math, pool
 
-proc choose(xs: openArray[float], t: float): float =
+proc choose[T](xs: openArray[T], t: float): T =
   xs[white_noise().sh(t).mul(xs.len.float).int]
 
 type Osc = proc(freq: float): float  
-
-proc choose(xs: openArray[Osc], t: float): Osc =
-  xs[white_noise().sh(t).mul(xs.len.float).int]
 
 template ooo(body): Osc = (proc(freq {.inject.}: float): float = body)
 
