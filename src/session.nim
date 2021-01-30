@@ -66,7 +66,7 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       ooo(freq.blsaw),
       ooo(freq.bltriangle),
       ooo(freq.osc)
-      ].choose(20.dmetro, [1.0, 2.0, 3.0])(f)
+      ].choose(7.dmetro, [1.0, 2.0, 3.0])(f)
       .mul(e)
       .pan((1/60).osc.mul(1/4))
       .conv([white_noise().bi.lpf(1/20)*0.1, white_noise().bi.lpf(1/20)*0.2, 0.9], s.cnv)
