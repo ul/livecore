@@ -73,7 +73,6 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       .fb(1/2,  0.5)
       .bqnotch((1/8).osc.biscale(11, 22).osc.biscale(@33, @69), 0.7071)
       .long_fb(20.0, 0.7071)
-      .zitarev(level=0)
       .long_fb(30.0, 0.5)
       .wpkorg35(@81, 1.0, 0.0)
       .conv([white_noise().bi.lpf(1/20)*0.1, white_noise().bi.lpf(1/20)*0.2, 0.9], s.cnv2)
