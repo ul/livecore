@@ -8,6 +8,18 @@ import
 proc choose[T](xs: openArray[T], t: float): T =
   xs[white_noise().sh(t).mul(xs.len.float).int]
 
+proc choose[T](xs: openArray[T], t: float, ps: openArray[float]): T =
+  var r = white_noise().sh(t) 
+  var z = 0.0
+  for p in ps: z += p
+  var i = 0
+  while i < xs.len and i < ps.len:
+    let p = ps[i] / z
+    if p < r: break
+    i += 1
+    r -= p
+  xs[i]
+
 type Osc = proc(freq: float): float  
 
 template ooo(body): Osc = (proc(freq {.inject.}: float): float = body)
