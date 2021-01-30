@@ -15,10 +15,10 @@ proc choose[T](xs: openArray[T], t: float, ps: openArray[float]): T =
   var i = 0
   while i < xs.len and i < ps.len:
     let p = ps[i] / z
-    if p < r: break
+    if p < r: return xs[i]
     i += 1
     r -= p
-  xs[i]
+  xs[xs.high]
 
 type Osc = proc(freq: float): float  
 
@@ -67,10 +67,6 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       ooo(freq.bltriangle.bi),
       ooo(freq.osc)
       ].choose(5.dmetro, [1.0, 2.0, 3.0])(f)
-      # changing oscillator here is a good way to add dynamics during the performance
-      # .blsquare((1.30).osc.biscale(0.01, 0.5)).bi
-      # .bltriangle.bi
-      # .osc
       # ...and waveshaping here
       # .circle.sin
       # .mul(f.osc)
