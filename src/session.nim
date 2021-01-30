@@ -54,7 +54,7 @@ type
 
 proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
   s.pool.init
-  let clk = (1/10).bpm2freq.saw
+  let clk = (1/2).bpm2freq.saw
   template bt(n: float): float = clk.phsclk(n)
   let
     e = bt(40.0).maytrig(0.5).gaussian(0.2, 11.osc.biscale(0.1, 0.2))
