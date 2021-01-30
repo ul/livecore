@@ -62,12 +62,14 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       .tline(0.025)
       .mul([0.25, 0.5, 1.0].choose(bt(30.0)))
       .mul(@33)
+    w = [ws(x.sin), ws(x.mul(osc(f))), ws(x)].choose(3.dmetro, [1.0, 2.0, 3.0])
     t1 = [
       ws(x.blsaw),
       ws(x.bltriangle),
       ws(x.osc)
       ].choose(7.dmetro, [1.0, 2.0, 3.0])(f)
       .mul(e)
+      .w
       .pan((1/60).osc.mul(1/4))
       .conv([white_noise().bi.lpf(1/20)*0.1, white_noise().bi.lpf(1/20)*0.2, 0.9], s.cnv)
       .fb(1/2,  0.5)
