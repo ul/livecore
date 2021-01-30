@@ -54,19 +54,19 @@ type
 
 proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
   s.pool.init
-  let clk = 0.25.bpm2freq.saw
+  let clk = (1/30).bpm2freq.saw
   template bt(n: float): float = clk.phsclk(n)
   let
-    e = bt(40.0).maytrig(0.5).gaussian(0.2, 55.osc.biscale(0.2, 0.5))
+    e = bt(40.0).maytrig(0.5).gaussian(5.0, 11.osc.biscale(0.2, 0.5))
     f = [4.0, 5.0, 6.0].choose(bt(30.0))
-      .tline(0.005)
+      .tline(0.025)
       .mul([0.25, 0.5, 1.0].choose(bt(30.0)))
       .mul(@33)
     t1 = [
       ooo(freq.blsaw),
       ooo(freq.bltriangle),
       ooo(freq.osc)
-      ].choose(5.dmetro, [1.0, 2.0, 3.0])(f)
+      ].choose(20.dmetro, [1.0, 2.0, 3.0])(f)
       .mul(e)
       .pan((1/60).osc.mul(1/4))
       .conv([white_noise().bi.lpf(1/20)*0.1, white_noise().bi.lpf(1/20)*0.2, 0.9], s.cnv)
