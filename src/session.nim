@@ -73,6 +73,7 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       .mul(e)
       .w
       .pan((1/60).osc.mul(1/4))
+      .fb((1/4).tri.biscale(0.04, 0.05), 0.2)
       .conv([white_noise().bi.lpf(1/20)*0.1, white_noise().bi.lpf(1/20)*0.2, 0.9], s.cnv)
       .fb(1/2,  0.5)
       .bqnotch((1/8).osc.biscale(11, 22).osc.biscale(@33, @69), 0.7071)
