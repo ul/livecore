@@ -268,7 +268,3 @@ proc zitarev*(
     level,
     pool.data.zitarev[pool.index.zitarev])
   pool.index.zitarev += 1
-
-# NB: using pooled ops inside callback will mess up cell assignment
-type WaveShaper = proc(x: float): float
-template ws*(body): WaveShaper = (proc(x {.inject.}: float): float = body)
