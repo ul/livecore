@@ -66,7 +66,7 @@ proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
       ooo(freq.blsaw.bi),
       ooo(freq.bltriangle.bi),
       ooo(freq.osc)
-      ].choose(5.dmetro)(f)
+      ].choose(5.dmetro, [1.0, 2.0, 3.0])(f)
       # changing oscillator here is a good way to add dynamics during the performance
       # .blsquare((1.30).osc.biscale(0.01, 0.5)).bi
       # .bltriangle.bi
