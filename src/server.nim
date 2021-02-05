@@ -5,8 +5,24 @@ import
   dsp/frame,
   dynlib,
   ffi/[fswatch, soundio],
+  ffi/lo/[lo, lo_serverthread, lo_types, lo_osc_types],
   os,
+  parseopt,
   strutils
+
+var
+  dev_id = -1
+  osc_addr = "7770"
+
+for kind, key, val in getopt():
+  case kind
+  of cmdArgument: discard
+  of cmdLongOption, cmdShortOption:
+    case key
+    of "dac": dev_id = val.parse_int
+    of "osc": osc_addr = val
+    else: discard
+  of cmdEnd: assert(false) # cannot happen
 
 var in_process: Atomic[bool]
 in_process.store(false)
@@ -16,14 +32,16 @@ const
   size_of_channel_area = sizeof SoundIoChannelArea
 
 type
-  Process = proc(arena: pointer): Frame {.nimcall.}
+  Process = proc(arena: pointer, cc: var Controls, n: var Notes): Frame {.nimcall.}
   Load = proc(arena: pointer) {.nimcall.}
   Unload = proc(arena: pointer) {.nimcall.}
   State = object
     process: Atomic[Process]
     arena: pointer
+    controls: Controls
+    notes: Notes
 
-proc default_process(arena: pointer): Frame = 0.0
+proc default_process(arena: pointer, cc: var Controls, n: var Notes): Frame = 0.0
 
 proc write_callback(out_stream: ptr SoundIoOutStream, frame_count_min: cint, frame_count_max: cint) {.cdecl.} =
   in_process.store(true)
@@ -48,7 +66,7 @@ proc write_callback(out_stream: ptr SoundIoOutStream, frame_count_min: cint, fra
     let ptr_areas = cast[int](areas)
 
     for frame in 0..<frame_count:
-      let samples = process(arena)
+      let samples = process(arena, state.controls, state.notes)
       for channel in 0..<channel_count:
         let ptr_area = cast[ptr SoundIoChannelArea](ptr_areas + channel*size_of_channel_area)
         var ptr_sample = cast[ptr float32](cast[int](ptr_area.pointer) + frame*ptr_area.step)
@@ -79,15 +97,13 @@ for i in 0..<sio.output_device_count:
   let device = sio.get_output_device(i)
   echo i, "\t", device.name
 
-var dev_id = sio.default_output_device_index
-if param_count() > 0:
-  try: dev_id = cast[cint](param_str(1).parse_int)
-  except ValueError: discard
+if dev_id < 0:
+  dev_id = sio.default_output_device_index
 
 if dev_id < 0:
   quit "Output device it not found"
 
-let device = sio.get_output_device(dev_id)
+let device = sio.get_output_device(dev_id.cint)
 if device.is_nil:
   quit "Out of memory"
 
@@ -123,6 +139,47 @@ if err > 0:
   quit "Unable to start stream"
 
 sio.flush_events
+
+proc osc_error(num: cint; msg: cstring; where: cstring) {.cdecl.} =
+  echo "liblo server error ", num, " in path ", where, ": ", msg
+
+proc control_handler(path: cstring; types: cstring; argv: ptr ptr lo_arg; argc: cint; msg: lo_message; user_data: pointer): cint {.cdecl.} =
+  var path = $path
+  if not path.startsWith("/cc/"):
+    return 1
+  path.removePrefix("/cc/")
+  let x = cast[ptr lo_arg](argv[]).f
+  let state = cast[ptr State](user_data)
+  state.controls[path.parse_int].store(x)
+
+proc midi2osc_handler(path: cstring; types: cstring; argv: ptr ptr lo_arg; argc: cint; msg: lo_message; user_data: pointer): cint {.cdecl.} =
+  let m = cast[ptr lo_arg](argv[]).m
+  let state = cast[ptr State](user_data)
+  case m[1]
+  of 0xB0: # cc
+    state.controls[m[2]].store(m[3].float / 0x80)
+  # notes are encoded as uint16 to atomically update both pitch and velocity
+  # lower byte is pitch, and higher one is velocity
+  of 0x90: # note on
+    for i in 0..state.notes.high:
+      let n = state.notes[i].load
+      # this slot if off or of the same pitch, let's use it
+      # bad for a quick succession of notes with long release tho
+      if (n and 0xFF00) == 0 or (n and 0x00FF) == m[2]:
+        state.notes[i].store(m[2].uint16 + 0x100*m[3].uint16)
+        break
+  of 0x80: # note off
+    for i in 0..state.notes.high:
+      if (state.notes[i].load and 0x00FF) == m[2]:
+        state.notes[i].store(m[2].uint16)
+  else: discard
+  # TODO log into file to be committed as a part of session 
+  echo "0x", m[1].to_hex, " 0x", m[2].to_hex, " 0x", m[3].to_hex
+
+let osc_server_thread = osc_addr.lo_server_thread_new(osc_error)
+discard lo_server_thread_add_method(osc_server_thread, "/notes", "m", midi2osc_handler, state);
+discard lo_server_thread_add_method(osc_server_thread, nil, "f", control_handler, state);
+discard lo_server_thread_start(osc_server_thread)
 
 if fsw_init_library() != 0:
   quit "Failed to init FSWatch"
@@ -196,9 +253,7 @@ if fsw.fsw_set_callback(monitor) != 0:
 
 discard fsw.fsw_start_monitor()
 
-while true:
-  if stdin.read_line == "quit": break
-
+osc_server_thread.lo_server_thread_free
 stream.destroy
 device.unref
 sio.destroy

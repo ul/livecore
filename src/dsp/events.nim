@@ -20,7 +20,7 @@ lift2(sh, float)
 
 proc timer*(s: var float): float =
   result = s
-  s = s + SAMPLE_PERIOD
+  s += SAMPLE_PERIOD
 lift0(timer, float)
 
 proc stopwatch*(t: float, s: var float): float =

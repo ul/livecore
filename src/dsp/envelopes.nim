@@ -44,31 +44,43 @@ proc gaussian*(trigger, apex, deviation: float, s: var float): float =
   result = exp(-0.5 * delta * delta / deviation)
 lift3(gaussian, float)
 
-type ADSR* = object
+type
+  ADSRState = enum
+    Release, Attack, Decay, Sustain
+  ADSR* = object
     time: float
-    start: SH
-    stop: SH
+    state: ADSRState
 
 proc adsr*(t, a, d, s, r: float, p: var ADSR): float =
-  let time = timer(p.time)
-  let start = time.sample_and_hold_start(t, p.start)
-  let stop = time.sample_and_hold_end(t, p.stop)
-  var delta = time - start
-
-  if delta <= a:
-    return delta / a
-
-  delta -= a
-  if delta <= d:
-    return 1.0 - (1.0 - s) * delta / d
-
-  if start > stop:
-    return s
-
-  delta = time - max(start + a + d, stop)
-
-  if delta <= r:
-    return s * (1.0 - delta / r)
-
-  return 0.0
+  case p.state
+  of ADSRState.Attack:
+    if p.time < a:
+      result = p.time / a
+      p.time += SAMPLE_PERIOD
+    else:
+      p.time = 0.0
+      p.state = ADSRState.Decay
+      result = 1.0
+  of ADSRState.Decay:
+    if p.time < d:
+      result = 1.0 - (1.0 - s) * p.time / d
+      p.time += SAMPLE_PERIOD
+    else:
+      p.time = 0.0
+      p.state = ADSRState.Sustain
+      result = s
+  of ADSRState.Sustain:
+    result = s
+    if t <= 0.0:
+      p.time = 0.0
+      p.state = ADSRState.Release
+  of ADSRState.Release:
+    if p.time < r:
+      result = s * (1.0 - p.time / r)
+      p.time += SAMPLE_PERIOD
+    else:
+      result = 0.0
+      if t > 0.0:
+        p.time = 0.0
+        p.state = ADSRState.Attack
 lift5(adsr, ADSR)

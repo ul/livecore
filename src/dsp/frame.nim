@@ -1,6 +1,6 @@
 ## Fundamental audio frame constants, types and operations.
 
-import math
+import atomics, math
 
 const
   CHANNELS* = 2
@@ -14,6 +14,8 @@ proc seconds*(t: Natural): Natural =
 
 type
   Frame* = array[CHANNELS, float]
+  Controls* = array[0x100, Atomic[float]]
+  Notes* = array[0x10, Atomic[uint16]]
 
 converter to_frame*(x: float): Frame =
   for i in 0..<CHANNELS:
