@@ -40,6 +40,7 @@ type
     arena: pointer
     controls: Controls
     notes: Notes
+    note_cursor: int
 
 proc default_process(arena: pointer, cc: var Controls, n: var Notes): Frame = 0.0
 
@@ -153,6 +154,7 @@ proc control_handler(path: cstring; types: cstring; argv: ptr ptr lo_arg; argc: 
   state.controls[path.parse_int].store(x)
 
 proc midi2osc_handler(path: cstring; types: cstring; argv: ptr ptr lo_arg; argc: cint; msg: lo_message; user_data: pointer): cint {.cdecl.} =
+  let n = state.notes.len
   let m = cast[ptr lo_arg](argv[]).m
   let state = cast[ptr State](user_data)
   case m[1]
@@ -161,17 +163,15 @@ proc midi2osc_handler(path: cstring; types: cstring; argv: ptr ptr lo_arg; argc:
   # notes are encoded as uint16 to atomically update both pitch and velocity
   # lower byte is pitch, and higher one is velocity
   of 0x90: # note on
-    for i in 0..state.notes.high:
-      let n = state.notes[i].load
-      # this slot if off or of the same pitch, let's use it
-      # bad for a quick succession of notes with long release tho
-      if (n and 0xFF00) == 0 or (n and 0x00FF) == m[2]:
-        state.notes[i].store(m[2].uint16 + 0x100*m[3].uint16)
-        break
+    state.notes[state.note_cursor].store(m[2].uint16 + 0x100*m[3].uint16)
+    state.note_cursor = (state.note_cursor + 1) mod n
   of 0x80: # note off
-    for i in 0..state.notes.high:
-      if (state.notes[i].load and 0x00FF) == m[2]:
-        state.notes[i].store(m[2].uint16)
+    for i in 1..n:
+      # we'd like to disable the most recent note with the same pitch
+      let j = (n + state.note_cursor - i) mod n
+      if (state.notes[j].load and 0x00FF) == m[2]:
+        state.notes[j].store(m[2].uint16)
+        break
   else: discard
   # TODO log into file to be committed as a part of session 
   echo "0x", m[1].to_hex, " 0x", m[2].to_hex, " 0x", m[3].to_hex
