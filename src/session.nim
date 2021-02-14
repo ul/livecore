@@ -2,7 +2,7 @@
 
 import
   dsp/[ frame, delays, effects, envelopes, events, filters, metro, modules,
-        noise, osc, soundpipe, stereo ],
+        noise, osc, sampler, soundpipe, stereo ],
   atomics, math, pool
 
 type
