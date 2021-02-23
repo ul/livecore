@@ -3,7 +3,7 @@
 import
   dsp/[ frame, delays, effects, envelopes, events, filters, metro, modules,
         noise, osc, sampler, soundpipe, stereo ],
-  atomics, math, pool
+  atomics, math, pool, control
 
 type
   State* = object

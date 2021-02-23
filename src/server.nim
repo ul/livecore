@@ -144,14 +144,15 @@ sio.flush_events
 proc osc_error(num: cint; msg: cstring; where: cstring) {.cdecl.} =
   echo "liblo server error ", num, " in path ", where, ": ", msg
 
-proc control_handler(path: cstring; types: cstring; argv: ptr ptr lo_arg; argc: cint; msg: lo_message; user_data: pointer): cint {.cdecl.} =
-  var path = $path
-  if not path.startsWith("/cc/"):
-    return 1
-  path.removePrefix("/cc/")
-  let x = cast[ptr lo_arg](argv[]).f
+proc controls_handler(path: cstring; types: cstring; argv: ptr ptr lo_arg; argc: cint; msg: lo_message; user_data: pointer): cint {.cdecl.} =
+  let argvi = cast[int](argv)
+  let psz = pointer.sizeof
+  let arg0 = cast[ptr lo_arg](argv[])
+  let arg1 = cast[ptr lo_arg](cast[ptr ptr lo_arg](argvi + psz)[])
+  let i = arg0.i
+  let x = arg1.f
   let state = cast[ptr State](user_data)
-  state.controls[path.parse_int].store(x)
+  state.controls[i].store(x)
 
 proc midi2osc_handler(path: cstring; types: cstring; argv: ptr ptr lo_arg; argc: cint; msg: lo_message; user_data: pointer): cint {.cdecl.} =
   let n = state.notes.len
@@ -176,9 +177,21 @@ proc midi2osc_handler(path: cstring; types: cstring; argv: ptr ptr lo_arg; argc:
   # TODO log into file to be committed as a part of session 
   echo "0x", m[1].to_hex, " 0x", m[2].to_hex, " 0x", m[3].to_hex
 
+proc tidal_triggers_handler(path: cstring; types: cstring; argv: ptr ptr lo_arg; argc: cint; msg: lo_message; user_data: pointer): cint {.cdecl.} =
+  let state = cast[ptr State](user_data)
+  state.controls[argv.i].store(1.0)
+
+proc tidal_notes_handler(path: cstring; types: cstring; argv: ptr ptr lo_arg; argc: cint; msg: lo_message; user_data: pointer): cint {.cdecl.} =
+  let state = cast[ptr State](user_data)
+  state.notes[state.note_cursor].store(argv.i.uint16 + (0x100*0xFF).uint16)
+  state.note_cursor = (state.note_cursor + 1) mod state.notes.len
+
 let osc_server_thread = osc_addr.lo_server_thread_new(osc_error)
 discard lo_server_thread_add_method(osc_server_thread, "/notes", "m", midi2osc_handler, state);
-discard lo_server_thread_add_method(osc_server_thread, nil, "f", control_handler, state);
+discard lo_server_thread_add_method(osc_server_thread, "/controls", "if", controls_handler, state);
+discard lo_server_thread_add_method(osc_server_thread, "/tidal/triggers", "i", tidal_triggers_handler, state);
+discard lo_server_thread_add_method(osc_server_thread, "/tidal/notes", "i", tidal_notes_handler, state);
+discard lo_server_thread_add_method(osc_server_thread, "/tidal/controls", "if", controls_handler, state);
 discard lo_server_thread_start(osc_server_thread)
 
 if fsw_init_library() != 0:
