@@ -9,8 +9,8 @@ NIM_FLAGS="--gc:arc -d:danger --passC:-ffast-math"
 # on restarting server manually.
 while true
 do
-  # --dac N is output device index, defaults to the system's one.
-  # --osc PORT listen for OSC messages on port, defaults to 7770
+  # --dac:N is output device index, defaults to the system's one.
+  # --osc:PORT listen for OSC messages on port, defaults to 7770
   # Server lists indexed devices upon start.
   nim c $NIM_FLAGS -r -o:target/livecore src/server.nim $@
   sleep 1

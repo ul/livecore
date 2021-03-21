@@ -10,7 +10,7 @@ type
     pool: Pool
     phase1: float
 
-proc process*(s: var State): Frame {.nimcall, exportc, dynlib.} =
+proc process*(s: var State, cc: var Controls, n: var Notes): Frame {.nimcall, exportc, dynlib.} =
   s.pool.init
   0.1 * (220.0.osc + 220.0.osc(s.phase1))
 

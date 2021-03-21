@@ -120,7 +120,7 @@ let stream = device.out_stream_create
 if stream.is_nil:
   quit "Out of memory"
 
-var state = cast[ptr State](State.sizeof.alloc)
+var state = cast[ptr State](State.sizeof.alloc0)
 state.process.store(default_process)
 state.arena = size_of_arena.alloc0
 
@@ -174,7 +174,7 @@ proc midi2osc_handler(path: cstring; types: cstring; argv: ptr ptr lo_arg; argc:
         state.notes[j].store(m[2].uint16)
         break
   else: discard
-  # TODO log into file to be committed as a part of session 
+  # TODO log into file to be committed as a part of session
   echo "0x", m[1].to_hex, " 0x", m[2].to_hex, " 0x", m[3].to_hex
 
 proc tidal_triggers_handler(path: cstring; types: cstring; argv: ptr ptr lo_arg; argc: cint; msg: lo_message; user_data: pointer): cint {.cdecl.} =
