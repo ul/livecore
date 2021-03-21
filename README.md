@@ -13,7 +13,7 @@ WIP with
 
 ## Dependencies
 
-- [Nim](https://nim-lang.org) 1.4.2
+- [Nim](https://nim-lang.org) 1.4.4
 - [libsoundio](http://libsound.io) 2.0.0
 - [fswatch](http://emcrisostomo.github.io/fswatch/) 1.15.0
 - [Soundpipe](https://pbat.ch/proj/soundpipe.html) 233c9646
