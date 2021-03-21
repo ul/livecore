@@ -160,7 +160,7 @@ proc midi2osc_handler(path: cstring; types: cstring; argv: ptr ptr lo_arg; argc:
   let state = cast[ptr State](user_data)
   case m[1]
   of 0xB0: # cc
-    state.controls[m[2]].store(m[3].float / 0x80)
+    state.controls[m[2]].store(m[3].float / 0x7F)
   # notes are encoded as uint16 to atomically update both pitch and velocity
   # lower byte is pitch, and higher one is velocity
   of 0x90: # note on
