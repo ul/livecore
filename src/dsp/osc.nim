@@ -2,6 +2,9 @@
 
 import frame, math
 
+when defined(bela):
+  proc sinf_neon(x: cfloat): cfloat {.inline, importc: "sinf_neon", header: "libraries/math_neon/math_neon.h".}
+
 proc saw*(freq: float, phase: var float): float =
   result = phase
   phase += 2.0 * freq * SAMPLE_PERIOD
@@ -11,7 +14,11 @@ proc saw*(freq: float, phase: var float): float =
     phase += 2.0
 lift1(saw, float)
 
-proc osc*(freq: float, phase: var float): float = sin(PI * freq.saw(phase))
+when defined(bela):
+  proc osc*(freq: float, phase: var float): float = sinf_neon(PI * freq.saw(phase))
+else:
+  proc osc*(freq: float, phase: var float): float = sin(PI * freq.saw(phase))
+
 lift1(osc, float)
 
 proc tri*(freq: float, phase: var float): float =

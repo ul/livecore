@@ -2,9 +2,13 @@
 
 import atomics, math
 
+when defined(bela):
+  const SAMPLE_RATE_INT* = 44100
+else:
+  const SAMPLE_RATE_INT* = 48000
+
 const
   CHANNELS* = 2
-  SAMPLE_RATE_INT* = 48000
   SAMPLE_RATE* = SAMPLE_RATE_INT.float
   SAMPLE_PERIOD* = 1.0 / SAMPLE_RATE
   SAMPLE_ANGULAR_PERIOD* = TAU * SAMPLE_PERIOD
