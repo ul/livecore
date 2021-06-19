@@ -1,31 +1,28 @@
 import
   atomics,
-  ffi/Bela,
   dsp/frame,
   session
 
 type
-  RenderState = object
-    arena: State
+  State = object
+    arena: session.State
     controls: Controls
     notes: Notes
 
-var render_state: ptr RenderState
+var state: ptr State
 
 proc livecore_cc_write*(idx: cint, value: cfloat) {.exportc.} =
-  render_state.controls[idx].store(value)
+  state.controls[idx].store(value)
 
-proc livecore_setup*(context: ptr BelaContext; user_data: pointer): bool {.exportc.} =
-  render_state = cast[ptr RenderState](RenderState.sizeof.alloc0)
-  render_state.arena.load
-  return true
+proc livecore_setup*() {.exportc.} =
+  state = cast[ptr State](State.sizeof.alloc0)
+  state.arena.load
 
-proc livecore_render*(context: ptr BelaContext; user_data: pointer) {.exportc.} =
-  for n in 0..<context.audioFrames.int:
-    let frame = process(render_state.arena, render_state.controls, render_state.notes)
-    for channel in 0..<CHANNELS:
-      audioWrite(context, n.cint, channel.cint, frame[channel])
+proc livecore_render*(frame: var array[CHANNELS, cfloat]) {.exportc.} =
+  let xs = process(state.arena, state.controls, state.notes)
+  for i in 0..<CHANNELS:
+    frame[i] = xs[i]
 
-proc livecore_cleanup*(context: ptr BelaContext; user_data: pointer) {.exportc.} =
-  render_state.arena.unload
-  render_state.dealloc
+proc livecore_cleanup*() {.exportc.} =
+  state.arena.unload
+  state.dealloc

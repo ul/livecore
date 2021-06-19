@@ -1,6 +1,7 @@
 #include <Bela.h>
 #include <libraries/Trill/Trill.h>
 
+#define CHANNELS 2
 #define NUM_TOUCH 5 // Number of touches on Trill sensor
 
 // Trill object declaration
@@ -19,9 +20,9 @@ unsigned int gTaskSleepTime = 12000; // microseconds
 // Provided by bela.nim
 extern "C" {
 void livecore_cc_write(int idx, float value);
-bool livecore_setup(BelaContext *context, void *userData);
-void livecore_render(BelaContext *context, void *userData);
-void livecore_cleanup(BelaContext *context, void *userData);
+void livecore_setup();
+void livecore_render(float frame[CHANNELS]);
+void livecore_cleanup();
 }
 
 /*
@@ -58,7 +59,7 @@ void loop(void *) {
 //
 // Return true on success; returning false halts the program.
 bool setup(BelaContext *context, void *userData) {
-  livecore_setup(context, userData);
+  livecore_setup();
 
   // Setup a Trill Bar sensor on i2c bus 1, using the default mode and address
   if (touchSensor.setup(1, Trill::BAR) != 0) {
@@ -76,11 +77,15 @@ bool setup(BelaContext *context, void *userData) {
 // Input and output are given from the audio hardware and the other
 // ADCs and DACs (if available).
 void render(BelaContext *context, void *userData) {
-  livecore_render(context, userData);
+  float frame[CHANNELS] = {0, 0};
+  for (unsigned int n = 0; n < context->audioFrames; n++) {
+    livecore_render(frame);
+    for (unsigned int channel = 0; channel < CHANNELS; channel++) {
+      audioWrite(context, n, channel, frame[channel]);
+    }
+  }
 }
 
 // cleanup() is called once at the end, after the audio has stopped.
 // Release any resources that were allocated in setup().
-void cleanup(BelaContext *context, void *userData) {
-  livecore_cleanup(context, userData);
-}
+void cleanup(BelaContext *context, void *userData) { livecore_cleanup(); }
