@@ -67,3 +67,39 @@ make_bi_quad(bqlpf, make_lpf_coefficients)
 make_bi_quad(bqhpf, make_hpf_coefficients)
 make_bi_quad(bqbpf, make_bpf_coefficients)
 make_bi_quad(bqnotch, make_notch_coefficients)
+
+type Conv* = array[2, float]
+
+proc conv*(x, k0, k1, k2: float, s: var Conv): float =
+  result = k0 * s[0] + k1 * s[1] + k2 * x
+  s[0] = s[1]
+  s[1] = x
+lift4(conv, Conv)
+
+proc gaussian_kernel*[N: static[Natural]](): array[N, float] =
+  var s = 0.0
+  for i in 0..<N:
+    let k = exp(-0.5 * (i^2).float)
+    s += k
+    result[i] = k
+  for i in 0..<N:
+    result[i] /= s
+
+proc conv*[N: static[Natural]](x: float, kernel: array[N, float], s: var array[N, float]): float =
+  for i in 1..<N:
+    s[i] = s[i-1]
+  s[0] = x
+  for i in 0..<N:
+    result += kernel[i] * s[i]
+
+proc iir*[N, M: static[Natural]](x: float, a: array[N, float], b: array[M, float], s: var array[N+M, float]): float =
+  result = s[0] * a[0]
+  for i in 1..<N:
+    result += s[i] * a[i]
+    s[i] = s[i-1]
+  result += s[N] * b[0]
+  for i in 1..<M:
+    result += s[i+N] * b[i]
+    s[i+N] = s[i+N-1]
+  s[0] = result
+  s[N] = x
