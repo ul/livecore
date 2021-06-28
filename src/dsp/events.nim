@@ -52,7 +52,7 @@ proc sequence*(seq: openArray[float], t: float, s: var int): float =
     s = 0
   result = seq[s]
 
-proc sequence*(seq: openArray[Frame], t: Frame, s: var array[2, int]): Frame =
+proc sequence*(seq: openArray[Frame], t: Frame, s: var array[CHANNELS, int]): Frame =
   for ch in 0..<CHANNELS:
     if unlikely(t[ch] > 0.0):
       s[ch] += 1
