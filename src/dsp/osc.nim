@@ -1,6 +1,6 @@
 ## If it cycles enough, it sounds.
 
-import frame, math
+import frame, math, soundpipe
 
 when defined(bela):
   proc sinf_neon(x: cfloat): cfloat {.inline, importc: "sinf_neon", header: "libraries/math_neon/math_neon.h".}
@@ -30,22 +30,34 @@ proc square*(freq, width: float, phase: var float): float =
   if freq.saw(phase) <= width: 1.0 else: -1.0
 lift2(square, float)
 
-type FM* = array[2, float]
+proc square*(freq: float, phase: var float): float = square(freq, 0.5, phase)
+lift1(square, float)
 
-template fm*(osc) =
-  proc `fm osc`*(c, m, i: float, s: var FM): float =
+proc blsquare*(freq: float, s: var BlSquare): float = blsquare(freq, 0.5, s)
+lift1(blsquare, BlSquare)
+
+template fm*(osc, S) =
+  proc `fm osc`*(c, m, i: float, s: var array[2, S]): float =
     (c*m).osc(s[0]).mul(i).add(1.0).mul(c).osc(s[1])
-  lift3(`fm osc`, FM)
+  lift3(`fm osc`, array[2, S])
 
-fm(saw)
-fm(tri)
-fm(osc)
+fm(saw, float)
+fm(tri, float)
+fm(osc, float)
+fm(square, float)
+fm(blsaw, BlSaw)
+fm(bltriangle, BlTriangle)
+fm(blsquare, BlSquare)
 
-template detune*(osc) =
-  proc `detune osc`*(f, r: float, s: var FM): float =
+template detune*(osc, S) =
+  proc `detune osc`*(f, r: float, s: var array[2, S]): float =
     ((1.0 + r) * f).osc(s[0]) + ((1.0 - r) * f).osc(s[1])
-  lift2(`detune osc`, FM)
+  lift2(`detune osc`, array[2, S])
 
-detune(saw)
-detune(tri)
-detune(osc)
+detune(saw, float)
+detune(tri, float)
+detune(osc, float)
+detune(square, float)
+detune(blsaw, BlSaw)
+detune(bltriangle, BlTriangle)
+detune(blsquare, BlSquare)

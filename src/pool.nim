@@ -30,7 +30,10 @@ type
     delay: array[medium_pool, Delay[1.seconds]]
     diode: array[medium_pool, Diode]
     hpf: array[medium_pool, HPF]
-    fms: array[medium_pool, FM]
+    fms: array[medium_pool, array[2, float]]
+    fm_blsaw: array[medium_pool, array[2, BlSaw]]
+    fm_bltriangle: array[medium_pool, array[2, BlTriangle]]
+    fm_blsquare: array[medium_pool, array[2, BlSquare]]
     jcrev: array[medium_pool, JCRev]
     long_delay: array[small_pool, Delay[30.seconds]]
     maygate: array[medium_pool, MayGate]
@@ -66,6 +69,9 @@ type
       diode,
       hpf,
       fms,
+      fm_blsaw,
+      fm_bltriangle,
+      fm_blsquare,
       jcrev,
       long_delay,
       maygate,
@@ -146,9 +152,16 @@ def1(rline)
 def1(saturator)
 def1(saw, sample)
 def1(tri, sample)
+def1(square, sample)
 def2(blsquare)
 def2(chaos_noise)
 def2(detune_osc, fms)
+def2(detune_tri, fms)
+def2(detune_saw, fms)
+def2(detune_square, fms)
+def2(detune_blsaw, fm_blsaw)
+def2(detune_bltriangle, fm_bltriangle)
+def2(detune_blsquare, fm_blsquare)
 def2(hpf)
 def2(impulse, sample)
 def2(lpf, sample)
@@ -165,6 +178,12 @@ def3(bqlpf, biquad)
 def3(bqnotch, biquad)
 def3(diode)
 def3(fm_osc, fms)
+def3(fm_tri, fms)
+def3(fm_saw, fms)
+def3(fm_square, fms)
+def3(fm_blsaw)
+def3(fm_bltriangle)
+def3(fm_blsquare)
 def3(gaussian, sample)
 def4(autowah)
 def4(conv)
