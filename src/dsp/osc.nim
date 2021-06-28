@@ -32,6 +32,20 @@ lift2(square, float)
 
 type FM* = array[2, float]
 
-proc fm*(c, m, i: float, s: var FM): float =
-  (c*m).osc(s[0]).mul(i).add(1.0).mul(c).osc(s[1])
-lift3(fm, FM)
+template fm*(osc) =
+  proc `fm osc`*(c, m, i: float, s: var FM): float =
+    (c*m).osc(s[0]).mul(i).add(1.0).mul(c).osc(s[1])
+  lift3(`fm osc`, FM)
+
+fm(saw)
+fm(tri)
+fm(osc)
+
+template detune*(osc) =
+  proc `detune osc`*(f, r: float, s: var FM): float =
+    ((1.0 + r) * f).osc(s[0]) + ((1.0 - r) * f).osc(s[1])
+  lift2(`detune osc`, FM)
+
+detune(saw)
+detune(tri)
+detune(osc)

@@ -17,7 +17,7 @@ proc tidal*(cc: var Controls, idx: int): float {.inline.} =
     cc[idx].store(0.0)
 
 proc tidal*(n: var Notes): array[0x10, (float, float)] {.inline.} =
-  ## Interpret notes as triggered by returing tuples of frequencies and trigger
+  ## Interpret notes as triggered by returning tuples of frequencies and trigger
   ## state for all voices. To be used with `n` function from BootTidal.hs, where
   ## pattern elements are midi pitches.
   for i in 0..n.high:
