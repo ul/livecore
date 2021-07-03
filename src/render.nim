@@ -39,6 +39,9 @@ state.load
 const frames_chunk = 60 * SAMPLE_RATE_INT
 let buffer = alloc(frames_chunk * CHANNELS * cdouble.sizeof)
 
+var cc: Controls
+var notes: Notes
+
 var frames_left = frames
 const bar_len = 40
 stdout.write("[" & " ".repeat(bar_len) & "]")
@@ -46,7 +49,7 @@ stdout.flushFile
 while frames_left > 0:
   var frames_to_write = min(frames_left, frames_chunk)
   for frame in 0..<frames_to_write:
-    let data = state.process()
+    let data = state.process(cc, notes)
     for channel in 0..<CHANNELS:
       let i = (channel + frame * CHANNELS).int
       let offset = cast[int](buffer) + i * cdouble.sizeof
