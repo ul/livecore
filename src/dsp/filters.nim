@@ -92,14 +92,14 @@ proc conv*[N: static[Natural]](x: float, kernel: array[N, float], s: var array[N
   for i in 0..<N:
     result += kernel[i] * s[i]
 
-proc iir*[N, M: static[Natural]](x: float, a: array[N, float], b: array[M, float], s: var array[N+M, float]): float =
-  result = s[0] * a[0]
-  for i in 1..<N:
-    result += s[i] * a[i]
+proc iir*[NX, NY: static[Natural]](x: float, a: array[NY, float], b: array[NX, float], s: var array[NX+NY-1, float]): float =
+  for i in countdown(NX-1, 1):
     s[i] = s[i-1]
-  result += s[N] * b[0]
-  for i in 1..<M:
-    result += s[i+N] * b[i]
-    s[i+N] = s[i+N-1]
-  s[0] = result
-  s[N] = x
+  s[0] = x
+  for i in 0..<NX:
+    result += b[i] * s[i]
+  for i in 0..<NY:
+    result += a[i] * s[NX+i]
+  for i in countdown(NX+NY-1, NX+1):
+    s[i] = s[i-1]
+  s[NX] = result
