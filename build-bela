@@ -6,7 +6,7 @@ rm -rf target/bela
 
 nim c \
 	-d:bela -d:danger \
-	--gc:arc \
+	--gc:orc \
 	--noMain:on \
 	--cpu:arm --os:linux \
 	--cincludes:~/Bela/include \

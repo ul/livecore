@@ -1,17 +1,16 @@
 #!/bin/sh
 
 # This should minimize overhead of the write_callback's glue code.
-NIM_FLAGS="--gc:arc -d:danger --passC:-ffast-math"
+NIM_FLAGS="--gc:orc -d:danger --passC:-ffast-math"
 
 # Loop is an attempt to minimize disruption to the performance caused by
 # crashing the server. There will be a silent gap, and state is lost
 # but at least we can focus on correcting the session code rather than
 # on restarting server manually.
-while true
-do
-  # --dac:N is output device index, defaults to the system's one.
-  # --osc:PORT listen for OSC messages on port, defaults to 7770
-  # Server lists indexed devices upon start.
-  nim c $NIM_FLAGS -r -o:target/livecore src/server.nim $@
-  sleep 1
+while true; do
+	# --dac:N is output device index, defaults to the system's one.
+	# --osc:PORT listen for OSC messages on port, defaults to 7770
+	# Server lists indexed devices upon start.
+	nim c $NIM_FLAGS -r -o:target/livecore src/server.nim $@
+	sleep 1
 done

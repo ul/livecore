@@ -19,16 +19,14 @@
 #
 ###
 
-if [ -z $1 ]
-then
-  echo "Please provide session name."
-  exit 1
+if [ -z $1 ]; then
+	echo "Please provide session name."
+	exit 1
 fi
 
-if ! git diff --quiet HEAD
-then
-  echo "Tree must be clean."
-  exit 1
+if ! git diff --quiet HEAD; then
+	echo "Tree must be clean."
+	exit 1
 fi
 
 git checkout "session/$1" || git checkout -b "session/$1" || exit 1
@@ -38,7 +36,7 @@ rm target/session.so.*
 echo "All set, make sure server is running and edit src/session.nim to make some noises."
 
 # In the session code we want as much performance as possible.
-NIM_FLAGS="--gc:arc -d:danger --passc:-ffast-math"
+NIM_FLAGS="--gc:orc -d:danger --passc:-ffast-math"
 # dlopen tries really hard to reuse shared objects. The simplest way I've found
 # to workaround it on macOS is to build the library with a different name each
 # time. Just "double-buffer" copying as clive does didn't work, I assume because
@@ -47,9 +45,8 @@ NIM_FLAGS="--gc:arc -d:danger --passc:-ffast-math"
 # make it work.
 SO_VERSION=0
 
-fswatch -o src | while read num
-do
-  nim c $NIM_FLAGS --app:lib -o:target/session.so.$((SO_VERSION++ % 3)) src/session.nim && git commit -am "$(date)"
+fswatch -o src | while read num; do
+	nim c $NIM_FLAGS --app:lib -o:target/session.so.$((SO_VERSION++ % 3)) src/session.nim && git commit -am "$(date)"
 done
 
 git commit -am "$(date)"
