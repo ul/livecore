@@ -1,6 +1,6 @@
 ## A pattern composition module inspired by TidalCycles.
 
-import rationals, sequtils, strformat
+import rationals, strformat
 
 type
   Arc* = tuple
