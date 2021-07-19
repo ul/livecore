@@ -10,8 +10,8 @@ proc hann*(N: static[Natural]): array[N, float] =
     let x = sin(k * n.toFloat)
     result[n] = x * x
 
-template defFFT*(W) =
-  ## `W` is window size and must be even.
+template defFFT*(W: static[Natural]) =
+  ## `W` is window size and must be even, better a power of two.
   ## Generated type will be `FFT_W` with `init` and `process` "methods" available.
   ## Hop size is 1/16 of window size.
   ## Applies Hann window to the input before passing to forward FFT.
@@ -70,7 +70,7 @@ template defFFT*(W) =
     s.write_cursor = (s.write_cursor + H) mod N
 
   proc read_output(s: var Output): float {.inline.} =
-    result = s.buffer[s.read_cursor]
+    result = s.buffer[s.read_cursor] * H / W
     s.buffer[s.read_cursor] = 0.0
     s.read_cursor += 1
     if unlikely(s.read_cursor >= N):
@@ -98,8 +98,9 @@ template defFFT*(W) =
     # array[N, cfloat] have different memory representation.
     var t: array[W, kiss_fft_scalar]
     kiss_fftri(s.icfg, cast[ptr kiss_fft_cpx](freqdata.addr), cast[ptr kiss_fft_scalar](t.addr))
-    # 8 to compensate overlap
-    const norm = 1.0 / (8 * W).toFloat # TODO Double-check that this is correct norm factor.
+    # `2 * W`` due to the bug in Nim when `W` alone produces:
+    # Error: unhandled exception: 'intVal' is not accessible using discriminant 'kind' of type 'TFullReg' [FieldDefect]
+    const norm = 2.0 / toFloat(2 * W) # TODO Double-check that this is correct norm factor.
     for i in 0..<W:
       result[i] = norm * t[i]
 
