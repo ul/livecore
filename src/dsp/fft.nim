@@ -13,7 +13,7 @@ proc hann*(N: static[Natural]): array[N, float] =
 template defFFT*(W) =
   ## `W` is window size and must be even.
   ## Generated type will be `FFT_W` with `init` and `process` "methods" available.
-  ## Hop size is 50% of window size.
+  ## Hop size is 1/16 of window size.
   ## Applies Hann window to the input before passing to forward FFT.
   ##
   ## Nim's array generics are PITA as they don't play nice with type inference
@@ -21,7 +21,7 @@ template defFFT*(W) =
   ## family of types instead of a single generic type.
 
   const
-    H = W div 2
+    H = W div 16
     N = W+H
     window = hann(W)
 
@@ -97,11 +97,12 @@ template defFFT*(W) =
     # array[N, cfloat] have different memory representation.
     var t: array[W, kiss_fft_scalar]
     kiss_fftri(s.icfg, cast[ptr kiss_fft_cpx](freqdata.addr), cast[ptr kiss_fft_scalar](t.addr))
-    const norm = 1.0 / W.toFloat # TODO Double-check that this is correct norm factor.
+    # 8 to compensate overlap
+    const norm = 1.0 / (8 * W).toFloat # TODO Double-check that this is correct norm factor.
     for i in 0..<W:
       result[i] = norm * t[i]
 
-  template process*(x, s, f, body): float =
+  template process*(x: float, s: FFT; f, body: untyped): float =
     block:
       write_input(s.input, x)
 
@@ -116,4 +117,12 @@ template defFFT*(W) =
 
       read_output(s.output)
 
+defFFT(128)
+defFFT(256)
+defFFT(512)
 defFFT(1024)
+defFFT(2048)
+defFFT(4096)
+defFFT(8192)
+defFFT(16384)
+defFFT(32768)
