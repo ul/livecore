@@ -1,98 +1,119 @@
-## Primitives for fft-based effects.
+## Overlap-add FFT transform.
 
 import math, ffi/kissfft/kissfft
 
-type
-  InputBuffer[W: static[Natural]] = object
-    cursor: int
-    buffer: array[W, float]
+type Complex* = kiss_fft_cpx
 
-  OutputBuffer[W, H: static[Natural]] = object
-    read_cursor, write_cursor: int
-    buffer: array[W+H, float]
+proc hann*(N: static[Natural]): array[N, float] =
+  let k = PI / N.toFloat
+  for n in 0..<N:
+    let x = sin(k * n.toFloat)
+    result[n] = x * x
 
-  Window*[W, H: static[Natural]] = object
-    hop_cursor: int
-    input: InputBuffer[W]
-    output: OutputBuffer[W, H]
+template defFFT*(W) =
+  ## `W` is window size and must be even.
+  ## Generated type will be `FFT_W` with `init` and `process` "methods" available.
+  ## Hop size is 50% of window size.
+  ## Applies Hann window to the input before passing to forward FFT.
+  ##
+  ## Nim's array generics are PITA as they don't play nice with type inference
+  ## and templates. `defFFT` avoids these problems for the cost of producing
+  ## family of types instead of a single generic type.
 
-proc write_input[N: static[Natural]](s: var InputBuffer[N], x: float) =
-  s.buffer[s.cursor] = x
-  s.cursor += 1
-  if unlikely(s.cursor >= N):
-    s.cursor = 0
+  const
+    H = W div 2
+    N = W+H
+    window = hann(W)
 
-proc read_input[N: static[Natural]](s: InputBuffer[N]): array[N, float] =
-  var j = s.cursor
-  for i in 0..<N:
-    result[i] = s.buffer[j]
-    j += 1
-    if unlikely(j >= N):
-      j = 0
+  type
+    Input = object
+      cursor: int
+      buffer: array[W, float]
 
-proc write_output[W, H: static[Natural]](s: var OutputBuffer[W, H], output: array[W, float]) =
-  const N = W+H
-  var cursor = s.write_cursor
-  for x in output:
-    # s.buffer[cursor] = x
-    s.buffer[cursor] += x
-    cursor += 1
-    if unlikely(cursor >= N):
-      cursor = 0
-  s.write_cursor = (s.write_cursor + H) mod N
+    Output = object
+      read_cursor, write_cursor: int
+      buffer: array[W+H, float]
 
-proc read_output[W, H: static[Natural]](s: var OutputBuffer[W, H]): float =
-  const N = W+H
-  result = s.buffer[s.read_cursor]
-  s.buffer[s.read_cursor] = 0.0
-  s.read_cursor += 1
-  if unlikely(s.read_cursor >= N):
-    s.read_cursor = 0
+    FFT = object
+      ready: bool
+      cfg: kiss_fftr_cfg
+      icfg: kiss_fftr_cfg
+      mem: array[6*W + 72, uint64] # TODO Make a better guess.
+      imem: array[6*W + 72, uint64]
+      hop_cursor: int
+      input: Input
+      output: Output
 
-# Caller is responsible for handling lifecycle (and transforming input on hop) as we don't want to mess with closures.
-# w.write(x)
-# if w.hop:
-#   w.update(f(w.window))
-# w.read
+    `FFT W`* {.inject.} = FFT
 
-proc write*[W, H: static[Natural]](s: var Window[W, H], x: float) =
-  write_input[W](s.input, x)
-  s.hop_cursor += 1
-  if unlikely(s.hop_cursor >= H):
-    s.hop_cursor = 0
+  proc write_input(s: var Input, x: float) {.inline.} =
+    s.buffer[s.cursor] = x
+    s.cursor += 1
+    if unlikely(s.cursor >= W):
+      s.cursor = 0
 
-proc read*[W, H: static[Natural]](s: var Window[W, H]): float = read_output[W, H](s.output)
-proc hop*[W, H: static[Natural]](s: Window[W, H]): bool = s.hop_cursor == 0
-proc window*[W, H: static[Natural]](s: Window[W, H]): array[W, float] = read_input[W](s.input)
-proc update*[W, H: static[Natural]](s: var Window[W, H], output: array[W, float]) = write_output[W, H](s.output, output)
+  proc read_input(s: Input): array[W, float] {.inline.} =
+    var j = s.cursor
+    for i in 0..<W:
+      result[i] = window[i] * s.buffer[j]
+      j += 1
+      if unlikely(j >= W):
+        j = 0
 
-type
-  Complex* = kiss_fft_cpx
-  # N must be even
-  FFT*[N: static[Natural]] = object
-    ready: bool
-    cfg: kiss_fftr_cfg
-    icfg: kiss_fftr_cfg
-    mem: array[6*N + 72, uint64] # TODO Make a better guess.
-    imem: array[6*N + 72, uint64]
+  proc write_output(s: var Output, a: array[W, float]) {.inline.} =
+    var cursor = s.write_cursor
+    for x in a:
+      s.buffer[cursor] += x
+      cursor += 1
+      if unlikely(cursor >= N):
+        cursor = 0
+    s.write_cursor = (s.write_cursor + H) mod N
 
-proc init*[N: static[Natural]](s: var FFT[N]) =
-  if not s.ready:
-    var lenmem = cast[csize_t](s.mem.sizeof)
-    var ilenmem = cast[csize_t](s.imem.sizeof)
-    s.cfg = kiss_fftr_alloc(N, 0, s.mem.addr, lenmem.addr)
-    s.icfg = kiss_fftr_alloc(N, 1, s.imem.addr, ilenmem.addr)
-    s.ready = true
+  proc read_output(s: var Output): float {.inline.} =
+    result = s.buffer[s.read_cursor]
+    s.buffer[s.read_cursor] = 0.0
+    s.read_cursor += 1
+    if unlikely(s.read_cursor >= N):
+      s.read_cursor = 0
 
-proc fft*[N: static[Natural]](s: var FFT[N], timedata: array[N, float]): array[(N div 2) + 1, Complex] =
-  var t: array[N, kiss_fft_scalar]
-  for i in 0..<N:
-    t[i] = timedata[i]
-  kiss_fftr(s.cfg, cast[ptr kiss_fft_scalar](t.addr), cast[ptr kiss_fft_cpx](result.addr))
+  proc init*(s: var FFT) =
+    if not s.ready:
+      var lenmem = cast[csize_t](s.mem.sizeof)
+      var ilenmem = cast[csize_t](s.imem.sizeof)
+      s.cfg = kiss_fftr_alloc(W, 0, s.mem.addr, lenmem.addr)
+      s.icfg = kiss_fftr_alloc(W, 1, s.imem.addr, ilenmem.addr)
+      s.ready = true
 
-proc ifft*[N: static[Natural]](s: var FFT[N], freqdata: var array[(N div 2) + 1, Complex]): array[N, float] =
-  var t: array[N, kiss_fft_scalar]
-  kiss_fftri(s.icfg, cast[ptr kiss_fft_cpx](freqdata.addr), cast[ptr kiss_fft_scalar](t.addr))
-  const norm = 1.0 / N.toFloat
-  for i in 0..<N:
-    result[i] = norm * t[i]
+  proc fft(s: var FFT, timedata: array[W, float]): array[(W div 2) + 1, Complex] =
+    # Copying via assignment is necessary as apparently array[N, float] and
+    # array[N, cfloat] have different memory representation.
+    var t: array[W, kiss_fft_scalar]
+    for i in 0..<W:
+      t[i] = timedata[i]
+    kiss_fftr(s.cfg, cast[ptr kiss_fft_scalar](t.addr), cast[ptr kiss_fft_cpx](result.addr))
+
+  proc ifft(s: var FFT, freqdata: var array[(W div 2) + 1, Complex]): array[W, float] =
+    # Copying via assignment is necessary as apparently array[N, float] and
+    # array[N, cfloat] have different memory representation.
+    var t: array[W, kiss_fft_scalar]
+    kiss_fftri(s.icfg, cast[ptr kiss_fft_cpx](freqdata.addr), cast[ptr kiss_fft_scalar](t.addr))
+    const norm = 1.0 / W.toFloat # TODO Double-check that this is correct norm factor.
+    for i in 0..<W:
+      result[i] = norm * t[i]
+
+  template process*(x, s, f, body): float =
+    block:
+      write_input(s.input, x)
+
+      s.hop_cursor += 1
+      if unlikely(s.hop_cursor >= H):
+        s.hop_cursor = 0
+        var w = read_input(s.input)
+        var f = fft(s, w)
+        body
+        var t = ifft(s, f)
+        write_output(s.output, t)
+
+      read_output(s.output)
+
+defFFT(1024)
