@@ -82,6 +82,7 @@ template defFFT*(W) =
       var ilenmem = cast[csize_t](s.imem.sizeof)
       s.cfg = kiss_fftr_alloc(W, 0, s.mem.addr, lenmem.addr)
       s.icfg = kiss_fftr_alloc(W, 1, s.imem.addr, ilenmem.addr)
+      s.output.write_cursor = H
       s.ready = true
 
   proc fft(s: var FFT, timedata: array[W, float]): array[(W div 2) + 1, Complex] =
