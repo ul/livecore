@@ -4,6 +4,9 @@ import math, ffi/kissfft/kissfft
 
 type Complex* = kiss_fft_cpx
 
+proc magnitude*(x: Complex): float = sqrt(x.r^2 + x.i^2)
+proc phase*(x: Complex): float = arctan2(x.i, x.r)
+
 proc hann*(N: static[Natural]): array[N, float] =
   let k = PI / N.toFloat
   for n in 0..<N:
@@ -23,6 +26,7 @@ template defFFT*(W: static[Natural]) =
   const
     H = W div 16
     N = W+H
+    norm = sqrt(1.0 / W.toFloat)
     window = hann(W)
 
   type
@@ -92,15 +96,15 @@ template defFFT*(W: static[Natural]) =
     for i in 0..<W:
       t[i] = timedata[i]
     kiss_fftr(s.cfg, cast[ptr kiss_fft_scalar](t.addr), cast[ptr kiss_fft_cpx](result.addr))
+    for i in 0..<W:
+      result[i].r *= norm
+      result[i].i *= norm
 
   proc ifft(s: var FFT, freqdata: var array[(W div 2) + 1, Complex]): array[W, float] =
     # Copying via assignment is necessary as apparently array[N, float] and
     # array[N, cfloat] have different memory representation.
     var t: array[W, kiss_fft_scalar]
     kiss_fftri(s.icfg, cast[ptr kiss_fft_cpx](freqdata.addr), cast[ptr kiss_fft_scalar](t.addr))
-    # `2 * W`` due to the bug in Nim when `W` alone produces:
-    # Error: unhandled exception: 'intVal' is not accessible using discriminant 'kind' of type 'TFullReg' [FieldDefect]
-    const norm = 2.0 / toFloat(2 * W) # TODO Double-check that this is correct norm factor.
     for i in 0..<W:
       result[i] = norm * t[i]
 
@@ -118,6 +122,12 @@ template defFFT*(W: static[Natural]) =
         write_output(s.output, t)
 
       read_output(s.output)
+
+  proc robotize*(x: float, s: var FFT): float =
+    process(x, s, f):
+      for bin in f.mitems():
+        bin.r = bin.magnitude
+        bin.i = 0.0
 
 defFFT(128)
 defFFT(256)
