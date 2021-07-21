@@ -67,8 +67,8 @@ template defFFT*(W: static[Natural]) =
 
   proc write_output(s: var Output, a: array[W, float]) {.inline.} =
     var cursor = s.write_cursor
-    for x in a:
-      s.buffer[cursor] += x
+    for i in 0..<W:
+      s.buffer[cursor] += window[i] * a[i]
       cursor += 1
       if unlikely(cursor >= N):
         cursor = 0
