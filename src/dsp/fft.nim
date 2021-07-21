@@ -6,6 +6,7 @@ type Complex* = kiss_fft_cpx
 
 proc magnitude*(x: Complex): float = sqrt(x.r^2 + x.i^2)
 proc phase*(x: Complex): float = arctan2(x.i, x.r)
+proc toComplex*(magnitude, phase: float): Complex = Complex(r: magnitude*cos(phase), i: magnitude*sin(phase))
 
 proc hann*(N: static[Natural]): array[N, float] =
   let k = PI / N.toFloat
@@ -74,7 +75,7 @@ template defFFT*(W: static[Natural]) =
     s.write_cursor = (s.write_cursor + H) mod N
 
   proc read_output(s: var Output): float {.inline.} =
-    result = s.buffer[s.read_cursor] * H / W
+    result = s.buffer[s.read_cursor] * 2 * H / W
     s.buffer[s.read_cursor] = 0.0
     s.read_cursor += 1
     if unlikely(s.read_cursor >= N):
