@@ -22,7 +22,7 @@ proc process*(s: var State, cc: var Controls, n: var Notes,
     .blsaw
     .mul((i.to_float/2.0).metro.impulse(0.05 + white_noise().scale(-0.01, 0.01)))
 
-  let k = 0.2 * pink_noise()
+  let k = 1.0 #0.2 * pink_noise()
 
   let z = process(x, s.fft):
     for i in 0..<s.fft.bins:
