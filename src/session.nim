@@ -20,7 +20,7 @@ proc process*(s: var State, cc: var Controls, n: var Notes,
     x += 55.0.mul(i.to_float)
     .add(white_noise().lpf(50.0).scale(-2.0, 2.0))
     .blsaw
-    .mul((i.to_float/10.0).metro.impulse(0.05 + white_noise().scale(-0.01, 0.01)))
+    .mul((i.to_float/10.0).metro.impulse(0.1 + white_noise().scale(-0.05, 0.05)))
 
   let k = pink_noise() * pink_noise()
 
