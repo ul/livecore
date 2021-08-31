@@ -29,7 +29,7 @@ proc process*(s: var State, cc: var Controls, n: var Notes,
       s.fft.synthesis_magnitudes[i] = (1.0-k)*s.fft.synthesis_magnitudes[i] + k*s.fft.analysis_magnitudes[i]
       s.fft.synthesis_frequencies[i] = (1.0-k)*s.fft.synthesis_frequencies[i] + k*s.fft.analysis_frequencies[i]
   z
-    .mul(0.1)
+    .simple_saturator
 
 # A place for heavy init logic, like reading tables from the disk.
 # Beware access to the state is not guarded and may happen simultaneously with `process`.
