@@ -27,7 +27,7 @@ type
     clock: array[medium_pool, Clock]
     compressor: array[medium_pool, Compressor]
     conv: array[medium_pool, Conv]
-    delay: array[medium_pool, Delay[1.seconds]]
+    delay: array[medium_pool, Delay1]
     diode: array[medium_pool, Diode]
     hpf: array[medium_pool, HPF]
     fms: array[medium_pool, array[2, float]]
@@ -35,7 +35,7 @@ type
     fm_bltriangle: array[medium_pool, array[2, BlTriangle]]
     fm_blsquare: array[medium_pool, array[2, BlSquare]]
     jcrev: array[medium_pool, JCRev]
-    long_delay: array[small_pool, Delay[30.seconds]]
+    long_delay: array[small_pool, Delay30]
     maygate: array[medium_pool, MayGate]
     metro: array[medium_pool, Metro]
     peaklim: array[medium_pool, PeakLimiter]
@@ -198,22 +198,22 @@ proc bigverb*(x: Frame, feedback, lpfreq: float): Frame =
   pool.index.bigverb += 1
 
 proc delay*(x, dt: float): float =
-  result = delay[1.seconds](x, dt, pool.data.delay[pool.index.delay])
+  result = delay(x, dt, pool.data.delay[pool.index.delay])
   pool.index.delay += 1
 lift2(delay)
 
 proc fb*(x, dt, k: float): float =
-  result = fb[1.seconds](x, dt, k, pool.data.delay[pool.index.delay])
+  result = fb(x, dt, k, pool.data.delay[pool.index.delay])
   pool.index.delay += 1
 lift3(fb)
 
 proc long_delay*(x, dt: float): float =
-  result = delay[30.seconds](x, dt, pool.data.long_delay[pool.index.long_delay])
+  result = delay(x, dt, pool.data.long_delay[pool.index.long_delay])
   pool.index.long_delay += 1
 lift2(long_delay)
 
 proc long_fb*(x, dt, k: float): float =
-  result = fb[30.seconds](x, dt, k, pool.data.long_delay[pool.index.long_delay])
+  result = fb(x, dt, k, pool.data.long_delay[pool.index.long_delay])
   pool.index.long_delay += 1
 lift3(long_fb)
 
