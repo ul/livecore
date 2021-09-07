@@ -40,7 +40,7 @@ template defSampler*(max_duration: static[Natural]) =
 
   lift1(read_table, Sampler)
 
-  proc write_table*(x, trigger: float, s: var Sampler): float =
+  proc write_table_trigger*(x, trigger: float, s: var Sampler): float =
     result = x
     if unlikely(trigger > 0.0):
       s.cursor = 0
@@ -48,4 +48,14 @@ template defSampler*(max_duration: static[Natural]) =
       s.table[s.cursor] = x
       s.cursor += 1
 
-  lift2(write_table, Sampler)
+  proc write_table_index*(x, index: float, s: var Sampler): float =
+    result = x
+    let
+      L = s.length
+      norm_index = if index >= 0: index mod 1.0 else: 1.0 - (index mod 1.0)
+      z = (norm_index * L.float).split_decimal
+      n = z[0].int
+    s.table[n] = x
+
+  lift2(write_table_trigger, Sampler)
+  lift2(write_table_index, Sampler)
