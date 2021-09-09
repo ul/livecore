@@ -28,7 +28,7 @@ var in_process: Atomic[bool]
 in_process.store(false)
 
 const
-  size_of_arena = 512 * 1024 * 1024 # = 512MB
+  size_of_arena = 2 * 1024 * 1024 * 1024 # = 2GB
   size_of_channel_area = sizeof SoundIoChannelArea
 
 type

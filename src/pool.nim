@@ -27,7 +27,7 @@ type
     clock: array[medium_pool, Clock]
     compressor: array[medium_pool, Compressor]
     conv: array[medium_pool, Conv]
-    delay: array[medium_pool, Delay1]
+    delay: array[2048, Delay1]
     diode: array[medium_pool, Diode]
     hpf: array[medium_pool, HPF]
     fms: array[medium_pool, array[2, float]]
