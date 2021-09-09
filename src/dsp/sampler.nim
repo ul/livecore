@@ -39,6 +39,8 @@ template defSampler*(max_duration: static[Natural]) =
     result = (a*x_0 + b*x_1 + c*x_2 + d*x_3) * f + x_1
 
   lift1(read_table, Sampler)
+  proc rt*(index: float, s: var Sampler): float {.inline.} = read_table(index, s)
+  lift1(rt, Sampler)
 
   proc write_table_trigger*(x, trigger: float, s: var Sampler): float =
     result = x
@@ -48,14 +50,18 @@ template defSampler*(max_duration: static[Natural]) =
       s.table[s.cursor] = x
       s.cursor += 1
 
+  lift2(write_table_trigger, Sampler)
+  proc wtt*(x, trigger: float, s: var Sampler): float {.inline.} = write_table_trigger(x, trigger, s)
+  lift2(wtt, Sampler)
+
   proc write_table_index*(x, index: float, s: var Sampler): float =
     result = x
     let
-      L = s.length
       norm_index = if index >= 0: index mod 1.0 else: 1.0 - (index mod 1.0)
-      z = (norm_index * L.float).split_decimal
+      z = (norm_index * s.length.float).split_decimal
       n = z[0].int
     s.table[n] = x
 
-  lift2(write_table_trigger, Sampler)
   lift2(write_table_index, Sampler)
+  proc wti*(x, index: float, s: var Sampler): float {.inline.} = write_table_index(x, index, s)
+  lift2(wti, Sampler)
