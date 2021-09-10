@@ -32,7 +32,7 @@ proc process*(s: var State, cc: var Controls, n: var Notes): Frame {.nimcall, ex
   discard (z+x.fb(0.1, 0.65)).wti((1/10).saw.add((1/9).osc.mul(0.01)).mul(0.5).uni, s.table)
 
   discard (0.05 + pink_noise().mul(0.01)).saw.uni.rt(s.table).wti((1/20).osc.uni, s.table)
-  0.008.saw.uni.rt(s.table)
+  0.012.saw.uni.rt(s.table)
     .mul(0.2)
     .zitarev(level=0)
     .simple_saturator
