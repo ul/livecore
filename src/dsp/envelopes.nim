@@ -46,6 +46,8 @@ lift3(gaussian, float)
 
 type
   ADSRState = enum
+    # We declare Release first so it has value 0 as we rely on alloc0 for memory
+    # initialization rather setting initial state explicitly.
     Release, Attack, Decay, Sustain
   ADSR* = object
     time: float
