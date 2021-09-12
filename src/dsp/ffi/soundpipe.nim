@@ -580,7 +580,7 @@ type
     counter* {.importc: "counter".}: cint
     `in`* {.importc: "in".}: ptr cshort
     `out`* {.importc: "out".}: ptr cshort
-    data* {.importc: "data".}: array[7, cuchar]
+    data* {.importc: "data".}: array[7, uint8]
     y* {.importc: "y".}: array[7, SPFLOAT]
     smooth* {.importc: "smooth".}: SPFLOAT
     samp* {.importc: "samp".}: SPFLOAT
@@ -720,7 +720,7 @@ type
     tmp1* {.importc: "tmp1".}: ptr kiss_fft_cpx
     tmp2* {.importc: "tmp2".}: ptr kiss_fft_cpx
     counter* {.importc: "counter".}: uint32_t
-    wrap* {.importc: "wrap".}: cuchar
+    wrap* {.importc: "wrap".}: uint8
 
 
 proc paulstretch_create*(p: ptr ptr paulstretch): cint {.
