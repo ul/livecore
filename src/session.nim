@@ -8,7 +8,7 @@ import
 type
   State* = object
     pool: Pool
-    p1: PSeq16
+    p1: PSeq
 
 proc process*(s: var State, cc: var Controls, n: var Notes): Frame {.nimcall, exportc, dynlib.} =
   s.pool.init
