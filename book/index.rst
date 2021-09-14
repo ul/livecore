@@ -1,15 +1,17 @@
-.. LiveCore documentation master file, created by
-   sphinx-quickstart on Sun Aug 22 05:32:46 2021.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+=====================
+Concerto for Solo CPU
+=====================
 
-Welcome to LiveCore's documentation!
-====================================
+.. warning:: Pile of drafts! Read at your own risk.
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
+   concerto/prelude
+   concerto/history
+   concerto/philosophy
+   concerto/elements
 
 
 Indices and tables
