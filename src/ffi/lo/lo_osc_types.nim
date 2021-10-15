@@ -97,7 +97,7 @@ type
     size*: int32_t
     data*: char
 
-  lo_arg* {.bycopy.} = object {.union.}
+  lo_arg* {.bycopy, union.} = object
     i*: int32_t                ## * 32 bit signed integer.
     i32*: int32_t              ## * 32 bit signed integer.
     h*: int64_t                ## * 64 bit signed integer.
@@ -108,7 +108,7 @@ type
     f64*: cdouble              ## * 64 bit IEEE-754 double.
     s*: char                   ## * Standard C, NULL terminated string.
     S*: char                   ## * Standard C, NULL terminated, string. Used in systems which distinguish strings and symbols.
-    c*: cuchar                 ## * Standard C, 8 bit, char.
+    c*: char                   ## * Standard C, 8 bit, char.
     m*: array[4, uint8_t]      ## * A 4 byte MIDI packet.
     t*: lo_timetag             ## * OSC TimeTag value.
     blob*: lo_arg_blob         ## * Blob *

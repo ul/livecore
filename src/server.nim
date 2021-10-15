@@ -5,7 +5,7 @@ import
   dsp/frame,
   dynlib,
   ffi/[fswatch, soundio],
-  ffi/lo/[lo, lo_serverthread, lo_types, lo_osc_types],
+  ffi/lo/[lo_serverthread, lo_types, lo_osc_types],
   os,
   parseopt,
   strutils
@@ -186,7 +186,7 @@ proc tidal_notes_handler(path: cstring; types: cstring; argv: ptr ptr lo_arg; ar
   state.notes[state.note_cursor].store(argv.i.uint16 + (0x100*0xFF).uint16)
   state.note_cursor = (state.note_cursor + 1) mod state.notes.len
 
-let osc_server_thread = osc_addr.lo_server_thread_new(osc_error)
+let osc_server_thread = osc_addr.cstring.lo_server_thread_new(osc_error)
 discard lo_server_thread_add_method(osc_server_thread, "/notes", "m", midi2osc_handler, state);
 discard lo_server_thread_add_method(osc_server_thread, "/controls", "if", controls_handler, state);
 discard lo_server_thread_add_method(osc_server_thread, "/tidal/triggers", "i", tidal_triggers_handler, state);

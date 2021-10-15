@@ -350,7 +350,7 @@ proc lo_message_get_argv*(m: lo_message): ptr ptr lo_arg {.cdecl,
 ##  \param path The path the message will be sent to
 ##
 
-proc lo_message_length*(m: lo_message; path: cstring): csize {.cdecl,
+proc lo_message_length*(m: lo_message; path: cstring): csize_t {.cdecl,
     importc: "lo_message_length", dynlib: soname.}
 ## *
 ##  \brief  Serialise the lo_message object to an area of memory and return a
@@ -367,7 +367,7 @@ proc lo_message_length*(m: lo_message; path: cstring): csize {.cdecl,
 ##  having the correct endianess and bit-packed structure.
 ##
 
-proc lo_message_serialise*(m: lo_message; path: cstring; to: pointer; size: ptr csize): pointer {.
+proc lo_message_serialise*(m: lo_message; path: cstring; to: pointer; size: ptr csize_t): pointer {.
     cdecl, importc: "lo_message_serialise", dynlib: soname.}
 ## *
 ##  \brief  Deserialise a raw OSC message and return a new lo_message object.
@@ -383,7 +383,7 @@ proc lo_message_serialise*(m: lo_message; path: cstring; to: pointer; size: ptr 
 ##  Use lo_message_free() to free the resulting object.
 ##
 
-proc lo_message_deserialise*(data: pointer; size: csize; result: ptr cint): lo_message {.
+proc lo_message_deserialise*(data: pointer; size: csize_t; result: ptr cint): lo_message {.
     cdecl, importc: "lo_message_deserialise", dynlib: soname.}
 ## *
 ##  \brief  Dispatch a raw block of memory containing an OSC message.
@@ -401,7 +401,7 @@ proc lo_message_deserialise*(data: pointer; size: csize; result: ptr cint): lo_m
 ##  Returns the number of bytes used if successful, or less than 0 otherwise.
 ##
 
-proc lo_server_dispatch_data*(s: lo_server; data: pointer; size: csize): cint {.cdecl,
+proc lo_server_dispatch_data*(s: lo_server; data: pointer; size: csize_t): cint {.cdecl,
     importc: "lo_server_dispatch_data", dynlib: soname.}
 ## *
 ##  \brief  Return the hostname of a lo_address object
@@ -564,7 +564,7 @@ proc lo_bundle_add_bundle*(b: lo_bundle; n: lo_bundle): cint {.cdecl,
 ##  \param b The bundle to be sized
 ##
 
-proc lo_bundle_length*(b: lo_bundle): csize {.cdecl, importc: "lo_bundle_length",
+proc lo_bundle_length*(b: lo_bundle): csize_t {.cdecl, importc: "lo_bundle_length",
     dynlib: soname.}
 ## *
 ##  \brief  Return the number of top-level elements in a bundle.
@@ -629,7 +629,7 @@ proc lo_bundle_get_timestamp*(b: lo_bundle): lo_timetag {.cdecl,
 ##  having the correct endianess and bit-packed structure.
 ##
 
-proc lo_bundle_serialise*(b: lo_bundle; to: pointer; size: ptr csize): pointer {.cdecl,
+proc lo_bundle_serialise*(b: lo_bundle; to: pointer; size: ptr csize_t): pointer {.cdecl,
     importc: "lo_bundle_serialise", dynlib: soname.}
 ## *
 ##  \brief  Frees the memory taken by a bundle object.
@@ -1102,7 +1102,7 @@ proc lo_timetag_now*(t: ptr lo_timetag) {.cdecl, importc: "lo_timetag_now",
 ##  \brief Return the storage size, in bytes, of the given argument.
 ##
 
-proc lo_arg_size*(`type`: lo_type; data: pointer): csize {.cdecl,
+proc lo_arg_size*(`type`: lo_type; data: pointer): csize_t {.cdecl,
     importc: "lo_arg_size", dynlib: soname.}
 ## *
 ##  \brief Given a raw OSC message, return the message path.

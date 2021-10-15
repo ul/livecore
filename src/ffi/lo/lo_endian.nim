@@ -28,7 +28,7 @@ type
     a*: uint32_t
     b*: uint32_t
 
-  lo_split64* {.bycopy.} = object {.union.}
+  lo_split64* {.bycopy, union.} = object
     all*: uint64_t
     part*: INNER_C_STRUCT_378856124
 
