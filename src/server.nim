@@ -8,6 +8,7 @@ import
   ffi/lo/[lo_serverthread, lo_types, lo_osc_types],
   os,
   parseopt,
+  strformat,
   strutils
 
 var
@@ -108,7 +109,18 @@ let device = sio.get_output_device(dev_id.cint)
 if device.is_nil:
   quit "Out of memory"
 
-echo "Output device:\t", device.name
+let layout = device.current_layout
+let chans = layout.channel_count
+let sr = device.sample_rate_current
+echo fmt"Output device:{'\t'}{device.name} ({chans}ch @ {sr/1000}kHz)"
+
+if chans < CHANNELS:
+  echo fmt"Device has less channels ({chans}) than defined by CHANNELS ({CHANNELS})."
+  quit "Please either try another device or update CHANNELS in src/dsp/frames.nim"
+
+if sr != SAMPLE_RATE_INT:
+  echo fmt"Device sample rate ({sr}) differs from SAMPLE_RATE_INT ({SAMPLE_RATE_INT})"
+  quit "Please either try another device or update SAMPLE_RATE_INT in src/dsp/frames.nim"
 
 if device.probe_error > 0:
   quit "Cannot probe device:" & $soundio.strerror(device.probe_error)
