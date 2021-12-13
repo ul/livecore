@@ -12,7 +12,8 @@ import
   strutils
 
 var
-  dev_id = -1
+  dac_id = -1
+  adc_id = -1
   osc_addr = "7770"
 
 for kind, key, val in getopt():
@@ -20,7 +21,8 @@ for kind, key, val in getopt():
   of cmdArgument: discard
   of cmdLongOption, cmdShortOption:
     case key
-    of "dac": dev_id = val.parse_int
+    of "dac": dac_id = val.parse_int
+    of "adc": adc_id = val.parse_int
     of "osc": osc_addr = val
     else: discard
   of cmdEnd: assert(false) # cannot happen
@@ -33,7 +35,7 @@ const
   size_of_channel_area = sizeof SoundIoChannelArea
 
 type
-  Process = proc(arena: pointer, cc: var Controls, n: var Notes): Frame {.nimcall.}
+  Process = proc(arena: pointer, cc: var Controls, n: var Notes, input: Frame): Frame {.nimcall.}
   Load = proc(arena: pointer) {.nimcall.}
   Unload = proc(arena: pointer) {.nimcall.}
   State = object
@@ -42,8 +44,9 @@ type
     controls: Controls
     notes: Notes
     note_cursor: int
+    input: ptr SoundIoRingBuffer
 
-proc default_process(arena: pointer, cc: var Controls, n: var Notes): Frame = 0.0
+proc default_process(arena: pointer, cc: var Controls, n: var Notes, input: Frame): Frame = 0.0
 
 proc write_callback(out_stream: ptr SoundIoOutStream, frame_count_min: cint, frame_count_max: cint) {.cdecl.} =
   in_process.store(true)
@@ -51,6 +54,7 @@ proc write_callback(out_stream: ptr SoundIoOutStream, frame_count_min: cint, fra
   let state = cast[ptr State](out_stream.userdata)
   let arena = state.arena
   let process = state.process.load
+  let input = state.input
   let channel_count = out_stream.layout.channel_count
   var areas: ptr SoundIoChannelArea
   var frames_left = frame_count_max
@@ -67,22 +71,73 @@ proc write_callback(out_stream: ptr SoundIoOutStream, frame_count_min: cint, fra
 
     let ptr_areas = cast[int](areas)
 
+    var ptr_input: int
+    if not input.is_nil:
+      ptr_input = cast[int](input.read_ptr)
+
     for frame in 0..<frame_count:
-      let samples = process(arena, state.controls, state.notes)
+      var input_frame: array[CHANNELS, float]
+      if not input.is_nil:
+        for channel in 0..<CHANNELS:
+          input_frame[channel] = cast[ptr float](ptr_input + (frame*CHANNELS + channel)*(sizeof float))[]
+
+      let samples = process(arena, state.controls, state.notes, input_frame)
       for channel in 0..<channel_count:
         let ptr_area = cast[ptr SoundIoChannelArea](ptr_areas + channel*size_of_channel_area)
         var ptr_sample = cast[ptr float32](cast[int](ptr_area.pointer) + frame*ptr_area.step)
         ptr_sample[] = samples[channel].float32.min(1.0).max(-1.0)
 
+    if not input.is_nil:
+      input.advance_read_ptr(cast[cint](frame_count*CHANNELS*(sizeof float)))
+
     err = out_stream.end_write
     if err > 0 and err != cint(SoundIoError.Underflow):
       quit "Unrecoverable out stream end error: " & $soundio.strerror(err)
+
 
     frames_left -= frame_count
     if frames_left <= 0:
       break
 
   in_process.store(false)
+
+proc read_callback(in_stream: ptr SoundIoInStream, frame_count_min: cint, frame_count_max: cint) {.cdecl.} =
+  let state = cast[ptr State](in_stream.userdata)
+  let input = state.input
+  let channel_count = in_stream.layout.channel_count
+  var areas: ptr SoundIoChannelArea
+  var frames_left = frame_count_max
+  var err: cint
+
+  while true:
+    var frame_count = frames_left
+
+    err = in_stream.begin_read(areas.addr, frame_count.addr)
+    if err > 0:
+      quit "Unrecoverable input stream begin error: " & $soundio.strerror(err)
+    if frame_count <= 0:
+      break
+
+    let ptr_areas = cast[int](areas)
+
+    let ptr_input: int = cast[int](input.write_ptr)
+
+    for frame in 0..<frame_count:
+      for channel in 0..<CHANNELS:
+        var ptr_input_sample = cast[ptr float](ptr_input + (frame*CHANNELS + channel)*(sizeof float))
+        let ptr_area = cast[ptr SoundIoChannelArea](ptr_areas + channel*size_of_channel_area)
+        var ptr_sample = cast[ptr float32](cast[int](ptr_area.pointer) + frame*ptr_area.step)
+        ptr_input_sample[] = ptr_sample[].float
+
+    input.advance_write_ptr(cast[cint](frame_count*CHANNELS*(sizeof float)))
+
+    err = in_stream.end_read
+    if err > 0 and err != cint(SoundIoError.Underflow):
+      quit "Unrecoverable input stream end error: " & $soundio.strerror(err)
+
+    frames_left -= frame_count
+    if frames_left <= 0:
+      break
 
 let sio = soundio_create()
 if sio.is_nil:
@@ -95,24 +150,32 @@ if err > 0:
 echo "Backend: \t", sio.current_backend.name
 sio.flush_events
 
+echo "\nOutput devices (select with --dac:N):"
 for i in 0..<sio.output_device_count:
   let device = sio.get_output_device(i)
   echo i, "\t", device.name
 
-if dev_id < 0:
-  dev_id = sio.default_output_device_index
+echo "\nInput devices (select with --adc:N):"
+for i in 0..<sio.input_device_count:
+  let device = sio.get_input_device(i)
+  echo i, "\t", device.name
 
-if dev_id < 0:
+# Open output device
+
+if dac_id < 0:
+  dac_id = sio.default_output_device_index
+
+if dac_id < 0:
   quit "Output device it not found"
 
-let device = sio.get_output_device(dev_id.cint)
-if device.is_nil:
+let output_device = sio.get_output_device(dac_id.cint)
+if output_device.is_nil:
   quit "Out of memory"
 
-let layout = device.current_layout
+let layout = output_device.current_layout
 let chans = layout.channel_count
-let sr = device.sample_rate_current
-echo fmt"Output device:{'\t'}{device.name} ({chans}ch @ {sr/1000}kHz)"
+let sr = output_device.sample_rate_current
+echo fmt"{'\n'}Output device:{'\t'}{output_device.name} ({chans}ch @ {sr/1000}kHz)"
 
 if chans < CHANNELS:
   echo fmt"Device has less channels ({chans}) than defined by CHANNELS ({CHANNELS})."
@@ -122,34 +185,87 @@ if sr != SAMPLE_RATE_INT:
   echo fmt"Device sample rate ({sr}) differs from SAMPLE_RATE_INT ({SAMPLE_RATE_INT})"
   quit "Please either try another device or update SAMPLE_RATE_INT in src/dsp/frames.nim"
 
-if device.probe_error > 0:
-  quit "Cannot probe device:" & $soundio.strerror(device.probe_error)
+if output_device.probe_error > 0:
+  quit "Cannot probe device:" & $soundio.strerror(output_device.probe_error)
 
-if not device.supports_format(SoundIoFormatFloat32NE):
+if not output_device.supports_format(SoundIoFormatFloat32NE):
   quit "Device doesn't support float32 format"
 
-let stream = device.out_stream_create
-if stream.is_nil:
+let output_stream = output_device.out_stream_create
+if output_stream.is_nil:
   quit "Out of memory"
 
 var state = cast[ptr State](State.sizeof.alloc0)
 state.process.store(default_process)
 state.arena = size_of_arena.alloc0
 
-stream.write_callback = write_callback
-stream.userdata = state
-stream.format = SoundIoFormatFloat32NE
+output_stream.write_callback = write_callback
+output_stream.userdata = state
+output_stream.format = SoundIoFormatFloat32NE
 
-err = stream.open
+err = output_stream.open
 if err > 0:
   quit "Unable to open device"
 
-if stream.layout_error > 0:
+if output_stream.layout_error > 0:
   quit "Unable to set channel layout"
 
-err = stream.start
+err = output_stream.start
 if err > 0:
   quit "Unable to start stream"
+
+
+# Open input device
+var input_device: ptr SoundIoDevice
+var input_stream: ptr SoundIoInStream
+if adc_id >= 0:
+
+  input_device = sio.get_input_device(adc_id.cint)
+  if input_device.is_nil:
+    quit "Out of memory"
+
+  let layout = input_device.current_layout
+  let chans = layout.channel_count
+  let sr = input_device.sample_rate_current
+  echo fmt"{'\n'}Input device:{'\t'}{input_device.name} ({chans}ch @ {sr/1000}kHz)"
+
+  if chans < CHANNELS:
+    echo fmt"Device has less channels ({chans}) than defined by CHANNELS ({CHANNELS})."
+    quit "Please either try another device or update CHANNELS in src/dsp/frames.nim"
+
+  if sr != SAMPLE_RATE_INT:
+    echo fmt"Device sample rate ({sr}) differs from SAMPLE_RATE_INT ({SAMPLE_RATE_INT})"
+    quit "Please either try another device or update SAMPLE_RATE_INT in src/dsp/frames.nim"
+
+  if input_device.probe_error > 0:
+    quit "Cannot probe device:" & $soundio.strerror(input_device.probe_error)
+
+  if not input_device.supports_format(SoundIoFormatFloat32NE):
+    quit "Device doesn't support float32 format"
+
+  input_stream = input_device.in_stream_create
+  if input_stream.is_nil:
+    quit "Out of memory"
+
+  state.input = sio.ring_buffer_create(cast[cint](4 * (
+    max(input_stream.software_latency, output_stream.software_latency) * SAMPLE_RATE *
+    (CHANNELS * (sizeof float)).to_float
+  ).to_int))
+
+  input_stream.read_callback = read_callback
+  input_stream.userdata = state
+  input_stream.format = SoundIoFormatFloat32NE
+
+  err = input_stream.open
+  if err > 0:
+    quit "Unable to open device"
+
+  if input_stream.layout_error > 0:
+    quit "Unable to set channel layout"
+
+  err = input_stream.start
+  if err > 0:
+    quit "Unable to start stream"
 
 sio.flush_events
 
@@ -279,8 +395,14 @@ if fsw.fsw_set_callback(monitor) != 0:
 discard fsw.fsw_start_monitor()
 
 osc_server_thread.lo_server_thread_free
-stream.destroy
-device.unref
+if not input_stream.is_nil:
+  input_stream.destroy
+if not input_device.is_nil:
+  input_device.unref
+output_stream.destroy
+output_device.unref
 sio.destroy
+if not state.input.is_nil:
+  state.input.destroy
 state.arena.dealloc
 state.dealloc
