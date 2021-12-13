@@ -45,6 +45,11 @@ proc sample*[T](pattern: Pattern[T], time: float): seq[T] =
     if tile.arc.start.toFloat <= time and time < tile.arc.stop.toFloat:
       result.add(tile.color)
 
+proc sample_one*[T](pattern: Pattern[T], time: float): T =
+  for tile in pattern:
+    if tile.arc.start.toFloat <= time and time < tile.arc.stop.toFloat:
+      return tile.color
+
 proc `@!`*[T](colors: openArray[T]): Pattern[T] = colors.toPattern
 proc `@~`*[T](patterns: openArray[Pattern[T]]): Pattern[T] = patterns.sequence
 proc `@|`*[T](patterns: openArray[Pattern[T]]): Pattern[T] = patterns.parallel
