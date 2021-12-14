@@ -1,11 +1,11 @@
 ## A pattern composition module inspired by TidalCycles.
 
-import rationals, strformat
+import strformat
 
 type
   Arc* = tuple
-    start: Rational[int]
-    stop: Rational[int]
+    start: float
+    stop: float
 
   Tile*[T] = tuple
     arc: Arc
@@ -15,10 +15,10 @@ type
 
 template arc_op(op) =
   proc op*(a: Arc, b: Arc): Arc = (op(a[0], b[0]), op(a[1], b[1]))
-  proc op*(a: Arc, b: Rational[int]): Arc = (op(a[0], b), op(a[1], b))
-  proc op*(a: Rational[int], b: Arc): Arc = (op(a, b[0]), op(a, b[1]))
-  proc op*(a: Arc, b: int): Arc = (op(a[0], b), op(a[1], b))
-  proc op*(a: int, b: Arc): Arc = (op(a, b[0]), op(a, b[1]))
+  proc op*(a: Arc, b: float): Arc = (op(a[0], b), op(a[1], b))
+  proc op*(a: float, b: Arc): Arc = (op(a, b[0]), op(a, b[1]))
+  proc op*(a: Arc, b: int): Arc = (op(a[0], b.to_float), op(a[1], b.to_float))
+  proc op*(a: int, b: Arc): Arc = (op(a.to_float, b[0]), op(a.to_float, b[1]))
 
 arc_op(`+`)
 arc_op(`-`)
@@ -36,18 +36,18 @@ proc parallel*[T](patterns: openArray[Pattern[T]]): Pattern[T] =
     result.add(tiles)
 
 proc toPattern*[T](colors: openArray[T]): Pattern[T] =
-  let n = colors.len
+  let n = colors.len.to_float
   for i, color in colors:
-    result.add(((i // n, (i + 1) // n), color))
+    result.add(((i.to_float / n, (i + 1).to_float / n), color))
 
 proc sample*[T](pattern: Pattern[T], time: float): seq[T] =
   for tile in pattern:
-    if tile.arc.start.toFloat <= time and time < tile.arc.stop.toFloat:
+    if tile.arc.start <= time and time < tile.arc.stop:
       result.add(tile.color)
 
 proc sample_one*[T](pattern: Pattern[T], time: float): T =
   for tile in pattern:
-    if tile.arc.start.toFloat <= time and time < tile.arc.stop.toFloat:
+    if tile.arc.start <= time and time < tile.arc.stop:
       return tile.color
 
 proc `@!`*[T](colors: openArray[T]): Pattern[T] = colors.toPattern
