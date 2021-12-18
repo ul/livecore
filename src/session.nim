@@ -10,7 +10,7 @@ type
     pool: Pool
     p1: PSeq
 
-proc process*(s: var State, cc: var Controls, n: var Notes): Frame {.nimcall, exportc, dynlib.} =
+proc process*(s: var State, cc: var Controls, n: var Notes, input: Frame): Frame {.nimcall, exportc, dynlib.} =
   s.pool.init
 
   let freq = 2.dmetro.step(s.p1).mul(55.0)
