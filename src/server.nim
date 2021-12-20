@@ -8,13 +8,16 @@ import
   ffi/lo/[lo_serverthread, lo_types, lo_osc_types],
   os,
   parseopt,
+  scope,
   strformat,
-  strutils
+  strutils,
+  threadpool
 
 var
   dac_id = -1
   adc_id = -1
   osc_addr = "7770"
+  run_scope = false
 
 for kind, key, val in getopt():
   case kind
@@ -24,6 +27,7 @@ for kind, key, val in getopt():
     of "dac": dac_id = val.parse_int
     of "adc": adc_id = val.parse_int
     of "osc": osc_addr = val
+    of "scope": run_scope = true
     else: discard
   of cmdEnd: assert(false) # cannot happen
 
@@ -35,7 +39,7 @@ const
   size_of_channel_area = sizeof SoundIoChannelArea
 
 type
-  Process = proc(arena: pointer, cc: var Controls, n: var Notes, input: Frame): Frame {.nimcall.}
+  Process = proc(arena: pointer, cc: var Controls, n: var Notes, input: Frame, monitor: var Monitor): Frame {.nimcall.}
   Load = proc(arena: pointer) {.nimcall.}
   Unload = proc(arena: pointer) {.nimcall.}
   State = object
@@ -45,8 +49,9 @@ type
     notes: Notes
     note_cursor: int
     input: ptr SoundIoRingBuffer
+    monitor: Monitor
 
-proc default_process(arena: pointer, cc: var Controls, n: var Notes, input: Frame): Frame = 0.0
+proc default_process(arena: pointer, cc: var Controls, n: var Notes, input: Frame, monitor: var Monitor): Frame = 0.0
 
 proc write_callback(out_stream: ptr SoundIoOutStream, frame_count_min: cint, frame_count_max: cint) {.cdecl.} =
   in_process.store(true)
@@ -81,7 +86,7 @@ proc write_callback(out_stream: ptr SoundIoOutStream, frame_count_min: cint, fra
         for channel in 0..<CHANNELS:
           input_frame[channel] = cast[ptr float](ptr_input + (frame*CHANNELS + channel)*(sizeof float))[]
 
-      let samples = process(arena, state.controls, state.notes, input_frame)
+      let samples = process(arena, state.controls, state.notes, input_frame, state.monitor)
       for channel in 0..<channel_count:
         let ptr_area = cast[ptr SoundIoChannelArea](ptr_areas + channel*size_of_channel_area)
         var ptr_sample = cast[ptr float32](cast[int](ptr_area.pointer) + frame*ptr_area.step)
@@ -104,7 +109,6 @@ proc write_callback(out_stream: ptr SoundIoOutStream, frame_count_min: cint, fra
 proc read_callback(in_stream: ptr SoundIoInStream, frame_count_min: cint, frame_count_max: cint) {.cdecl.} =
   let state = cast[ptr State](in_stream.userdata)
   let input = state.input
-  let channel_count = in_stream.layout.channel_count
   var areas: ptr SoundIoChannelArea
   var frames_left = frame_count_max
   var err: cint
@@ -322,6 +326,7 @@ discard lo_server_thread_add_method(osc_server_thread, "/tidal/notes", "i", tida
 discard lo_server_thread_add_method(osc_server_thread, "/tidal/controls", "if", controls_handler, state);
 discard lo_server_thread_start(osc_server_thread)
 
+
 if fsw_init_library() != 0:
   quit "Failed to init FSWatch"
 
@@ -382,18 +387,30 @@ for path in walk_files("target/session.so.*"):
 if initial_path != "":
   load(initial_path)
 
-proc monitor(event: fsw_cevent, num: cuint) =
+proc fs_monitor(event: fsw_cevent, num: cuint) =
   for i in 0..<event.flags_num:
     let flag = cast[ptr fsw_event_flag](cast[int](event.flags) + cast[int](i) * fsw_event_flag.sizeof)[]
     if flag == fsw_event_flag.Removed:
       return
   load(relative_path($event.path, "."))
 
-if fsw.fsw_set_callback(monitor) != 0:
+if fsw.fsw_set_callback(fs_monitor) != 0:
   quit "Failed add target to watch paths"
 
-discard fsw.fsw_start_monitor()
+proc start_fs_monitor() {.gcsafe.} =
+  discard fsw.fsw_start_monitor()
 
+spawn start_fs_monitor()
+
+
+var scope_app: Scope
+if run_scope:
+  scope_app = Scope(window: nil, renderer: nil, monitor: state.monitor.addr)
+  scope_app.start
+
+
+if run_scope:
+  scope_app.exit
 osc_server_thread.lo_server_thread_free
 if not input_stream.is_nil:
   input_stream.destroy

@@ -3,32 +3,24 @@
 import
   dsp/[ frame, delays, effects, envelopes, events, filters, metro, modules,
         nanotidal, noise, osc, sampler, soundpipe, stereo, fft, patterns ],
-  atomics, math, pool, control
+  atomics, math, pool, control, scope, sequtils
 
 type
   State* = object
     pool: Pool
-    p1: PSeq
 
-proc process*(s: var State, cc: var Controls, n: var Notes, input: Frame): Frame {.nimcall, exportc, dynlib.} =
+proc process*(s: var State, cc: var Controls, n: var Notes, input: Frame, m: var Monitor): Frame {.nimcall, exportc, dynlib.} =
   s.pool.init
+  let x = 55.osc
+  x.write_to_monitor(m, 0)
 
-  let freq = 2.dmetro.step(s.p1).mul(55.0)
-  let sig = 0.1 * freq.osc
-  let env = 1.metro.impulse(0.1)
-
-  sig.mul(env).simple_saturator
-
+  
 # A place for heavy init logic, like reading tables from the disk.
 # Beware access to the state is not guarded and may happen simultaneously with `process`.
 proc load*(s: var State) {.nimcall, exportc, dynlib.} =
   const MB = 1024^2
   echo "State: ", int(State.size_of/MB) , "MB / Pool: ", int(Pool.size_of/MB), "MB" 
-  # s.pool.addr.zero_mem(Pool.size_of)
-  # s.addr.zero_mem(State.size_of)
   sp_create()
-
-  [1.0, 2.5, 3.0, 3.5, 4.0].init(s.p1)
 
 # Clean up any garbage allocated outside of the State arena.
 # Beware access to the state is not guarded and may happen simultaneously with `process`.

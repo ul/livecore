@@ -20,6 +20,7 @@ type
   Frame* = array[CHANNELS, float]
   Controls* = array[0x100, Atomic[float]]
   Notes* = array[0x10, Atomic[uint16]]
+  Monitor* = array[0x10, Atomic[float]]
 
 converter to_frame*(x: float): Frame =
   for i in 0..<CHANNELS:
@@ -187,3 +188,13 @@ lift1(`@`)
 
 proc `%%`*(x, y: float): float = quantize(x, y)
 lift2(`%%`)
+
+proc write_to_monitor*(x: float, monitor: var Monitor, index: int): float =
+  monitor[index].store(x)
+  x
+
+proc write_to_monitor*(xs: Frame, monitor: var Monitor, index: int): Frame =
+  var offset = index
+  for x in xs:
+    monitor[index + offset].store(x)
+  xs
