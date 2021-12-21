@@ -1,4 +1,4 @@
-## Overlap-add FFT transform.
+## OLS FFT transform.
 
 import math, ffi/mufft/fft
 
@@ -24,7 +24,7 @@ proc wrap_phase(x: float): float =
   ((x + p) mod (2 * p)) - p
 
 template defFFT*(window_size: static[Natural]) =
-  ## `window_size` must be even, better a power of two.
+  ## `window_size` must be a power of two.
   ## Generated type will be `FFT_{window_size}` with `init` and `process` "methods" available.
   ## Hop size is 1/16 of window size.
   ## Applies Hann window to the input before passing to forward FFT.
