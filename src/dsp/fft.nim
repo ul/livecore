@@ -1,8 +1,8 @@
 ## Overlap-add FFT transform.
 
-import math, ffi/kissfft/kissfft
+import math, ffi/mufft/fft
 
-type Complex* = kiss_fft_cpx
+type Complex* = mufft_cpx
 
 proc magnitude*(x: Complex): float = sqrt(x.r^2 + x.i^2)
 proc phase*(x: Complex): float = arctan2(x.i, x.r)
@@ -20,10 +20,8 @@ proc fft_bins*(N: static[Natural]): array[N, float] =
     result[n] = k * n.to_float
 
 proc wrap_phase(x: float): float =
- if x >= 0.0:
-   return ((x + PI) mod TAU) - PI
- else:
-   return ((x - PI) mod -TAU) + PI
+  let p = copy_sign(PI, x)
+  ((x + p) mod (2 * p)) - p
 
 template defFFT*(window_size: static[Natural]) =
   ## `window_size` must be even, better a power of two.
@@ -47,7 +45,7 @@ template defFFT*(window_size: static[Natural]) =
     # TODO: figure out why do we need 1.5 to even amplitude with the source!
     output_scale_factor = 1.5 * hann_window_scale_factor * overlap_scale_factor
     output_buffer_size = 16 * window_size # Minimum is window_size + hop_size but let's have some leeway.
-    norm = sqrt(1.0 / window_size.to_float) # KissFFT returns non-normalized from both forward and inverse transformations.
+    norm = sqrt(1.0 / window_size.to_float) # muFFT returns non-normalized from both forward and inverse transformations.
     window = hann(window_size)
     bin_frequencies = fft_bins(window_size)
 
@@ -63,12 +61,8 @@ template defFFT*(window_size: static[Natural]) =
     FFT = object
       bins*: int
       ready: bool
-      cfg: kiss_fftr_cfg
-      icfg: kiss_fftr_cfg
-      # KissFFT uses sizeof on internal structures to determine required memory,
-      # so we just approximate it with quick and dirty calculation.
-      # mem: array[6*window_size + 72, uint64] # TODO Make a better guess.
-      # imem: array[6*window_size + 72, uint64]
+      plan: ptr mufft_plan_1d
+      iplan: ptr mufft_plan_1d
       hop_cursor: int
       input: Input
       output: Output
@@ -112,14 +106,11 @@ template defFFT*(window_size: static[Natural]) =
       s.read_cursor = 0
 
   proc init*(s: var FFT) =
-    if not s.ready:
+    if s.ready:
+      mufft_free_plan_1d(s.plan)
+      mufft_free_plan_1d(s.iplan)
+    else:
       s.bins = fft_size
-      # var lenmem = cast[csize_t](s.mem.sizeof)
-      # var ilenmem = cast[csize_t](s.imem.sizeof)
-      # s.cfg = kiss_fftr_alloc(window_size, 0, s.mem.addr, lenmem.addr)
-      # s.icfg = kiss_fftr_alloc(window_size, 1, s.imem.addr, ilenmem.addr)
-      s.cfg = kiss_fftr_alloc(window_size, 0, nil, nil)
-      s.icfg = kiss_fftr_alloc(window_size, 1, nil, nil)
       s.output.write_cursor = hop_size
       for n in 0..<fft_size:
         s.last_input_phases[n] = 0.0
@@ -127,14 +118,16 @@ template defFFT*(window_size: static[Natural]) =
         s.synthesis_magnitudes[n] = 0.0
         s.synthesis_frequencies[n] = bin_frequencies[n]
       s.ready = true
+    s.plan = mufft_create_plan_1d_r2c(window_size, 0)
+    s.iplan = mufft_create_plan_1d_c2r(window_size, 0)
 
   proc fft(s: var FFT, timedata: array[window_size, float]): array[fft_size, Complex] =
     # Copying via assignment is necessary as apparently array[N, float] and
     # array[N, cfloat] have different memory representation.
-    var t: array[window_size, kiss_fft_scalar]
+    var t: array[window_size, cfloat]
     for i in 0..<window_size:
       t[i] = timedata[i]
-    kiss_fftr(s.cfg, cast[ptr kiss_fft_scalar](t.addr), cast[ptr kiss_fft_cpx](result.addr))
+    mufft_execute_plan_1d(s.plan, cast[ptr mufft_cpx](result.addr), cast[ptr cfloat](t.addr))
     for i in 0..<window_size:
       result[i].r *= norm
       result[i].i *= norm
@@ -142,8 +135,8 @@ template defFFT*(window_size: static[Natural]) =
   proc ifft(s: var FFT, freqdata: var array[fft_size, Complex]): array[window_size, float] =
     # Copying via assignment is necessary as apparently array[N, float] and
     # array[N, cfloat] have different memory representation.
-    var t: array[window_size, kiss_fft_scalar]
-    kiss_fftri(s.icfg, cast[ptr kiss_fft_cpx](freqdata.addr), cast[ptr kiss_fft_scalar](t.addr))
+    var t: array[window_size, cfloat]
+    mufft_execute_plan_1d(s.iplan, cast[ptr cfloat](t.addr), cast[ptr mufft_cpx](freqdata.addr))
     for i in 0..<window_size:
       result[i] = norm * t[i]
 

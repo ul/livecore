@@ -3,6 +3,6 @@
 # ./render <duration in seconds> <path/to/output.wav>
 
 # To render as fast as we can.
-NIM_FLAGS="--gc:orc -d:danger --passC:-ffast-math --cincludes:dsp/ffi/kissfft"
+NIM_FLAGS="--gc:orc -d:danger --passC:-ffast-math --cincludes:dsp/ffi/mufft"
 
 nim c $NIM_FLAGS -r -o:target/render src/render.nim $@
