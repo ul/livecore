@@ -50,9 +50,12 @@ template defFFT*(window_size: static[Natural]) =
     bin_frequencies = fft_bins(window_size)
 
   type
+    TimeData = array[window_size, cfloat]
+    FrequencyData = array[fft_size, Complex]
+
     Input = object
       cursor: int
-      buffer: array[window_size, float]
+      buffer: TimeData
 
     Output = object
       read_cursor, write_cursor: int
@@ -81,7 +84,7 @@ template defFFT*(window_size: static[Natural]) =
     if unlikely(s.cursor >= window_size):
       s.cursor = 0
 
-  proc read_input_window(s: Input): array[window_size, float] {.inline.} =
+  proc read_input_window(s: Input): TimeData {.inline.} =
     var j = s.cursor
     for i in 0..<window_size:
       result[i] = window[i] * s.buffer[j]
@@ -89,7 +92,7 @@ template defFFT*(window_size: static[Natural]) =
       if unlikely(j >= window_size):
         j = 0
 
-  proc write_output_window(s: var Output, a: array[window_size, float]) {.inline.} =
+  proc write_output_window(s: var Output, a: TimeData) {.inline.} =
     var cursor = s.write_cursor
     for i in 0..<window_size:
       s.buffer[cursor] += window[i] * a[i]
@@ -121,24 +124,15 @@ template defFFT*(window_size: static[Natural]) =
     s.plan = mufft_create_plan_1d_r2c(window_size, 0)
     s.iplan = mufft_create_plan_1d_c2r(window_size, 0)
 
-  proc fft(s: var FFT, timedata: array[window_size, float]): array[fft_size, Complex] =
-    # Copying via assignment is necessary as apparently array[N, float] and
-    # array[N, cfloat] have different memory representation.
-    var t: array[window_size, cfloat]
+  proc fft(s: var FFT, timedata: var TimeData): FrequencyData =
+    mufft_execute_plan_1d(s.plan, result.addr, timedata.addr)
     for i in 0..<window_size:
-      t[i] = timedata[i]
-    mufft_execute_plan_1d(s.plan, cast[ptr mufft_cpx](result.addr), cast[ptr cfloat](t.addr))
-    for i in 0..<window_size:
-      result[i].r *= norm
-      result[i].i *= norm
+      result[i] *= norm
 
-  proc ifft(s: var FFT, freqdata: var array[fft_size, Complex]): array[window_size, float] =
-    # Copying via assignment is necessary as apparently array[N, float] and
-    # array[N, cfloat] have different memory representation.
-    var t: array[window_size, cfloat]
-    mufft_execute_plan_1d(s.iplan, cast[ptr cfloat](t.addr), cast[ptr mufft_cpx](freqdata.addr))
+  proc ifft(s: var FFT, freqdata: var FrequencyData): TimeData =
+    mufft_execute_plan_1d(s.iplan, result.addr, freqdata.addr)
     for i in 0..<window_size:
-      result[i] = norm * t[i]
+      result[i] *= norm
 
   template process*(x: float, s: var FFT; body: untyped): float =
     block:
