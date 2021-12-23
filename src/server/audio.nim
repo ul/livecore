@@ -60,7 +60,6 @@ proc write_callback(out_stream: ptr SoundIoOutStream, frame_count_min: cint, fra
 proc read_callback(in_stream: ptr SoundIoInStream, frame_count_min: cint, frame_count_max: cint) {.cdecl.} =
   let ctx = cast[ptr Context](in_stream.userdata)
   let input = ctx.input
-  let channel_count = in_stream.layout.channel_count
   var areas: ptr SoundIoChannelArea
   var frames_left = frame_count_max
   var err: cint
