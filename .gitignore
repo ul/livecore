@@ -1,3 +1,4 @@
 target/
 *.dylib
 _build/
+.DS_Store
