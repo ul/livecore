@@ -204,7 +204,7 @@ proc start_audio*(ctx: ptr Context, param_dac_id, param_adc_id: int) =
     ctx.input = sio.ring_buffer_create(cast[cint](4 * (
       max(input_stream.software_latency, output_stream.software_latency) * SAMPLE_RATE *
       (CHANNELS * (sizeof float)).float
-    ).to_int))
+    ).int))
 
     input_stream.read_callback = read_callback
     input_stream.userdata = ctx
