@@ -42,27 +42,10 @@ proc midi2osc_handler(path: cstring; types: cstring; argv: ptr ptr lo_arg;
   # TODO log into file to be committed as a part of session
   echo "0x", m[1].to_hex, " 0x", m[2].to_hex, " 0x", m[3].to_hex
 
-proc tidal_triggers_handler(path: cstring; types: cstring; argv: ptr ptr lo_arg;
-    argc: cint; msg: lo_message; user_data: pointer): cint {.cdecl.} =
-  let ctx = cast[ptr Context](user_data)
-  ctx.controls[argv.i].store(1.0)
-
-proc tidal_notes_handler(path: cstring; types: cstring; argv: ptr ptr lo_arg;
-    argc: cint; msg: lo_message; user_data: pointer): cint {.cdecl.} =
-  let ctx = cast[ptr Context](user_data)
-  ctx.notes[ctx.note_cursor].store(argv.i.uint16 + (0x100*0xFF).uint16)
-  ctx.note_cursor = (ctx.note_cursor + 1) mod ctx.notes.len
-
 proc start_osc*(ctx: ptr Context; osc_addr: string) =
   let osc_server_thread = osc_addr.cstring.lo_server_thread_new(osc_error)
   discard lo_server_thread_add_method(osc_server_thread, "/notes", "m",
       midi2osc_handler, ctx);
   discard lo_server_thread_add_method(osc_server_thread, "/controls", "if",
       controls_handler, ctx);
-  discard lo_server_thread_add_method(osc_server_thread, "/tidal/triggers", "i",
-      tidal_triggers_handler, ctx);
-  discard lo_server_thread_add_method(osc_server_thread, "/tidal/notes", "i",
-      tidal_notes_handler, ctx);
-  discard lo_server_thread_add_method(osc_server_thread, "/tidal/controls",
-      "if", controls_handler, ctx);
   discard lo_server_thread_start(osc_server_thread)
