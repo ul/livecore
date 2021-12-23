@@ -5,7 +5,8 @@ import
   ffi/soundio,
   strformat
 
-proc write_callback(out_stream: ptr SoundIoOutStream, frame_count_min: cint, frame_count_max: cint) {.cdecl.} =
+proc write_callback(out_stream: ptr SoundIoOutStream, frame_count_min: cint,
+    frame_count_max: cint) {.cdecl.} =
   let ctx = cast[ptr Context](out_stream.userdata)
   ctx.in_process.store(true)
 
@@ -36,12 +37,15 @@ proc write_callback(out_stream: ptr SoundIoOutStream, frame_count_min: cint, fra
       var input_frame: array[CHANNELS, float]
       if not input.is_nil:
         for channel in 0..<CHANNELS:
-          input_frame[channel] = cast[ptr float](ptr_input + (frame*CHANNELS + channel)*(sizeof float))[]
+          input_frame[channel] = cast[ptr float](ptr_input + (frame*CHANNELS +
+              channel)*(sizeof float))[]
 
       let samples = process(arena, ctx.controls, ctx.notes, input_frame)
       for channel in 0..<channel_count:
-        let ptr_area = cast[ptr SoundIoChannelArea](ptr_areas + channel*SoundIoChannelArea.sizeof)
-        var ptr_sample = cast[ptr float32](cast[int](ptr_area.pointer) + frame*ptr_area.step)
+        let ptr_area = cast[ptr SoundIoChannelArea](ptr_areas +
+            channel*SoundIoChannelArea.sizeof)
+        var ptr_sample = cast[ptr float32](cast[int](ptr_area.pointer) +
+            frame*ptr_area.step)
         ptr_sample[] = samples[channel].float32.min(1.0).max(-1.0)
 
     if not input.is_nil:
@@ -57,7 +61,8 @@ proc write_callback(out_stream: ptr SoundIoOutStream, frame_count_min: cint, fra
 
   ctx.in_process.store(false)
 
-proc read_callback(in_stream: ptr SoundIoInStream, frame_count_min: cint, frame_count_max: cint) {.cdecl.} =
+proc read_callback(in_stream: ptr SoundIoInStream, frame_count_min: cint,
+    frame_count_max: cint) {.cdecl.} =
   let ctx = cast[ptr Context](in_stream.userdata)
   let input = ctx.input
   var areas: ptr SoundIoChannelArea
@@ -79,9 +84,12 @@ proc read_callback(in_stream: ptr SoundIoInStream, frame_count_min: cint, frame_
 
     for frame in 0..<frame_count:
       for channel in 0..<CHANNELS:
-        var ptr_input_sample = cast[ptr float](ptr_input + (frame*CHANNELS + channel)*(sizeof float))
-        let ptr_area = cast[ptr SoundIoChannelArea](ptr_areas + channel*SoundIoChannelArea.sizeof)
-        var ptr_sample = cast[ptr float32](cast[int](ptr_area.pointer) + frame*ptr_area.step)
+        var ptr_input_sample = cast[ptr float](ptr_input + (frame*CHANNELS +
+            channel)*(sizeof float))
+        let ptr_area = cast[ptr SoundIoChannelArea](ptr_areas +
+            channel*SoundIoChannelArea.sizeof)
+        var ptr_sample = cast[ptr float32](cast[int](ptr_area.pointer) +
+            frame*ptr_area.step)
         ptr_input_sample[] = ptr_sample[].float
 
     input.advance_write_ptr(cast[cint](frame_count*CHANNELS*(sizeof float)))
@@ -103,7 +111,7 @@ proc start_audio*(ctx: ptr Context, param_dac_id, param_adc_id: int) =
 
   var err = sio.connect
   if err > 0:
-     quit "Unable to connect to backend: " & $soundio.strerror(err)
+    quit "Unable to connect to backend: " & $soundio.strerror(err)
 
   echo "Backend: \t", sio.current_backend.name
   sio.flush_events
@@ -202,7 +210,8 @@ proc start_audio*(ctx: ptr Context, param_dac_id, param_adc_id: int) =
       quit "Out of memory."
 
     ctx.input = sio.ring_buffer_create(cast[cint](4 * (
-      max(input_stream.software_latency, output_stream.software_latency) * SAMPLE_RATE *
+      max(input_stream.software_latency, output_stream.software_latency) *
+          SAMPLE_RATE *
       (CHANNELS * (sizeof float)).float
     ).int))
 

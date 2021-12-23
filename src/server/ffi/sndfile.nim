@@ -39,65 +39,65 @@ const
 ## * types.
 ##
 
-const                         ##  Major formats.
-  SF_FORMAT_WAV* = 0x00010000   ##  Microsoft WAV format (little endian default).
-  SF_FORMAT_AIFF* = 0x00020000  ##  Apple/SGI AIFF format (big endian).
-  SF_FORMAT_AU* = 0x00030000    ##  Sun/NeXT AU format (big endian).
-  SF_FORMAT_RAW* = 0x00040000   ##  RAW PCM data.
-  SF_FORMAT_PAF* = 0x00050000   ##  Ensoniq PARIS file format.
-  SF_FORMAT_SVX* = 0x00060000   ##  Amiga IFF / SVX8 / SV16 format.
-  SF_FORMAT_NIST* = 0x00070000  ##  Sphere NIST format.
-  SF_FORMAT_VOC* = 0x00080000   ##  VOC files.
-  SF_FORMAT_IRCAM* = 0x000A0000 ##  Berkeley/IRCAM/CARL
-  SF_FORMAT_W64* = 0x000B0000   ##  Sonic Foundry's 64 bit RIFF/WAV
-  SF_FORMAT_MAT4* = 0x000C0000  ##  Matlab (tm) V4.2 / GNU Octave 2.0
-  SF_FORMAT_MAT5* = 0x000D0000  ##  Matlab (tm) V5.0 / GNU Octave 2.1
-  SF_FORMAT_PVF* = 0x000E0000   ##  Portable Voice Format
-  SF_FORMAT_XI* = 0x000F0000    ##  Fasttracker 2 Extended Instrument
-  SF_FORMAT_HTK* = 0x00100000   ##  HMM Tool Kit format
-  SF_FORMAT_SDS* = 0x00110000   ##  Midi Sample Dump Standard
-  SF_FORMAT_AVR* = 0x00120000   ##  Audio Visual Research
-  SF_FORMAT_WAVEX* = 0x00130000 ##  MS WAVE with WAVEFORMATEX
-  SF_FORMAT_SD2* = 0x00160000   ##  Sound Designer 2
-  SF_FORMAT_FLAC* = 0x00170000  ##  FLAC lossless file format
-  SF_FORMAT_CAF* = 0x00180000   ##  Core Audio File format
-  SF_FORMAT_WVE* = 0x00190000   ##  Psion WVE format
-  SF_FORMAT_OGG* = 0x00200000   ##  Xiph OGG container
-  SF_FORMAT_MPC2K* = 0x00210000 ##  Akai MPC 2000 sampler
-  SF_FORMAT_RF64* = 0x00220000  ##  RF64 WAV file
-                            ##  Subtypes from here on.
-  SF_FORMAT_PCM_S8* = 0x00000001 ##  Signed 8 bit data
-  SF_FORMAT_PCM_16* = 0x00000002 ##  Signed 16 bit data
-  SF_FORMAT_PCM_24* = 0x00000003 ##  Signed 24 bit data
-  SF_FORMAT_PCM_32* = 0x00000004 ##  Signed 32 bit data
-  SF_FORMAT_PCM_U8* = 0x00000005 ##  Unsigned 8 bit data (WAV and RAW only)
-  SF_FORMAT_FLOAT* = 0x00000006 ##  32 bit float data
-  SF_FORMAT_DOUBLE* = 0x00000007 ##  64 bit float data
-  SF_FORMAT_ULAW* = 0x00000010  ##  U-Law encoded.
-  SF_FORMAT_ALAW* = 0x00000011  ##  A-Law encoded.
+const                               ##  Major formats.
+  SF_FORMAT_WAV* = 0x00010000       ##  Microsoft WAV format (little endian default).
+  SF_FORMAT_AIFF* = 0x00020000      ##  Apple/SGI AIFF format (big endian).
+  SF_FORMAT_AU* = 0x00030000        ##  Sun/NeXT AU format (big endian).
+  SF_FORMAT_RAW* = 0x00040000       ##  RAW PCM data.
+  SF_FORMAT_PAF* = 0x00050000       ##  Ensoniq PARIS file format.
+  SF_FORMAT_SVX* = 0x00060000       ##  Amiga IFF / SVX8 / SV16 format.
+  SF_FORMAT_NIST* = 0x00070000      ##  Sphere NIST format.
+  SF_FORMAT_VOC* = 0x00080000       ##  VOC files.
+  SF_FORMAT_IRCAM* = 0x000A0000     ##  Berkeley/IRCAM/CARL
+  SF_FORMAT_W64* = 0x000B0000       ##  Sonic Foundry's 64 bit RIFF/WAV
+  SF_FORMAT_MAT4* = 0x000C0000      ##  Matlab (tm) V4.2 / GNU Octave 2.0
+  SF_FORMAT_MAT5* = 0x000D0000      ##  Matlab (tm) V5.0 / GNU Octave 2.1
+  SF_FORMAT_PVF* = 0x000E0000       ##  Portable Voice Format
+  SF_FORMAT_XI* = 0x000F0000        ##  Fasttracker 2 Extended Instrument
+  SF_FORMAT_HTK* = 0x00100000       ##  HMM Tool Kit format
+  SF_FORMAT_SDS* = 0x00110000       ##  Midi Sample Dump Standard
+  SF_FORMAT_AVR* = 0x00120000       ##  Audio Visual Research
+  SF_FORMAT_WAVEX* = 0x00130000     ##  MS WAVE with WAVEFORMATEX
+  SF_FORMAT_SD2* = 0x00160000       ##  Sound Designer 2
+  SF_FORMAT_FLAC* = 0x00170000      ##  FLAC lossless file format
+  SF_FORMAT_CAF* = 0x00180000       ##  Core Audio File format
+  SF_FORMAT_WVE* = 0x00190000       ##  Psion WVE format
+  SF_FORMAT_OGG* = 0x00200000       ##  Xiph OGG container
+  SF_FORMAT_MPC2K* = 0x00210000     ##  Akai MPC 2000 sampler
+  SF_FORMAT_RF64* = 0x00220000      ##  RF64 WAV file
+                                    ##  Subtypes from here on.
+  SF_FORMAT_PCM_S8* = 0x00000001    ##  Signed 8 bit data
+  SF_FORMAT_PCM_16* = 0x00000002    ##  Signed 16 bit data
+  SF_FORMAT_PCM_24* = 0x00000003    ##  Signed 24 bit data
+  SF_FORMAT_PCM_32* = 0x00000004    ##  Signed 32 bit data
+  SF_FORMAT_PCM_U8* = 0x00000005    ##  Unsigned 8 bit data (WAV and RAW only)
+  SF_FORMAT_FLOAT* = 0x00000006     ##  32 bit float data
+  SF_FORMAT_DOUBLE* = 0x00000007    ##  64 bit float data
+  SF_FORMAT_ULAW* = 0x00000010      ##  U-Law encoded.
+  SF_FORMAT_ALAW* = 0x00000011      ##  A-Law encoded.
   SF_FORMAT_IMA_ADPCM* = 0x00000012 ##  IMA ADPCM.
-  SF_FORMAT_MS_ADPCM* = 0x00000013 ##  Microsoft ADPCM.
-  SF_FORMAT_GSM610* = 0x00000020 ##  GSM 6.10 encoding.
+  SF_FORMAT_MS_ADPCM* = 0x00000013  ##  Microsoft ADPCM.
+  SF_FORMAT_GSM610* = 0x00000020    ##  GSM 6.10 encoding.
   SF_FORMAT_VOX_ADPCM* = 0x00000021 ##  OKI / Dialogix ADPCM
-  SF_FORMAT_G721_32* = 0x00000030 ##  32kbs G721 ADPCM encoding.
-  SF_FORMAT_G723_24* = 0x00000031 ##  24kbs G723 ADPCM encoding.
-  SF_FORMAT_G723_40* = 0x00000032 ##  40kbs G723 ADPCM encoding.
-  SF_FORMAT_DWVW_12* = 0x00000040 ##  12 bit Delta Width Variable Word encoding.
-  SF_FORMAT_DWVW_16* = 0x00000041 ##  16 bit Delta Width Variable Word encoding.
-  SF_FORMAT_DWVW_24* = 0x00000042 ##  24 bit Delta Width Variable Word encoding.
-  SF_FORMAT_DWVW_N* = 0x00000043 ##  N bit Delta Width Variable Word encoding.
-  SF_FORMAT_DPCM_8* = 0x00000050 ##  8 bit differential PCM (XI only)
-  SF_FORMAT_DPCM_16* = 0x00000051 ##  16 bit differential PCM (XI only)
-  SF_FORMAT_VORBIS* = 0x00000060 ##  Xiph Vorbis encoding.
-  SF_FORMAT_ALAC_16* = 0x00000070 ##  Apple Lossless Audio Codec (16 bit).
-  SF_FORMAT_ALAC_20* = 0x00000071 ##  Apple Lossless Audio Codec (20 bit).
-  SF_FORMAT_ALAC_24* = 0x00000072 ##  Apple Lossless Audio Codec (24 bit).
-  SF_FORMAT_ALAC_32* = 0x00000073 ##  Apple Lossless Audio Codec (32 bit).
-                               ##  Endian-ness options.
-  SF_ENDIAN_FILE* = 0x00000000  ##  Default file endian-ness.
-  SF_ENDIAN_LITTLE* = 0x10000000 ##  Force little endian-ness.
-  SF_ENDIAN_BIG* = 0x20000000   ##  Force big endian-ness.
-  SF_ENDIAN_CPU* = 0x30000000   ##  Force CPU endian-ness.
+  SF_FORMAT_G721_32* = 0x00000030   ##  32kbs G721 ADPCM encoding.
+  SF_FORMAT_G723_24* = 0x00000031   ##  24kbs G723 ADPCM encoding.
+  SF_FORMAT_G723_40* = 0x00000032   ##  40kbs G723 ADPCM encoding.
+  SF_FORMAT_DWVW_12* = 0x00000040   ##  12 bit Delta Width Variable Word encoding.
+  SF_FORMAT_DWVW_16* = 0x00000041   ##  16 bit Delta Width Variable Word encoding.
+  SF_FORMAT_DWVW_24* = 0x00000042   ##  24 bit Delta Width Variable Word encoding.
+  SF_FORMAT_DWVW_N* = 0x00000043    ##  N bit Delta Width Variable Word encoding.
+  SF_FORMAT_DPCM_8* = 0x00000050    ##  8 bit differential PCM (XI only)
+  SF_FORMAT_DPCM_16* = 0x00000051   ##  16 bit differential PCM (XI only)
+  SF_FORMAT_VORBIS* = 0x00000060    ##  Xiph Vorbis encoding.
+  SF_FORMAT_ALAC_16* = 0x00000070   ##  Apple Lossless Audio Codec (16 bit).
+  SF_FORMAT_ALAC_20* = 0x00000071   ##  Apple Lossless Audio Codec (20 bit).
+  SF_FORMAT_ALAC_24* = 0x00000072   ##  Apple Lossless Audio Codec (24 bit).
+  SF_FORMAT_ALAC_32* = 0x00000073   ##  Apple Lossless Audio Codec (32 bit).
+                                    ##  Endian-ness options.
+  SF_ENDIAN_FILE* = 0x00000000      ##  Default file endian-ness.
+  SF_ENDIAN_LITTLE* = 0x10000000    ##  Force little endian-ness.
+  SF_ENDIAN_BIG* = 0x20000000       ##  Force big endian-ness.
+  SF_ENDIAN_CPU* = 0x30000000       ##  Force CPU endian-ness.
   SF_FORMAT_SUBMASK* = 0x0000FFFF
   SF_FORMAT_TYPEMASK* = 0x0FFF0000
   SF_FORMAT_ENDMASK* = 0x30000000
@@ -154,24 +154,24 @@ const
   SFC_SET_BROADCAST_INFO* = 0x000010F1
   SFC_GET_CHANNEL_MAP_INFO* = 0x00001100
   SFC_SET_CHANNEL_MAP_INFO* = 0x00001101
-  SFC_RAW_DATA_NEEDS_ENDSWAP* = 0x00001110 ##  Support for Wavex Ambisonics Format
+  SFC_RAW_DATA_NEEDS_ENDSWAP* = 0x00001110  ##  Support for Wavex Ambisonics Format
   SFC_WAVEX_SET_AMBISONIC* = 0x00001200
-  SFC_WAVEX_GET_AMBISONIC* = 0x00001201 ##
-                                     ## * RF64 files can be set so that on-close, writable files that have less
-                                     ## * than 4GB of data in them are converted to RIFF/WAV, as per EBU
-                                     ## * recommendations.
-                                     ##
+  SFC_WAVEX_GET_AMBISONIC* = 0x00001201     ##
+                                          ## * RF64 files can be set so that on-close, writable files that have less
+                                          ## * than 4GB of data in them are converted to RIFF/WAV, as per EBU
+                                            ## * recommendations.
+                                            ##
   SFC_RF64_AUTO_DOWNGRADE* = 0x00001210
   SFC_SET_VBR_ENCODING_QUALITY* = 0x00001300
-  SFC_SET_COMPRESSION_LEVEL* = 0x00001301 ##  Cart Chunk support
+  SFC_SET_COMPRESSION_LEVEL* = 0x00001301   ##  Cart Chunk support
   SFC_SET_CART_INFO* = 0x00001400
-  SFC_GET_CART_INFO* = 0x00001401 ##  Following commands for testing only.
+  SFC_GET_CART_INFO* = 0x00001401           ##  Following commands for testing only.
   SFC_TEST_IEEE_FLOAT_REPLACE* = 0x00006001 ##
-                                         ## * SFC_SET_ADD_* values are deprecated and will disappear at some
-                                         ## * time in the future. They are guaranteed to be here up to and
-                                         ## * including version 1.0.8 to avoid breakage of existing software.
-                                         ## * They currently do nothing and will continue to do nothing.
-                                         ##
+                                            ## * SFC_SET_ADD_* values are deprecated and will disappear at some
+                                            ## * time in the future. They are guaranteed to be here up to and
+                                            ## * including version 1.0.8 to avoid breakage of existing software.
+                                            ## * They currently do nothing and will continue to do nothing.
+                                            ##
   SFC_SET_ADD_DITHER_ON_WRITE* = 0x00001070
   SFC_SET_ADD_DITHER_ON_READ* = 0x00001071
 
@@ -202,9 +202,9 @@ const
   SF_STR_FIRST* = SF_STR_TITLE
   SF_STR_LAST* = SF_STR_GENRE
 
-const                         ##  True and false
+const          ##  True and false
   SF_FALSE* = 0
-  SF_TRUE* = 1                  ##  Modes for opening files.
+  SF_TRUE* = 1 ##  Modes for opening files.
   SFM_READ* = 0x00000010
   SFM_WRITE* = 0x00000020
   SFM_RDWR* = 0x00000030
@@ -230,27 +230,27 @@ const
 const
   SF_CHANNEL_MAP_INVALID* = 0
   SF_CHANNEL_MAP_MONO* = 1
-  SF_CHANNEL_MAP_LEFT* = 2      ##  Apple calls this 'Left'
-  SF_CHANNEL_MAP_RIGHT* = 3     ##  Apple calls this 'Right'
-  SF_CHANNEL_MAP_CENTER* = 4    ##  Apple calls this 'Center'
+  SF_CHANNEL_MAP_LEFT* = 2                  ##  Apple calls this 'Left'
+  SF_CHANNEL_MAP_RIGHT* = 3                 ##  Apple calls this 'Right'
+  SF_CHANNEL_MAP_CENTER* = 4                ##  Apple calls this 'Center'
   SF_CHANNEL_MAP_FRONT_LEFT* = 5
   SF_CHANNEL_MAP_FRONT_RIGHT* = 6
   SF_CHANNEL_MAP_FRONT_CENTER* = 7
   SF_CHANNEL_MAP_REAR_CENTER* = 8 ##  Apple calls this 'Center Surround', Msft calls this 'Back Center'
   SF_CHANNEL_MAP_REAR_LEFT* = 9 ##  Apple calls this 'Left Surround', Msft calls this 'Back Left'
   SF_CHANNEL_MAP_REAR_RIGHT* = 10 ##  Apple calls this 'Right Surround', Msft calls this 'Back Right'
-  SF_CHANNEL_MAP_LFE* = 11      ##  Apple calls this 'LFEScreen', Msft calls this 'Low Frequency'
+  SF_CHANNEL_MAP_LFE* = 11 ##  Apple calls this 'LFEScreen', Msft calls this 'Low Frequency'
   SF_CHANNEL_MAP_FRONT_LEFT_OF_CENTER* = 12 ##  Apple calls this 'Left Center'
-  SF_CHANNEL_MAP_FRONT_RIGHT_OF_CENTER* = 13 ##  Apple calls this 'Right Center
-  SF_CHANNEL_MAP_SIDE_LEFT* = 14 ##  Apple calls this 'Left Surround Direct'
-  SF_CHANNEL_MAP_SIDE_RIGHT* = 15 ##  Apple calls this 'Right Surround Direct'
-  SF_CHANNEL_MAP_TOP_CENTER* = 16 ##  Apple calls this 'Top Center Surround'
-  SF_CHANNEL_MAP_TOP_FRONT_LEFT* = 17 ##  Apple calls this 'Vertical Height Left'
-  SF_CHANNEL_MAP_TOP_FRONT_RIGHT* = 18 ##  Apple calls this 'Vertical Height Right'
-  SF_CHANNEL_MAP_TOP_FRONT_CENTER* = 19 ##  Apple calls this 'Vertical Height Center'
-  SF_CHANNEL_MAP_TOP_REAR_LEFT* = 20 ##  Apple and MS call this 'Top Back Left'
-  SF_CHANNEL_MAP_TOP_REAR_RIGHT* = 21 ##  Apple and MS call this 'Top Back Right'
-  SF_CHANNEL_MAP_TOP_REAR_CENTER* = 22 ##  Apple and MS call this 'Top Back Center'
+  SF_CHANNEL_MAP_FRONT_RIGHT_OF_CENTER * = 13 ##  Apple calls this 'Right Center
+  SF_CHANNEL_MAP_SIDE_LEFT* = 14            ##  Apple calls this 'Left Surround Direct'
+  SF_CHANNEL_MAP_SIDE_RIGHT* = 15           ##  Apple calls this 'Right Surround Direct'
+  SF_CHANNEL_MAP_TOP_CENTER* = 16           ##  Apple calls this 'Top Center Surround'
+  SF_CHANNEL_MAP_TOP_FRONT_LEFT* = 17       ##  Apple calls this 'Vertical Height Left'
+  SF_CHANNEL_MAP_TOP_FRONT_RIGHT* = 18      ##  Apple calls this 'Vertical Height Right'
+  SF_CHANNEL_MAP_TOP_FRONT_CENTER* = 19     ##  Apple calls this 'Vertical Height Center'
+  SF_CHANNEL_MAP_TOP_REAR_LEFT* = 20        ##  Apple and MS call this 'Top Back Left'
+  SF_CHANNEL_MAP_TOP_REAR_RIGHT* = 21       ##  Apple and MS call this 'Top Back Right'
+  SF_CHANNEL_MAP_TOP_REAR_CENTER* = 22      ##  Apple and MS call this 'Top Back Center'
   SF_CHANNEL_MAP_AMBISONIC_B_W* = 23
   SF_CHANNEL_MAP_AMBISONIC_B_X* = 24
   SF_CHANNEL_MAP_AMBISONIC_B_Y* = 25
@@ -278,10 +278,10 @@ type
   sf_count_t* = int64_t
 const
   SF_COUNT_MAX* = 0x7FFFFFFFFFFFFFFF'i64
-##  A pointer to a SF_INFO structure is passed to sf_open () and filled in.
-## * On write, the SF_INFO structure is filled in by the user and passed into
-## * sf_open ().
-##
+ ##  A pointer to a SF_INFO structure is passed to sf_open () and filled in.
+ ## * On write, the SF_INFO structure is filled in by the user and passed into
+ ## * sf_open ().
+ ##
 
 type
   SF_INFO* {.importc: "SF_INFO", header: "sndfile.h", bycopy.} = object
@@ -305,7 +305,8 @@ type
 ##
 
 type
-  SF_FORMAT_INFO* {.importc: "SF_FORMAT_INFO", header: "sndfile.h", bycopy.} = object
+  SF_FORMAT_INFO* {.importc: "SF_FORMAT_INFO", header: "sndfile.h",
+      bycopy.} = object
     format* {.importc: "format".}: cint
     name* {.importc: "name".}: cstring
     extension* {.importc: "extension".}: cstring
@@ -325,7 +326,8 @@ const
   SFD_TRIANGULAR_PDF* = 502
 
 type
-  SF_DITHER_INFO* {.importc: "SF_DITHER_INFO", header: "sndfile.h", bycopy.} = object
+  SF_DITHER_INFO* {.importc: "SF_DITHER_INFO", header: "sndfile.h",
+      bycopy.} = object
     `type`* {.importc: "type".}: cint
     level* {.importc: "level".}: cdouble
     name* {.importc: "name".}: cstring
@@ -336,7 +338,8 @@ type
 ##
 
 type
-  SF_EMBED_FILE_INFO* {.importc: "SF_EMBED_FILE_INFO", header: "sndfile.h", bycopy.} = object
+  SF_EMBED_FILE_INFO* {.importc: "SF_EMBED_FILE_INFO", header: "sndfile.h",
+      bycopy.} = object
     offset* {.importc: "offset".}: sf_count_t
     length* {.importc: "length".}: sf_count_t
 
@@ -346,7 +349,8 @@ type
 ##
 
 type
-  SF_CUE_POINT* {.importc: "SF_CUE_POINT", header: "sndfile.h", bycopy.} = object
+  SF_CUE_POINT* {.importc: "SF_CUE_POINT", header: "sndfile.h",
+      bycopy.} = object
     indx* {.importc: "indx".}: int32_t
     position* {.importc: "position".}: uint32_t
     fcc_chunk* {.importc: "fcc_chunk".}: int32_t
@@ -361,21 +365,23 @@ type
 ##
 
 const ##
-     ## *	The loop mode field in SF_INSTRUMENT will be one of the following.
-     ##
+      ## *	The loop mode field in SF_INSTRUMENT will be one of the following.
+      ##
   SF_LOOP_NONE* = 800
   SF_LOOP_FORWARD* = 801
   SF_LOOP_BACKWARD* = 802
   SF_LOOP_ALTERNATING* = 803
 
 type
-  INNER_C_STRUCT_3943598867* {.importc: "no_name", header: "sndfile.h", bycopy.} = object
+  INNER_C_STRUCT_3943598867* {.importc: "no_name", header: "sndfile.h",
+      bycopy.} = object
     mode* {.importc: "mode".}: cint
     start* {.importc: "start".}: uint32_t
     `end`* {.importc: "end".}: uint32_t
     count* {.importc: "count".}: uint32_t
 
-  SF_INSTRUMENT* {.importc: "SF_INSTRUMENT", header: "sndfile.h", bycopy.} = object
+  SF_INSTRUMENT* {.importc: "SF_INSTRUMENT", header: "sndfile.h",
+      bycopy.} = object
     gain* {.importc: "gain".}: cint
     basenote* {.importc: "basenote".}: char
     detune* {.importc: "detune".}: char
@@ -384,26 +390,29 @@ type
     key_lo* {.importc: "key_lo".}: char
     key_hi* {.importc: "key_hi".}: char
     loop_count* {.importc: "loop_count".}: cint
-    loops* {.importc: "loops".}: array[16, INNER_C_STRUCT_3943598867] ##  make variable in a sensible way
+    loops* {.importc: "loops".}: array[16,
+        INNER_C_STRUCT_3943598867] ##  make variable in a sensible way
 
 
 ##  Struct used to retrieve loop information from a file.
 
 type
-  SF_LOOP_INFO* {.importc: "SF_LOOP_INFO", header: "sndfile.h", bycopy.} = object
+  SF_LOOP_INFO* {.importc: "SF_LOOP_INFO", header: "sndfile.h",
+      bycopy.} = object
     time_sig_num* {.importc: "time_sig_num".}: cshort ##  any positive integer    > 0
     time_sig_den* {.importc: "time_sig_den".}: cshort ##  any positive power of 2 > 0
     loop_mode* {.importc: "loop_mode".}: cint ##  see SF_LOOP enum
     num_beats* {.importc: "num_beats".}: cint ##  this is NOT the amount of quarter notes !!!
-                                          ##  a full bar of 4/4 is 4 beats
-                                          ##  a full bar of 7/8 is 7 beats
+                                              ##  a full bar of 4/4 is 4 beats
+                                              ##  a full bar of 7/8 is 7 beats
     bpm* {.importc: "bpm".}: cfloat ##  suggestion, as it can be calculated using other fields:
-                                ##  file's length, file's sampleRate and our time_sig_den
-                                ##  -> bpms are always the amount of _quarter notes_ per minute
-    root_key* {.importc: "root_key".}: cint ##  MIDI note, or -1 for None
+                                      ##  file's length, file's sampleRate and our time_sig_den
+                                      ##  -> bpms are always the amount of _quarter notes_ per minute
+    root_key* {.importc: "root_key".}: cint   ##  MIDI note, or -1 for None
     future* {.importc: "future".}: array[6, cint]
 
-  SF_CART_TIMER* {.importc: "SF_CART_TIMER", header: "sndfile.h", bycopy.} = object
+  SF_CART_TIMER* {.importc: "SF_CART_TIMER", header: "sndfile.h",
+      bycopy.} = object
     usage* {.importc: "usage".}: array[4, char]
     value* {.importc: "value".}: int32_t
 
@@ -412,11 +421,15 @@ type
 
 type
   sf_vio_get_filelen* = proc (user_data: pointer): sf_count_t
-  sf_vio_seek* = proc (offset: sf_count_t; whence: cint; user_data: pointer): sf_count_t
-  sf_vio_read* = proc (`ptr`: pointer; count: sf_count_t; user_data: pointer): sf_count_t
-  sf_vio_write* = proc (`ptr`: pointer; count: sf_count_t; user_data: pointer): sf_count_t
+  sf_vio_seek* = proc (offset: sf_count_t; whence: cint;
+      user_data: pointer): sf_count_t
+  sf_vio_read* = proc (`ptr`: pointer; count: sf_count_t;
+      user_data: pointer): sf_count_t
+  sf_vio_write* = proc (`ptr`: pointer; count: sf_count_t;
+      user_data: pointer): sf_count_t
   sf_vio_tell* = proc (user_data: pointer): sf_count_t
-  SF_VIRTUAL_IO* {.importc: "SF_VIRTUAL_IO", header: "sndfile.h", bycopy.} = object
+  SF_VIRTUAL_IO* {.importc: "SF_VIRTUAL_IO", header: "sndfile.h",
+      bycopy.} = object
     get_filelen* {.importc: "get_filelen".}: sf_vio_get_filelen
     seek* {.importc: "seek".}: sf_vio_seek
     read* {.importc: "read".}: sf_vio_read
@@ -444,7 +457,8 @@ proc sf_open*(path: cstring; mode: cint; sfinfo: ptr SF_INFO): ptr SNDFILE {.
 ##
 ##
 
-proc sf_open_fd*(fd: cint; mode: cint; sfinfo: ptr SF_INFO; close_desc: cint): ptr SNDFILE {.
+proc sf_open_fd*(fd: cint; mode: cint; sfinfo: ptr SF_INFO;
+    close_desc: cint): ptr SNDFILE {.
     importc: "sf_open_fd", header: "sndfile.h".}
 proc sf_open_virtual*(sfvirtual: ptr SF_VIRTUAL_IO; mode: cint; sfinfo: ptr SF_INFO;
                      user_data: pointer): ptr SNDFILE {.importc: "sf_open_virtual",
@@ -453,7 +467,8 @@ proc sf_open_virtual*(sfvirtual: ptr SF_VIRTUAL_IO; mode: cint; sfinfo: ptr SF_I
 ## * string using sf_error_number().
 ##
 
-proc sf_error*(sndfile: ptr SNDFILE): cint {.importc: "sf_error", header: "sndfile.h".}
+proc sf_error*(sndfile: ptr SNDFILE): cint {.importc: "sf_error",
+    header: "sndfile.h".}
 ##  sf_strerror () returns to the caller a pointer to the current error message for
 ## * the given SNDFILE.
 ##
@@ -472,12 +487,14 @@ proc sf_error_number*(errnum: cint): cstring {.importc: "sf_error_number",
 ## * in their place.
 ##
 
-proc sf_perror*(sndfile: ptr SNDFILE): cint {.importc: "sf_perror", header: "sndfile.h".}
+proc sf_perror*(sndfile: ptr SNDFILE): cint {.importc: "sf_perror",
+    header: "sndfile.h".}
 proc sf_error_str*(sndfile: ptr SNDFILE; str: cstring; len: csize_t): cint {.
     importc: "sf_error_str", header: "sndfile.h".}
 ##  Return TRUE if fields of the SF_INFO struct are a valid combination of values.
 
-proc sf_command*(sndfile: ptr SNDFILE; command: cint; data: pointer; datasize: cint): cint {.
+proc sf_command*(sndfile: ptr SNDFILE; command: cint; data: pointer;
+    datasize: cint): cint {.
     importc: "sf_command", header: "sndfile.h".}
 ##  Return TRUE if fields of the SF_INFO struct are a valid combination of values.
 
@@ -500,7 +517,8 @@ const
   SF_SEEK_CUR* = 1
   SF_SEEK_END* = 2
 
-proc sf_seek*(sndfile: ptr SNDFILE; frames: sf_count_t; whence: cint): sf_count_t {.
+proc sf_seek*(sndfile: ptr SNDFILE; frames: sf_count_t;
+    whence: cint): sf_count_t {.
     importc: "sf_seek", header: "sndfile.h".}
 ##  Functions for retrieving and setting string data within sound files.
 ## * Not all file types support this features; AIFF and WAV do. For both
@@ -535,9 +553,11 @@ proc sf_current_byterate*(sndfile: ptr SNDFILE): cint {.
 ##  Functions for reading/writing the waveform data of a sound file.
 ##
 
-proc sf_read_raw*(sndfile: ptr SNDFILE; `ptr`: pointer; bytes: sf_count_t): sf_count_t {.
+proc sf_read_raw*(sndfile: ptr SNDFILE; `ptr`: pointer;
+    bytes: sf_count_t): sf_count_t {.
     importc: "sf_read_raw", header: "sndfile.h".}
-proc sf_write_raw*(sndfile: ptr SNDFILE; `ptr`: pointer; bytes: sf_count_t): sf_count_t {.
+proc sf_write_raw*(sndfile: ptr SNDFILE; `ptr`: pointer;
+    bytes: sf_count_t): sf_count_t {.
     importc: "sf_write_raw", header: "sndfile.h".}
 ##  Functions for reading and writing the data chunk in terms of frames.
 ## * The number of items actually read/written = frames * number of channels.
@@ -549,49 +569,66 @@ proc sf_write_raw*(sndfile: ptr SNDFILE; `ptr`: pointer; bytes: sf_count_t): sf_
 ## * All of these read/write function return number of frames read/written.
 ##
 
-proc sf_readf_short*(sndfile: ptr SNDFILE; `ptr`: ptr cshort; frames: sf_count_t): sf_count_t {.
+proc sf_readf_short*(sndfile: ptr SNDFILE; `ptr`: ptr cshort;
+    frames: sf_count_t): sf_count_t {.
     importc: "sf_readf_short", header: "sndfile.h".}
-proc sf_writef_short*(sndfile: ptr SNDFILE; `ptr`: ptr cshort; frames: sf_count_t): sf_count_t {.
+proc sf_writef_short*(sndfile: ptr SNDFILE; `ptr`: ptr cshort;
+    frames: sf_count_t): sf_count_t {.
     importc: "sf_writef_short", header: "sndfile.h".}
-proc sf_readf_int*(sndfile: ptr SNDFILE; `ptr`: ptr cint; frames: sf_count_t): sf_count_t {.
+proc sf_readf_int*(sndfile: ptr SNDFILE; `ptr`: ptr cint;
+    frames: sf_count_t): sf_count_t {.
     importc: "sf_readf_int", header: "sndfile.h".}
-proc sf_writef_int*(sndfile: ptr SNDFILE; `ptr`: ptr cint; frames: sf_count_t): sf_count_t {.
+proc sf_writef_int*(sndfile: ptr SNDFILE; `ptr`: ptr cint;
+    frames: sf_count_t): sf_count_t {.
     importc: "sf_writef_int", header: "sndfile.h".}
-proc sf_readf_float*(sndfile: ptr SNDFILE; `ptr`: ptr cfloat; frames: sf_count_t): sf_count_t {.
+proc sf_readf_float*(sndfile: ptr SNDFILE; `ptr`: ptr cfloat;
+    frames: sf_count_t): sf_count_t {.
     importc: "sf_readf_float", header: "sndfile.h".}
-proc sf_writef_float*(sndfile: ptr SNDFILE; `ptr`: ptr cfloat; frames: sf_count_t): sf_count_t {.
+proc sf_writef_float*(sndfile: ptr SNDFILE; `ptr`: ptr cfloat;
+    frames: sf_count_t): sf_count_t {.
     importc: "sf_writef_float", header: "sndfile.h".}
-proc sf_readf_double*(sndfile: ptr SNDFILE; `ptr`: ptr cdouble; frames: sf_count_t): sf_count_t {.
+proc sf_readf_double*(sndfile: ptr SNDFILE; `ptr`: ptr cdouble;
+    frames: sf_count_t): sf_count_t {.
     importc: "sf_readf_double", header: "sndfile.h".}
-proc sf_writef_double*(sndfile: ptr SNDFILE; `ptr`: ptr cdouble; frames: sf_count_t): sf_count_t {.
+proc sf_writef_double*(sndfile: ptr SNDFILE; `ptr`: ptr cdouble;
+    frames: sf_count_t): sf_count_t {.
     importc: "sf_writef_double", header: "sndfile.h".}
 ##  Functions for reading and writing the data chunk in terms of items.
 ## * Otherwise similar to above.
 ## * All of these read/write function return number of items read/written.
 ##
 
-proc sf_read_short*(sndfile: ptr SNDFILE; `ptr`: ptr cshort; items: sf_count_t): sf_count_t {.
+proc sf_read_short*(sndfile: ptr SNDFILE; `ptr`: ptr cshort;
+    items: sf_count_t): sf_count_t {.
     importc: "sf_read_short", header: "sndfile.h".}
-proc sf_write_short*(sndfile: ptr SNDFILE; `ptr`: ptr cshort; items: sf_count_t): sf_count_t {.
+proc sf_write_short*(sndfile: ptr SNDFILE; `ptr`: ptr cshort;
+    items: sf_count_t): sf_count_t {.
     importc: "sf_write_short", header: "sndfile.h".}
-proc sf_read_int*(sndfile: ptr SNDFILE; `ptr`: ptr cint; items: sf_count_t): sf_count_t {.
+proc sf_read_int*(sndfile: ptr SNDFILE; `ptr`: ptr cint;
+    items: sf_count_t): sf_count_t {.
     importc: "sf_read_int", header: "sndfile.h".}
-proc sf_write_int*(sndfile: ptr SNDFILE; `ptr`: ptr cint; items: sf_count_t): sf_count_t {.
+proc sf_write_int*(sndfile: ptr SNDFILE; `ptr`: ptr cint;
+    items: sf_count_t): sf_count_t {.
     importc: "sf_write_int", header: "sndfile.h".}
-proc sf_read_float*(sndfile: ptr SNDFILE; `ptr`: ptr cfloat; items: sf_count_t): sf_count_t {.
+proc sf_read_float*(sndfile: ptr SNDFILE; `ptr`: ptr cfloat;
+    items: sf_count_t): sf_count_t {.
     importc: "sf_read_float", header: "sndfile.h".}
-proc sf_write_float*(sndfile: ptr SNDFILE; `ptr`: ptr cfloat; items: sf_count_t): sf_count_t {.
+proc sf_write_float*(sndfile: ptr SNDFILE; `ptr`: ptr cfloat;
+    items: sf_count_t): sf_count_t {.
     importc: "sf_write_float", header: "sndfile.h".}
-proc sf_read_double*(sndfile: ptr SNDFILE; `ptr`: ptr cdouble; items: sf_count_t): sf_count_t {.
+proc sf_read_double*(sndfile: ptr SNDFILE; `ptr`: ptr cdouble;
+    items: sf_count_t): sf_count_t {.
     importc: "sf_read_double", header: "sndfile.h".}
-proc sf_write_double*(sndfile: ptr SNDFILE; `ptr`: ptr cdouble; items: sf_count_t): sf_count_t {.
+proc sf_write_double*(sndfile: ptr SNDFILE; `ptr`: ptr cdouble;
+    items: sf_count_t): sf_count_t {.
     importc: "sf_write_double", header: "sndfile.h".}
 ##  Close the SNDFILE and clean up all memory allocations associated with this
 ## * file.
 ## * Returns 0 on success, or an error number.
 ##
 
-proc sf_close*(sndfile: ptr SNDFILE): cint {.importc: "sf_close", header: "sndfile.h".}
+proc sf_close*(sndfile: ptr SNDFILE): cint {.importc: "sf_close",
+    header: "sndfile.h".}
 ##  If the file is opened SFM_WRITE or SFM_RDWR, call fsync() on the file
 ## * to force the writing of data to disk. If the file is opened SFM_READ
 ## * no action is taken.
@@ -611,7 +648,8 @@ proc sf_write_sync*(sndfile: ptr SNDFILE) {.importc: "sf_write_sync",
 ##
 
 when defined(ENABLE_SNDFILE_WINDOWS_PROTOTYPES):
-  proc sf_wchar_open*(wpath: LPCWSTR; mode: cint; sfinfo: ptr SF_INFO): ptr SNDFILE {.
+  proc sf_wchar_open*(wpath: LPCWSTR; mode: cint;
+      sfinfo: ptr SF_INFO): ptr SNDFILE {.
       importc: "sf_wchar_open", header: "sndfile.h".}
 ##  Getting and setting of chunks from within a sound file.
 ## *
@@ -625,11 +663,12 @@ when defined(ENABLE_SNDFILE_WINDOWS_PROTOTYPES):
 ##
 
 type
-  SF_CHUNK_INFO* {.importc: "SF_CHUNK_INFO", header: "sndfile.h", bycopy.} = object
+  SF_CHUNK_INFO* {.importc: "SF_CHUNK_INFO", header: "sndfile.h",
+      bycopy.} = object
     id* {.importc: "id".}: array[64, char] ##  The chunk identifier.
     id_size* {.importc: "id_size".}: cuint ##  The size of the chunk identifier.
     datalen* {.importc: "datalen".}: cuint ##  The size of that data.
-    data* {.importc: "data".}: pointer ##  Pointer to the data.
+    data* {.importc: "data".}: pointer     ##  Pointer to the data.
 
 
 ##  Set the specified chunk info (must be done before any audio data is written
@@ -664,7 +703,8 @@ proc sf_set_chunk*(sndfile: ptr SNDFILE; chunk_info: ptr SF_CHUNK_INFO): cint {.
 
 type SF_CHUNK_ITERATOR = pointer
 
-proc sf_get_chunk_iterator*(sndfile: ptr SNDFILE; chunk_info: ptr SF_CHUNK_INFO): ptr SF_CHUNK_ITERATOR {.
+proc sf_get_chunk_iterator*(sndfile: ptr SNDFILE;
+    chunk_info: ptr SF_CHUNK_INFO): ptr SF_CHUNK_ITERATOR {.
     importc: "sf_get_chunk_iterator", header: "sndfile.h".}
 ##  Iterate through chunks by incrementing the iterator.
 ## * Increments the iterator and returns a handle to the new one.
@@ -692,7 +732,8 @@ proc sf_next_chunk_iterator*(`iterator`: ptr SF_CHUNK_ITERATOR): ptr SF_CHUNK_IT
 ## * failure.
 ##
 
-proc sf_get_chunk_size*(it: ptr SF_CHUNK_ITERATOR; chunk_info: ptr SF_CHUNK_INFO): cint {.
+proc sf_get_chunk_size*(it: ptr SF_CHUNK_ITERATOR;
+    chunk_info: ptr SF_CHUNK_INFO): cint {.
     importc: "sf_get_chunk_size", header: "sndfile.h".}
 ##  Get the specified chunk data.
 ## * If the specified chunk exists, up to chunk_info->datalen bytes of
@@ -706,5 +747,6 @@ proc sf_get_chunk_size*(it: ptr SF_CHUNK_ITERATOR; chunk_info: ptr SF_CHUNK_INFO
 ## * failure.
 ##
 
-proc sf_get_chunk_data*(it: ptr SF_CHUNK_ITERATOR; chunk_info: ptr SF_CHUNK_INFO): cint {.
+proc sf_get_chunk_data*(it: ptr SF_CHUNK_ITERATOR;
+    chunk_info: ptr SF_CHUNK_INFO): cint {.
     importc: "sf_get_chunk_data", header: "sndfile.h".}

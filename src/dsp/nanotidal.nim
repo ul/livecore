@@ -29,7 +29,7 @@ proc sequence*[T](patterns: openArray[Pattern[T]]): Pattern[T] =
   let n = patterns.len
   for i, pattern in patterns:
     for tile in pattern:
-       result.add((arc: (tile.arc + i) / n, color: tile.color))
+      result.add((arc: (tile.arc + i) / n, color: tile.color))
 
 proc parallel*[T](patterns: openArray[Pattern[T]]): Pattern[T] =
   for tiles in patterns:

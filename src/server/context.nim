@@ -5,7 +5,8 @@ import
   ffi/soundio
 
 type
-  Process* = proc(arena: pointer, cc: var Controls, n: var Notes, input: Frame): Frame {.nimcall.}
+  Process* = proc(arena: pointer, cc: var Controls, n: var Notes,
+      input: Frame): Frame {.nimcall.}
   Load* = proc(arena: pointer) {.nimcall.}
   Unload* = proc(arena: pointer) {.nimcall.}
   Context* = object
@@ -19,7 +20,8 @@ type
     lib_path*: string
     lib*: LibHandle
 
-proc default_process*(arena: pointer, cc: var Controls, n: var Notes, input: Frame): Frame = 0.0
+proc default_process*(arena: pointer, cc: var Controls, n: var Notes,
+    input: Frame): Frame = 0.0
 
 proc new_context*(arena_mb: int): ptr Context =
   result = cast[ptr Context](Context.sizeof.alloc0)

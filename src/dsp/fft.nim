@@ -6,7 +6,8 @@ type Complex* = mufft_cpx
 
 proc magnitude*(x: Complex): float = sqrt(x.r^2 + x.i^2)
 proc phase*(x: Complex): float = arctan2(x.i, x.r)
-proc polarize*(magnitude, phase: float): Complex = Complex(r: magnitude*cos(phase), i: magnitude*sin(phase))
+proc polarize*(magnitude, phase: float): Complex = Complex(r: magnitude*cos(
+    phase), i: magnitude*sin(phase))
 
 proc hann*(N: static[Natural]): array[N, float] =
   let k = PI / N.float
@@ -152,7 +153,8 @@ template defFFT*(window_size: static[Natural]) =
           # Subtract the amount of phase increment we'd expect to see based
           # on the centre frequency of this bin (2*pi*n/window_size) for this
           # hop size, then wrap to the range -pi to pi.
-          phase_diff = wrap_phase(phase_diff - bin_frequencies[n] * hop_size.float)
+          phase_diff = wrap_phase(phase_diff - bin_frequencies[n] *
+              hop_size.float)
           # Find deviation from the centre frequency.
           let frequency_deviation = phase_diff / hop_size.float
           # Add the original bin number to get the fractional bin where this partial belongs.

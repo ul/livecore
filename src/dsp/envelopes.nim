@@ -11,7 +11,7 @@ type
     frame: int
 
 template transition(name; curve: proc(a, dx: float): float) =
-  proc name*(x, delta: float, s: var Transition): float =
+  proc name*(x, delta: float; s: var Transition): float =
     if unlikely(x != s.next_value):
       s.previous_value = s.current_value
       s.next_value = x
@@ -34,12 +34,12 @@ proc quadratic_curve(a, dx: float): float =
 transition(tline, linear_curve)
 transition(tquad, quadratic_curve)
 
-proc impulse*(trigger, apex: float, s: var float): float =
+proc impulse*(trigger, apex: float; s: var float): float =
   let h = trigger.stopwatch(s) / apex
   h * exp(1.0 - h)
 lift2(impulse, float)
 
-proc gaussian*(trigger, apex, deviation: float, s: var float): float =
+proc gaussian*(trigger, apex, deviation: float; s: var float): float =
   let delta = trigger.stopwatch(s) - apex
   result = exp(-0.5 * delta * delta / deviation)
 lift3(gaussian, float)
@@ -53,7 +53,7 @@ type
     time: float
     state: ADSRState
 
-proc adsr*(t, a, d, s, r: float, p: var ADSR): float =
+proc adsr*(t, a, d, s, r: float; p: var ADSR): float =
   case p.state
   of ADSRState.Attack:
     if p.time < a:

@@ -51,7 +51,8 @@ template defSampler*(max_duration: static[Natural]) =
       s.cursor += 1
 
   lift2(write_table_trigger, Sampler)
-  proc wtt*(x, trigger: float, s: var Sampler): float {.inline.} = write_table_trigger(x, trigger, s)
+  proc wtt*(x, trigger: float, s: var Sampler): float {.inline.} = write_table_trigger(
+      x, trigger, s)
   lift2(wtt, Sampler)
 
   proc write_table_index*(x, index: float, s: var Sampler): float =
@@ -63,5 +64,6 @@ template defSampler*(max_duration: static[Natural]) =
     s.table[n] = x
 
   lift2(write_table_index, Sampler)
-  proc wti*(x, index: float, s: var Sampler): float {.inline.} = write_table_index(x, index, s)
+  proc wti*(x, index: float, s: var Sampler): float {.inline.} = write_table_index(
+      x, index, s)
   lift2(wti, Sampler)

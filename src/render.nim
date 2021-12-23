@@ -69,4 +69,4 @@ state.addr.dealloc
 buffer.dealloc
 info.dealloc
 
-echo "\nDone at ", (duration.float / (epoch_time() - t0)).int , "x speed."
+echo "\nDone at ", (duration.float / (epoch_time() - t0)).int, "x speed."

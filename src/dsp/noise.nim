@@ -6,8 +6,8 @@ proc white_noise*(): float = rand(1.0)
 lift0(white_noise)
 
 type ChaosNoise* = object
-    y: array[2, float]
-    phs: float
+  y: array[2, float]
+  phs: float
 
 proc chaos_noise*(rate, chaos: float, s: var ChaosNoise): float =
   ## https://pbat.ch/sndkit/chaosnoise/

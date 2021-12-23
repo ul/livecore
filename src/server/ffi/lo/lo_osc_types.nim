@@ -20,16 +20,16 @@
 ##
 
 type
-  uint8_t*  = uint8
+  uint8_t* = uint8
   uint16_t* = uint16
   uint32_t* = uint32
   uint64_t* = uint64
-  int8_t*   = int8
-  int16_t*  = int16
-  int32_t*  = int32
-  int64_t*  = int64
-  va_list*  = pointer
-  ssize_t*  = int64
+  int8_t* = int8
+  int16_t* = int16
+  int32_t* = int32
+  int64_t* = int64
+  va_list* = pointer
+  ssize_t* = int64
 
 ## *
 ##  \addtogroup liblo
@@ -41,9 +41,9 @@ type
 
 type
   lo_timetag* {.bycopy.} = object
-    sec*: uint32_t             ## * The number of seconds since Jan 1st 1900 in the UTC timezone.
-    ## * The fractions of a second offset from above, expressed as 1/2^32nds
-    ##  of a second
+    sec*: uint32_t ## * The number of seconds since Jan 1st 1900 in the UTC timezone.
+ ## * The fractions of a second offset from above, expressed as 1/2^32nds
+ ##  of a second
     frac*: uint32_t
 
 
@@ -53,9 +53,9 @@ type
 ##  The element of a bundle can either be a message or an other bundle.
 ##
 
-type                          ## * bundle element is a message
+type ## * bundle element is a message
   lo_element_type* {.size: sizeof(cint).} = enum
-    LO_ELEMENT_MESSAGE = 1,     ## * bundle element is a bundle
+    LO_ELEMENT_MESSAGE = 1, ## * bundle element is a bundle
     LO_ELEMENT_BUNDLE = 2
 
 
@@ -66,22 +66,22 @@ type                          ## * bundle element is a message
 ##  specify arguments with lo_send().
 ##
 
-type                          ##  basic OSC types
+type ##  basic OSC types
   lo_type* {.size: sizeof(cint).} = enum
-    LO_FALSE = 'F',             ## * Sybol representing the value False.
-    LO_INFINITUM = 'I'          ## * Sybol representing the value Infinitum.
-    LO_NIL = 'N',               ## * Sybol representing the value Nil.
-    LO_SYMBOL = 'S',            ## * Standard C, NULL terminated, string. Used in systems which distinguish strings and symbols.
-    LO_TRUE = 'T',              ## * Sybol representing the value True.
-    LO_BLOB = 'b',              ## * OSC binary blob type. Accessed using the lo_blob_*() functions. ##  extended OSC types
-    LO_CHAR = 'c',              ## * Standard C, 8 bit, char variable.
-    LO_DOUBLE = 'd',            ## * 64 bit IEEE-754 double.
-    LO_FLOAT = 'f',             ## * 32 bit IEEE-754 float.
-    LO_INT64 = 'h',             ## * 64 bit signed integer.
-    LO_INT32 = 'i',             ## * 32 bit signed integer.
-    LO_MIDI = 'm',              ## * A 4 byte MIDI packet.
-    LO_STRING = 's',            ## * Standard C, NULL terminated string.
-    LO_TIMETAG = 't',           ## * OSC TimeTag type, represented by the lo_timetag structure.
+    LO_FALSE = 'F',    ## * Sybol representing the value False.
+    LO_INFINITUM = 'I' ## * Sybol representing the value Infinitum.
+    LO_NIL = 'N',      ## * Sybol representing the value Nil.
+    LO_SYMBOL = 'S',  ## * Standard C, NULL terminated, string. Used in systems which distinguish strings and symbols.
+    LO_TRUE = 'T',     ## * Sybol representing the value True.
+    LO_BLOB = 'b',  ## * OSC binary blob type. Accessed using the lo_blob_*() functions. ##  extended OSC types
+    LO_CHAR = 'c',     ## * Standard C, 8 bit, char variable.
+    LO_DOUBLE = 'd',   ## * 64 bit IEEE-754 double.
+    LO_FLOAT = 'f',    ## * 32 bit IEEE-754 float.
+    LO_INT64 = 'h',    ## * 64 bit signed integer.
+    LO_INT32 = 'i',    ## * 32 bit signed integer.
+    LO_MIDI = 'm',     ## * A 4 byte MIDI packet.
+    LO_STRING = 's',   ## * Standard C, NULL terminated string.
+    LO_TIMETAG = 't',  ## * OSC TimeTag type, represented by the lo_timetag structure.
 
 
 ## *
@@ -98,20 +98,20 @@ type
     data*: char
 
   lo_arg* {.bycopy, union.} = object
-    i*: int32_t                ## * 32 bit signed integer.
-    i32*: int32_t              ## * 32 bit signed integer.
-    h*: int64_t                ## * 64 bit signed integer.
-    i64*: int64_t              ## * 64 bit signed integer.
-    f*: cfloat                 ## * 32 bit IEEE-754 float.
-    f32*: cfloat               ## * 32 bit IEEE-754 float.
-    d*: cdouble                ## * 64 bit IEEE-754 double.
-    f64*: cdouble              ## * 64 bit IEEE-754 double.
-    s*: char                   ## * Standard C, NULL terminated string.
-    S*: char                   ## * Standard C, NULL terminated, string. Used in systems which distinguish strings and symbols.
-    c*: char                   ## * Standard C, 8 bit, char.
-    m*: array[4, uint8_t]      ## * A 4 byte MIDI packet.
-    t*: lo_timetag             ## * OSC TimeTag value.
-    blob*: lo_arg_blob         ## * Blob *
+    i*: int32_t           ## * 32 bit signed integer.
+    i32*: int32_t         ## * 32 bit signed integer.
+    h*: int64_t           ## * 64 bit signed integer.
+    i64*: int64_t         ## * 64 bit signed integer.
+    f*: cfloat            ## * 32 bit IEEE-754 float.
+    f32*: cfloat          ## * 32 bit IEEE-754 float.
+    d*: cdouble           ## * 64 bit IEEE-754 double.
+    f64*: cdouble         ## * 64 bit IEEE-754 double.
+    s*: char              ## * Standard C, NULL terminated string.
+    S*: char ## * Standard C, NULL terminated, string. Used in systems which distinguish strings and symbols.
+    c*: char              ## * Standard C, 8 bit, char.
+    m*: array[4, uint8_t] ## * A 4 byte MIDI packet.
+    t*: lo_timetag        ## * OSC TimeTag value.
+    blob*: lo_arg_blob    ## * Blob *
 
 
 ##  Note: No struct literals in MSVC

@@ -69,7 +69,8 @@ proc lo_address_new*(host: cstring; port: cstring): lo_address {.cdecl,
 ##  object created will be the receiver.
 ##
 
-proc lo_address_new_with_proto*(proto: cint; host: cstring; port: cstring): lo_address {.
+proc lo_address_new_with_proto*(proto: cint; host: cstring;
+    port: cstring): lo_address {.
     cdecl, importc: "lo_address_new_with_proto", dynlib: soname.}
 ## *
 ##  \brief Create a lo_address object from an OSC URL.
@@ -105,8 +106,8 @@ proc lo_address_set_ttl*(t: lo_address; ttl: cint) {.cdecl,
 ##  \return An integer specifying the scope of a multicast UDP message.
 ##
 
-proc lo_address_get_ttl*(t: lo_address): cint {.cdecl, importc: "lo_address_get_ttl",
-    dynlib: soname.}
+proc lo_address_get_ttl*(t: lo_address): cint {.cdecl,
+    importc: "lo_address_get_ttl", dynlib: soname.}
 ## *
 ##  \brief Send a OSC formatted message to the address specified.
 ##
@@ -125,8 +126,8 @@ proc lo_address_get_ttl*(t: lo_address): cint {.cdecl, importc: "lo_address_get_
 ##  \return -1 on failure.
 ##
 
-proc lo_send*(targ: lo_address; path: cstring; `type`: cstring): cint {.varargs, cdecl,
-    importc: "lo_send", dynlib: soname.}
+proc lo_send*(targ: lo_address; path: cstring; `type`: cstring): cint {.varargs,
+    cdecl, importc: "lo_send", dynlib: soname.}
 ## *
 ##  \brief Send a OSC formatted message to the address specified,
 ##  from the same socket as the specified server.
@@ -184,8 +185,8 @@ proc lo_send_timestamped*(targ: lo_address; ts: lo_timetag; path: cstring;
 ##  lo_address_new() call
 ##
 
-proc lo_address_errno*(a: lo_address): cint {.cdecl, importc: "lo_address_errno",
-    dynlib: soname.}
+proc lo_address_errno*(a: lo_address): cint {.cdecl,
+    importc: "lo_address_errno", dynlib: soname.}
 ## *
 ##  \brief Return the error string from the last failed lo_send() or
 ##  lo_address_new() call
@@ -207,15 +208,16 @@ proc lo_blob_new*(size: int32_t; data: pointer): lo_blob {.cdecl,
 ##  \brief Free the memory taken by a blob
 ##
 
-proc lo_blob_free*(b: lo_blob) {.cdecl, importc: "lo_blob_free", dynlib: soname.}
+proc lo_blob_free*(b: lo_blob) {.cdecl, importc: "lo_blob_free",
+    dynlib: soname.}
 ## *
 ##  \brief Return the amount of valid data in a lo_blob object.
 ##
 ##  If you want to know the storage size, use lo_arg_size().
 ##
 
-proc lo_blob_datasize*(b: lo_blob): uint32_t {.cdecl, importc: "lo_blob_datasize",
-    dynlib: soname.}
+proc lo_blob_datasize*(b: lo_blob): uint32_t {.cdecl,
+    importc: "lo_blob_datasize", dynlib: soname.}
 ## *
 ##  \brief Return a pointer to the start of the blob data to allow contents to
 ##  be changed.
@@ -253,7 +255,8 @@ proc lo_blob_dataptr*(b: lo_blob): pointer {.cdecl, importc: "lo_blob_dataptr",
 
 proc lo_version*(verstr: cstring; verstr_size: cint; major: ptr cint; minor: ptr cint;
                 extra: cstring; extra_size: cint; lt_major: ptr cint;
-                lt_minor: ptr cint; lt_bug: ptr cint) {.cdecl, importc: "lo_version",
+                lt_minor: ptr cint; lt_bug: ptr cint) {.cdecl,
+                    importc: "lo_version",
     dynlib: soname.}
 ## * @}
 

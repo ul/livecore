@@ -5,38 +5,38 @@ else:
 
 {.pragma: sio, cdecl, header: "soundio/soundio.h", importc: "soundio_$1".}
 {.pragma: cenum, pure, final, size: sizeof(cint).}
-{.pragma: siochan, sio, importc: "soundio_channel_layout_$1"}
-{.pragma: siodev, sio, importc: "soundio_device_$1"}
-{.pragma: sioout, sio, importc: "soundio_outstream_$1"}
-{.pragma: sioin, sio, importc: "soundio_instream_$1"}
-{.pragma: siorb, sio, importc: "soundio_ring_buffer_$1"}
+{.pragma: siochan, sio, importc: "soundio_channel_layout_$1".}
+{.pragma: siodev, sio, importc: "soundio_device_$1".}
+{.pragma: sioout, sio, importc: "soundio_outstream_$1".}
+{.pragma: sioin, sio, importc: "soundio_instream_$1".}
+{.pragma: siorb, sio, importc: "soundio_ring_buffer_$1".}
 
 type
   SoundIoError* {.cenum.} = enum
     ## See also ::soundio_strerror
     None,
-    NoMem, ## Out of memory.
-    InitAudioBackend, ## The backend does not appear to be active or running.
-    SystemResources, ## A system resource other than memory was not available.
-    OpeningDevice, ## Attempted to open a device and failed.
+    NoMem,               ## Out of memory.
+    InitAudioBackend,    ## The backend does not appear to be active or running.
+    SystemResources,     ## A system resource other than memory was not available.
+    OpeningDevice,       ## Attempted to open a device and failed.
     NoSuchDevice,
-    Invalid, ## The programmer did not comply with the API.
-    BackendUnavailable, ## libsoundio was compiled without support for that backend.
-    Streaming, ## An open stream had an error that can only be recovered from by destroying the stream and creating it again.
-    IncompatibleDevice, ## Attempted to use a device with parameters it cannot support.
-    NoSuchClient, ## When JACK returns `JackNoSuchClient`
+    Invalid,             ## The programmer did not comply with the API.
+    BackendUnavailable,  ## libsoundio was compiled without support for that backend.
+    Streaming,  ## An open stream had an error that can only be recovered from by destroying the stream and creating it again.
+    IncompatibleDevice,  ## Attempted to use a device with parameters it cannot support.
+    NoSuchClient,        ## When JACK returns `JackNoSuchClient`
     IncompatibleBackend, ## Attempted to use parameters that the backend cannot support.
     BackendDisconnected, ## Backend server shutdown or became inactive.
     Interrupted,
-    Underflow, ## Buffer underrun occurred.
-    EncodingString ## Unable to convert to or from UTF-8 to the native string format.
+    Underflow,           ## Buffer underrun occurred.
+    EncodingString       ## Unable to convert to or from UTF-8 to the native string format.
 
 type
   SoundIoChannelId* {.cenum.} = enum
     ## Specifies where a channel is physically located.
     Invalid,
 
-    FrontLeft, ##< First of the more commonly supported ids.
+    FrontLeft,        ##< First of the more commonly supported ids.
     FrontRight,
     FrontCenter,
     Lfe,
@@ -53,9 +53,9 @@ type
     TopFrontRight,
     TopBackLeft,
     TopBackCenter,
-    TopBackRight, ##< Last of the more commonly supported ids.
+    TopBackRight,     ##< Last of the more commonly supported ids.
 
-    BackLeftCenter, ##< First of the less commonly supported ids.
+    BackLeftCenter,   ##< First of the less commonly supported ids.
     BackRightCenter,
     FrontLeftWide,
     FrontRightWide,
@@ -87,7 +87,7 @@ type
     XyX,
     XyY,
 
-    HeadphonesLeft, ##< First of the "other" channel ids
+    HeadphonesLeft,   ##< First of the "other" channel ids
     HeadphonesRight,
     ClickTrack,
     ForeignLanguage,
@@ -152,24 +152,24 @@ type
     ## For your convenience, Native Endian and Foreign Endian constants are defined
     ## which point to the respective SoundIoFormat values.
     Invalid,
-    S8,        ##< Signed 8 bit
-    U8,        ##< Unsigned 8 bit
-    S16LE,     ##< Signed 16 bit Little Endian
-    S16BE,     ##< Signed 16 bit Big Endian
-    U16LE,     ##< Unsigned 16 bit Little Endian
-    U16BE,     ##< Unsigned 16 bit Little Endian
-    S24LE,     ##< Signed 24 bit Little Endian using low three bytes in 32-bit word
-    S24BE,     ##< Signed 24 bit Big Endian using low three bytes in 32-bit word
-    U24LE,     ##< Unsigned 24 bit Little Endian using low three bytes in 32-bit word
-    U24BE,     ##< Unsigned 24 bit Big Endian using low three bytes in 32-bit word
-    S32LE,     ##< Signed 32 bit Little Endian
-    S32BE,     ##< Signed 32 bit Big Endian
-    U32LE,     ##< Unsigned 32 bit Little Endian
-    U32BE,     ##< Unsigned 32 bit Big Endian
+    S8, ##< Signed 8 bit
+    U8, ##< Unsigned 8 bit
+    S16LE, ##< Signed 16 bit Little Endian
+    S16BE, ##< Signed 16 bit Big Endian
+    U16LE, ##< Unsigned 16 bit Little Endian
+    U16BE, ##< Unsigned 16 bit Little Endian
+    S24LE, ##< Signed 24 bit Little Endian using low three bytes in 32-bit word
+    S24BE, ##< Signed 24 bit Big Endian using low three bytes in 32-bit word
+    U24LE, ##< Unsigned 24 bit Little Endian using low three bytes in 32-bit word
+    U24BE, ##< Unsigned 24 bit Big Endian using low three bytes in 32-bit word
+    S32LE, ##< Signed 32 bit Little Endian
+    S32BE, ##< Signed 32 bit Big Endian
+    U32LE, ##< Unsigned 32 bit Little Endian
+    U32BE, ##< Unsigned 32 bit Big Endian
     Float32LE, ##< Float 32 bit Little Endian, Range -1.0 to 1.0
     Float32BE, ##< Float 32 bit Big Endian, Range -1.0 to 1.0
     Float64LE, ##< Float 64 bit Little Endian, Range -1.0 to 1.0
-    Float64BE  ##< Float 64 bit Big Endian, Range -1.0 to 1.0
+    Float64BE ##< Float 64 bit Big Endian, Range -1.0 to 1.0
 
 when cpuEndian == bigEndian:
   const
@@ -227,17 +227,17 @@ type
   SoundIoChannelArea* {.pure, final.} = object
     ## The size of this struct is OK to use.
     #`ptr`*: cstring            ## Base address of buffer.
-    pointer*: pointer            ## Base address of buffer.
-    ## How many bytes it takes to get from the beginning of one sample to
-    ## the beginning of the next sample.
+    pointer*: pointer ## Base address of buffer.
+                      ## How many bytes it takes to get from the beginning of one sample to
+                      ## the beginning of the next sample.
     step*: cint
 
 type
   SoundIo* {.pure, final.} = object
     ## The size of this struct is not part of the API or ABI.
     userdata*: pointer ## Optional. Put whatever you want here. Defaults to NULL.
-    ## Optional callback. Called when the list of devices change. Only called
-    ## during a call to ::soundio_flush_events or ::soundio_wait_events.
+                       ## Optional callback. Called when the list of devices change. Only called
+                       ## during a call to ::soundio_flush_events or ::soundio_wait_events.
     on_devices_change*: proc (a2: ptr SoundIo) {.cdecl.}
     ## Optional callback. Called when the backend disconnects. For example,
     ## when the JACK server shuts down. When this happens, listing devices
@@ -603,7 +603,8 @@ proc disconnect*(soundio: ptr SoundIo) {.sio.}
 proc strerror*(error: cint): cstring {.sio.}
   ## Get a string representation of a #SoundIoError
 
-proc name*(backend: SoundIoBackend): cstring {.sio, importc: "soundio_backend_$1".}
+proc name*(backend: SoundIoBackend): cstring {.sio,
+    importc: "soundio_backend_$1".}
   ## Get a string representation of a #SoundIoBackend
 
 proc backend_count*(soundio: ptr SoundIo): cint {.sio.}
@@ -740,13 +741,15 @@ proc output_device_count*(soundio: ptr SoundIo): cint {.sio.}
   ## Get the number of output devices.
   ## Returns -1 if you never called ::soundio_flush_events.
 
-proc get_input_device*(soundio: ptr SoundIo; index: cint): ptr SoundIoDevice {.sio.}
+proc get_input_device*(soundio: ptr SoundIo;
+    index: cint): ptr SoundIoDevice {.sio.}
   ## Always returns a device. Call ::soundio_device_unref when done.
   ## `index` must be 0 <= index < ::soundio_input_device_count
   ## Returns NULL if you never called ::soundio_flush_events or if you provide
   ## invalid parameter values.
 
-proc get_output_device*(soundio: ptr SoundIo; index: cint): ptr SoundIoDevice {.sio.}
+proc get_output_device*(soundio: ptr SoundIo;
+    index: cint): ptr SoundIoDevice {.sio.}
   ## Always returns a device. Call ::soundio_device_unref when done.
   ## `index` must be 0 <= index < ::soundio_output_device_count
   ## Returns NULL if you never called ::soundio_flush_events or if you provide

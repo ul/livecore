@@ -21,8 +21,8 @@ elif defined(macosx):
 else:
   const soname = "liblo.so"
 
-proc lo_throw*(s: lo_server; errnum: cint; message: cstring; path: cstring) {.cdecl,
-    importc: "lo_throw", dynlib: soname.}
+proc lo_throw*(s: lo_server; errnum: cint; message: cstring;
+    path: cstring) {.cdecl, importc: "lo_throw", dynlib: soname.}
 ## ! Since the liblo error handler does not provide a context pointer,
 ##   it can be provided by associating it with a particular server
 ##   through this thread-safe API.

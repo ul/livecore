@@ -42,7 +42,8 @@ import lo_types
 ##  raised. The function prototype is defined in lo_types.h
 ##
 
-proc lo_server_thread_new*(port: cstring; err_h: lo_err_handler): lo_server_thread {.
+proc lo_server_thread_new*(port: cstring;
+    err_h: lo_err_handler): lo_server_thread {.
     cdecl, importc: "lo_server_thread_new", dynlib: soname.}
 ## *
 ##  \brief Create a new server thread to handle incoming OSC
@@ -96,7 +97,8 @@ proc lo_server_thread_new_with_proto*(port: cstring; proto: cint;
 ##  \return A new lo_server_thread instance.
 ##
 
-proc lo_server_thread_new_from_url*(url: cstring; err_h: lo_err_handler): lo_server_thread {.
+proc lo_server_thread_new_from_url*(url: cstring;
+    err_h: lo_err_handler): lo_server_thread {.
     cdecl, importc: "lo_server_thread_new_from_url", dynlib: soname.}
 ## *
 ##  \brief Free memory taken by a server thread
@@ -146,7 +148,8 @@ proc lo_server_thread_del_method*(st: lo_server_thread; path: cstring;
 ##  \return Non-zero if it was not found in the list of methods for the server.
 ##
 
-proc lo_server_thread_del_lo_method*(st: lo_server_thread; m: lo_method): cint {.
+proc lo_server_thread_del_lo_method*(st: lo_server_thread;
+    m: lo_method): cint {.
     cdecl, importc: "lo_server_thread_del_lo_method", dynlib: soname.}
 ## *
 ##  \brief Set an init and/or a cleanup function to the specifed server thread.
@@ -212,7 +215,8 @@ proc lo_server_thread_get_server*(st: lo_server_thread): lo_server {.cdecl,
 
 proc lo_server_thread_events_pending*(st: lo_server_thread): cint {.cdecl,
     importc: "lo_server_thread_events_pending", dynlib: soname.}
-proc lo_server_thread_set_error_context*(st: lo_server_thread; user_data: pointer) {.
+proc lo_server_thread_set_error_context*(st: lo_server_thread;
+    user_data: pointer) {.
     cdecl, importc: "lo_server_thread_set_error_context", dynlib: soname.}
 ## * \brief Pretty-print a lo_server_thread object.
 

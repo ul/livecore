@@ -1,8 +1,8 @@
 ## Where the creativity blossoms.
 
 import
-  dsp/[ frame, delays, effects, envelopes, events, filters, metro, modules,
-        nanotidal, noise, osc, sampler, soundpipe, stereo, fft, patterns, fir ],
+  dsp/[frame, delays, effects, envelopes, events, filters, metro, modules,
+        nanotidal, noise, osc, sampler, soundpipe, stereo, fft, patterns, fir],
   atomics, math, pool, control
 
 type
@@ -10,7 +10,8 @@ type
     pool: Pool
     p1: PSeq
 
-proc process*(s: var State, cc: var Controls, n: var Notes, input: Frame): Frame {.nimcall, exportc, dynlib.} =
+proc process*(s: var State, cc: var Controls, n: var Notes,
+    input: Frame): Frame {.nimcall, exportc, dynlib.} =
   s.pool.init
 
   let freq = 2.dmetro.step(s.p1).mul(55.0)
@@ -23,7 +24,7 @@ proc process*(s: var State, cc: var Controls, n: var Notes, input: Frame): Frame
 # Beware access to the state is not guarded and may happen simultaneously with `process`.
 proc load*(s: var State) {.nimcall, exportc, dynlib.} =
   const MB = 1024^2
-  echo "State: ", int(State.size_of/MB) , "MB / Pool: ", int(Pool.size_of/MB), "MB" 
+  echo "State: ", int(State.size_of/MB), "MB / Pool: ", int(Pool.size_of/MB), "MB"
   # s.pool.addr.zero_mem(Pool.size_of)
   # s.addr.zero_mem(State.size_of)
   sp_create()

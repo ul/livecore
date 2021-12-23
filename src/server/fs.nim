@@ -18,11 +18,15 @@ proc watch_session*(ctx: ptr Context) =
   if fsw.fsw_add_path(TARGET_PATH) != 0:
     quit "Failed to add target to watch paths."
 
-  var fsw_filter1 = fsw_cmonitor_filter(text: SESSION_FILTER, filter_type: fsw_filter_type.filter_include, case_sensitive: false, extended: true)
+  var fsw_filter1 = fsw_cmonitor_filter(text: SESSION_FILTER,
+      filter_type: fsw_filter_type.filter_include, case_sensitive: false,
+      extended: true)
   if fsw.fsw_add_filter(fsw_filter1) != 0:
     quit "Failed to add watch filter."
 
-  var fsw_filter2 = fsw_cmonitor_filter(text: ALL_FILTER, filter_type: fsw_filter_type.filter_exclude, case_sensitive: false, extended: true)
+  var fsw_filter2 = fsw_cmonitor_filter(text: ALL_FILTER,
+      filter_type: fsw_filter_type.filter_exclude, case_sensitive: false,
+      extended: true)
   if fsw.fsw_add_filter(fsw_filter2) != 0:
     quit "Failed to add watch filter."
 
@@ -40,7 +44,8 @@ proc watch_session*(ctx: ptr Context) =
 
   proc monitor(event: fsw_cevent, num: cuint) =
     for i in 0..<event.flags_num:
-      let flag = cast[ptr fsw_event_flag](cast[int](event.flags) + cast[int](i) * fsw_event_flag.sizeof)[]
+      let flag = cast[ptr fsw_event_flag](cast[int](event.flags) + cast[int](
+          i) * fsw_event_flag.sizeof)[]
       if flag == fsw_event_flag.Removed:
         return
     let path = relative_path($event.path, ".")

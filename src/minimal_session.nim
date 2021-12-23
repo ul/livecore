@@ -4,7 +4,8 @@ import dsp/frame
 
 type State* = object
 
-proc process*(s: var State, cc: var Controls, n: var Notes, input: Frame): Frame {.nimcall, exportc, dynlib.} =
+proc process*(s: var State, cc: var Controls, n: var Notes,
+    input: Frame): Frame {.nimcall, exportc, dynlib.} =
   discard
 
 proc load*(s: var State) {.nimcall, exportc, dynlib.} =

@@ -137,7 +137,8 @@ type
 
 type
   lo_method_handler* = proc (path: cstring; types: cstring; argv: ptr ptr lo_arg;
-                          argc: cint; msg: lo_message; user_data: pointer): cint {.
+                          argc: cint; msg: lo_message;
+                              user_data: pointer): cint {.
       cdecl.}
 
 ## *
@@ -159,7 +160,8 @@ type
 ##
 
 type
-  lo_bundle_start_handler* = proc (time: lo_timetag; user_data: pointer): cint {.cdecl.}
+  lo_bundle_start_handler* = proc (time: lo_timetag;
+      user_data: pointer): cint {.cdecl.}
 
 ## *
 ##  \brief A callback function to receive notification of a bundle dispatch
@@ -187,7 +189,8 @@ type
 ##
 
 type
-  lo_server_thread_init_callback* = proc (s: lo_server_thread; user_data: pointer): cint {.
+  lo_server_thread_init_callback* = proc (s: lo_server_thread;
+      user_data: pointer): cint {.
       cdecl.}
 
 ## *
@@ -202,5 +205,6 @@ type
 ##
 
 type
-  lo_server_thread_cleanup_callback* = proc (s: lo_server_thread; user_data: pointer) {.
+  lo_server_thread_cleanup_callback* = proc (s: lo_server_thread;
+      user_data: pointer) {.
       cdecl.}

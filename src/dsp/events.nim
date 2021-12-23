@@ -67,7 +67,8 @@ proc choose*[T](xs: openArray[T], t: float, s: var Choose): T =
     s = rand(xs.high)
   xs[s.min(xs.high)]
 
-proc choose*[T](xs: openArray[T], t: float, ps: openArray[float], s: var Choose): T =
+proc choose*[T](xs: openArray[T], t: float, ps: openArray[float],
+    s: var Choose): T =
   if unlikely(t > 0.0):
     var r = rand(1.0)
     var z = 0.0

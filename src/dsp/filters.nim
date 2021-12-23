@@ -29,7 +29,8 @@ type
     xx, xxx, yy, yyy: float
   BiQuadCoeffs = (float, float, float, float, float, float)
 
-template make_bi_quad(name; make_coefficients: proc(sinω, cosω, α: float): BiQuadCoeffs) =
+template make_bi_quad(name; make_coefficients: proc(sinω, cosω,
+    α: float): BiQuadCoeffs) =
   proc name*(x, freq, Q: float, s: var BiQuad): float =
     let
       xx = x.prime(s.xx)
@@ -85,14 +86,16 @@ proc gaussian_kernel*[N: static[Natural]](): array[N, float] =
   for i in 0..<N:
     result[i] /= s
 
-proc conv*[N: static[Natural]](x: float, kernel: array[N, float], s: var array[N, float]): float =
+proc conv*[N: static[Natural]](x: float, kernel: array[N, float], s: var array[
+    N, float]): float =
   for i in 1..<N:
     s[i] = s[i-1]
   s[0] = x
   for i in 0..<N:
     result += kernel[i] * s[i]
 
-proc iir*[NX, NY: static[Natural]](x: float, a: array[NY, float], b: array[NX, float], s: var array[NX+NY-1, float]): float =
+proc iir*[NX, NY: static[Natural]](x: float, a: array[NY, float], b: array[NX,
+    float], s: var array[NX+NY-1, float]): float =
   for i in countdown(NX-1, 1):
     s[i] = s[i-1]
   s[0] = x

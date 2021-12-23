@@ -34,11 +34,14 @@ type
     val* {.importc: "val".}: SPFLOAT
 
 
-proc create*(spp: ptr ptr data): cint {.importc: "sp_create", header: "soundpipe.h".}
+proc create*(spp: ptr ptr data): cint {.importc: "sp_create",
+    header: "soundpipe.h".}
 proc createn*(spp: ptr ptr data; nchan: cint): cint {.importc: "sp_createn",
     header: "soundpipe.h".}
-proc destroy*(spp: ptr ptr data): cint {.importc: "sp_destroy", header: "soundpipe.h".}
-proc process*(sp: ptr data; ud: pointer; callback: proc (a1: ptr data; a2: pointer)): cint {.
+proc destroy*(spp: ptr ptr data): cint {.importc: "sp_destroy",
+    header: "soundpipe.h".}
+proc process*(sp: ptr data; ud: pointer; callback: proc (a1: ptr data;
+    a2: pointer)): cint {.
     importc: "sp_process", header: "soundpipe.h".}
 proc process_raw*(sp: ptr data; ud: pointer;
                  callback: proc (a1: ptr data; a2: pointer)): cint {.
@@ -49,12 +52,15 @@ proc process_plot*(sp: ptr data; ud: pointer;
 proc process_spa*(sp: ptr data; ud: pointer;
                  callback: proc (a1: ptr data; a2: pointer)): cint {.
     importc: "sp_process_spa", header: "soundpipe.h".}
-proc midi2cps*(nn: SPFLOAT): SPFLOAT {.importc: "sp_midi2cps", header: "soundpipe.h".}
-proc set*(p: ptr param; val: SPFLOAT): cint {.importc: "sp_set", header: "soundpipe.h".}
-proc `out`*(sp: ptr data; chan: uint32_t; val: SPFLOAT): cint {.importc: "sp_out",
+proc midi2cps*(nn: SPFLOAT): SPFLOAT {.importc: "sp_midi2cps",
     header: "soundpipe.h".}
+proc set*(p: ptr param; val: SPFLOAT): cint {.importc: "sp_set",
+    header: "soundpipe.h".}
+proc `out`*(sp: ptr data; chan: uint32_t;
+    val: SPFLOAT): cint {.importc: "sp_out", header: "soundpipe.h".}
 proc rand*(sp: ptr data): uint32_t {.importc: "sp_rand", header: "soundpipe.h".}
-proc srand*(sp: ptr data; val: uint32_t) {.importc: "sp_srand", header: "soundpipe.h".}
+proc srand*(sp: ptr data; val: uint32_t) {.importc: "sp_srand",
+    header: "soundpipe.h".}
 type
   fft* {.importc: "sp_fft", header: "soundpipe.h", bycopy.} = object
     utbl* {.importc: "utbl".}: ptr SPFLOAT
@@ -62,20 +68,24 @@ type
     BRLowCpx* {.importc: "BRLowCpx".}: ptr int16_t
 
 
-proc fft_create*(fft: ptr ptr fft) {.importc: "sp_fft_create", header: "soundpipe.h".}
-proc fft_init*(fft: ptr fft; M: cint) {.importc: "sp_fft_init", header: "soundpipe.h".}
+proc fft_create*(fft: ptr ptr fft) {.importc: "sp_fft_create",
+    header: "soundpipe.h".}
+proc fft_init*(fft: ptr fft; M: cint) {.importc: "sp_fft_init",
+    header: "soundpipe.h".}
 proc fftr*(fft: ptr fft; buf: ptr SPFLOAT; FFTsize: cint) {.importc: "sp_fftr",
     header: "soundpipe.h".}
-proc fft_cpx*(fft: ptr fft; buf: ptr SPFLOAT; FFTsize: cint) {.importc: "sp_fft_cpx",
+proc fft_cpx*(fft: ptr fft; buf: ptr SPFLOAT;
+    FFTsize: cint) {.importc: "sp_fft_cpx", header: "soundpipe.h".}
+proc ifftr*(fft: ptr fft; buf: ptr SPFLOAT;
+    FFTsize: cint) {.importc: "sp_ifftr", header: "soundpipe.h".}
+proc fft_destroy*(fft: ptr fft) {.importc: "sp_fft_destroy",
     header: "soundpipe.h".}
-proc ifftr*(fft: ptr fft; buf: ptr SPFLOAT; FFTsize: cint) {.importc: "sp_ifftr",
-    header: "soundpipe.h".}
-proc fft_destroy*(fft: ptr fft) {.importc: "sp_fft_destroy", header: "soundpipe.h".}
 when not defined(kiss_fft_scalar):
   type
     kiss_fft_scalar* = SPFLOAT
 type
-  kiss_fft_cpx* {.importc: "kiss_fft_cpx", header: "soundpipe.h", bycopy.} = object
+  kiss_fft_cpx* {.importc: "kiss_fft_cpx", header: "soundpipe.h",
+      bycopy.} = object
     r* {.importc: "r".}: kiss_fft_scalar
     i* {.importc: "i".}: kiss_fft_scalar
 
@@ -120,7 +130,8 @@ proc ftbl_create*(sp: ptr data; ft: ptr ptr ftbl; size: csize_t): cint {.
     importc: "sp_ftbl_create", header: "soundpipe.h".}
 proc ftbl_init*(sp: ptr data; ft: ptr ftbl; size: csize_t): cint {.
     importc: "sp_ftbl_init", header: "soundpipe.h".}
-proc ftbl_bind*(sp: ptr data; ft: ptr ptr ftbl; tbl: ptr SPFLOAT; size: csize_t): cint {.
+proc ftbl_bind*(sp: ptr data; ft: ptr ptr ftbl; tbl: ptr SPFLOAT;
+    size: csize_t): cint {.
     importc: "sp_ftbl_bind", header: "soundpipe.h".}
 proc ftbl_destroy*(ft: ptr ptr ftbl): cint {.importc: "sp_ftbl_destroy",
                                        header: "soundpipe.h".}
@@ -162,7 +173,8 @@ proc adsr_destroy*(p: ptr ptr adsr): cint {.importc: "sp_adsr_destroy",
                                       header: "soundpipe.h".}
 proc adsr_init*(sp: ptr data; p: ptr adsr): cint {.importc: "sp_adsr_init",
     header: "soundpipe.h".}
-proc adsr_compute*(sp: ptr data; p: ptr adsr; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc adsr_compute*(sp: ptr data; p: ptr adsr; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_adsr_compute", header: "soundpipe.h".}
 type
   autowah* {.importc: "sp_autowah", header: "soundpipe.h", bycopy.} = object
@@ -180,7 +192,8 @@ proc autowah_destroy*(p: ptr ptr autowah): cint {.importc: "sp_autowah_destroy",
     header: "soundpipe.h".}
 proc autowah_init*(sp: ptr data; p: ptr autowah): cint {.importc: "sp_autowah_init",
     header: "soundpipe.h".}
-proc autowah_compute*(sp: ptr data; p: ptr autowah; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc autowah_compute*(sp: ptr data; p: ptr autowah; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_autowah_compute", header: "soundpipe.h".}
 type
   biscale* {.importc: "sp_biscale", header: "soundpipe.h", bycopy.} = object
@@ -194,7 +207,8 @@ proc biscale_destroy*(p: ptr ptr biscale): cint {.importc: "sp_biscale_destroy",
     header: "soundpipe.h".}
 proc biscale_init*(sp: ptr data; p: ptr biscale): cint {.importc: "sp_biscale_init",
     header: "soundpipe.h".}
-proc biscale_compute*(sp: ptr data; p: ptr biscale; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc biscale_compute*(sp: ptr data; p: ptr biscale; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_biscale_compute", header: "soundpipe.h".}
 type
   blsaw* {.importc: "sp_blsaw", header: "soundpipe.h", bycopy.} = object
@@ -211,7 +225,8 @@ proc blsaw_destroy*(p: ptr ptr blsaw): cint {.importc: "sp_blsaw_destroy",
                                         header: "soundpipe.h".}
 proc blsaw_init*(sp: ptr data; p: ptr blsaw): cint {.importc: "sp_blsaw_init",
     header: "soundpipe.h".}
-proc blsaw_compute*(sp: ptr data; p: ptr blsaw; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc blsaw_compute*(sp: ptr data; p: ptr blsaw; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_blsaw_compute", header: "soundpipe.h".}
 type
   blsquare* {.importc: "sp_blsquare", header: "soundpipe.h", bycopy.} = object
@@ -233,7 +248,8 @@ proc blsquare_compute*(sp: ptr data; p: ptr blsquare; `in`: ptr SPFLOAT;
                       `out`: ptr SPFLOAT): cint {.importc: "sp_blsquare_compute",
     header: "soundpipe.h".}
 type
-  bltriangle* {.importc: "sp_bltriangle", header: "soundpipe.h", bycopy.} = object
+  bltriangle* {.importc: "sp_bltriangle", header: "soundpipe.h",
+      bycopy.} = object
     ud* {.importc: "ud".}: pointer
     argpos* {.importc: "argpos".}: cint
     args* {.importc: "args".}: array[2, ptr SPFLOAT]
@@ -265,7 +281,8 @@ proc butlp_destroy*(p: ptr ptr butlp): cint {.importc: "sp_butlp_destroy",
                                         header: "soundpipe.h".}
 proc butlp_init*(sp: ptr data; p: ptr butlp): cint {.importc: "sp_butlp_init",
     header: "soundpipe.h".}
-proc butlp_compute*(sp: ptr data; p: ptr butlp; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc butlp_compute*(sp: ptr data; p: ptr butlp; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_butlp_compute", header: "soundpipe.h".}
 type
   butbp* {.importc: "sp_butbp", header: "soundpipe.h", bycopy.} = object
@@ -284,7 +301,8 @@ proc butbp_destroy*(p: ptr ptr butbp): cint {.importc: "sp_butbp_destroy",
                                         header: "soundpipe.h".}
 proc butbp_init*(sp: ptr data; p: ptr butbp): cint {.importc: "sp_butbp_init",
     header: "soundpipe.h".}
-proc butbp_compute*(sp: ptr data; p: ptr butbp; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc butbp_compute*(sp: ptr data; p: ptr butbp; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_butbp_compute", header: "soundpipe.h".}
 type
   buthp* {.importc: "sp_buthp", header: "soundpipe.h", bycopy.} = object
@@ -300,7 +318,8 @@ proc buthp_destroy*(p: ptr ptr buthp): cint {.importc: "sp_buthp_destroy",
                                         header: "soundpipe.h".}
 proc buthp_init*(sp: ptr data; p: ptr buthp): cint {.importc: "sp_buthp_init",
     header: "soundpipe.h".}
-proc buthp_compute*(sp: ptr data; p: ptr buthp; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc buthp_compute*(sp: ptr data; p: ptr buthp; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_buthp_compute", header: "soundpipe.h".}
 type
   butbr* {.importc: "sp_butbr", header: "soundpipe.h", bycopy.} = object
@@ -319,7 +338,8 @@ proc butbr_destroy*(p: ptr ptr butbr): cint {.importc: "sp_butbr_destroy",
                                         header: "soundpipe.h".}
 proc butbr_init*(sp: ptr data; p: ptr butbr): cint {.importc: "sp_butbr_init",
     header: "soundpipe.h".}
-proc butbr_compute*(sp: ptr data; p: ptr butbr; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc butbr_compute*(sp: ptr data; p: ptr butbr; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_butbr_compute", header: "soundpipe.h".}
 type
   brown* {.importc: "sp_brown", header: "soundpipe.h", bycopy.} = object
@@ -332,7 +352,8 @@ proc brown_destroy*(p: ptr ptr brown): cint {.importc: "sp_brown_destroy",
                                         header: "soundpipe.h".}
 proc brown_init*(sp: ptr data; p: ptr brown): cint {.importc: "sp_brown_init",
     header: "soundpipe.h".}
-proc brown_compute*(sp: ptr data; p: ptr brown; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc brown_compute*(sp: ptr data; p: ptr brown; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_brown_compute", header: "soundpipe.h".}
 type
   clamp* {.importc: "sp_clamp", header: "soundpipe.h", bycopy.} = object
@@ -346,7 +367,8 @@ proc clamp_destroy*(p: ptr ptr clamp): cint {.importc: "sp_clamp_destroy",
                                         header: "soundpipe.h".}
 proc clamp_init*(sp: ptr data; p: ptr clamp): cint {.importc: "sp_clamp_init",
     header: "soundpipe.h".}
-proc clamp_compute*(sp: ptr data; p: ptr clamp; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc clamp_compute*(sp: ptr data; p: ptr clamp; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_clamp_compute", header: "soundpipe.h".}
 type
   clock* {.importc: "sp_clock", header: "soundpipe.h", bycopy.} = object
@@ -361,10 +383,12 @@ proc clock_destroy*(p: ptr ptr clock): cint {.importc: "sp_clock_destroy",
                                         header: "soundpipe.h".}
 proc clock_init*(sp: ptr data; p: ptr clock): cint {.importc: "sp_clock_init",
     header: "soundpipe.h".}
-proc clock_compute*(sp: ptr data; p: ptr clock; trig: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc clock_compute*(sp: ptr data; p: ptr clock; trig: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_clock_compute", header: "soundpipe.h".}
 type
-  compressor* {.importc: "sp_compressor", header: "soundpipe.h", bycopy.} = object
+  compressor* {.importc: "sp_compressor", header: "soundpipe.h",
+      bycopy.} = object
     faust* {.importc: "faust".}: pointer
     argpos* {.importc: "argpos".}: cint
     args* {.importc: "args".}: array[4, ptr SPFLOAT]
@@ -396,7 +420,8 @@ proc count_destroy*(p: ptr ptr count): cint {.importc: "sp_count_destroy",
                                         header: "soundpipe.h".}
 proc count_init*(sp: ptr data; p: ptr count): cint {.importc: "sp_count_init",
     header: "soundpipe.h".}
-proc count_compute*(sp: ptr data; p: ptr count; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc count_compute*(sp: ptr data; p: ptr count; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_count_compute", header: "soundpipe.h".}
 type
   crossfade* {.importc: "sp_crossfade", header: "soundpipe.h", bycopy.} = object
@@ -428,7 +453,8 @@ proc delay_destroy*(p: ptr ptr delay): cint {.importc: "sp_delay_destroy",
                                         header: "soundpipe.h".}
 proc delay_init*(sp: ptr data; p: ptr delay; time: SPFLOAT): cint {.
     importc: "sp_delay_init", header: "soundpipe.h".}
-proc delay_compute*(sp: ptr data; p: ptr delay; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc delay_compute*(sp: ptr data; p: ptr delay; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_delay_compute", header: "soundpipe.h".}
 type
   diode* {.importc: "sp_diode", header: "soundpipe.h", bycopy.} = object
@@ -453,7 +479,8 @@ proc diode_destroy*(p: ptr ptr diode): cint {.importc: "sp_diode_destroy",
                                         header: "soundpipe.h".}
 proc diode_init*(sp: ptr data; p: ptr diode): cint {.importc: "sp_diode_init",
     header: "soundpipe.h".}
-proc diode_compute*(sp: ptr data; p: ptr diode; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc diode_compute*(sp: ptr data; p: ptr diode; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_diode_compute", header: "soundpipe.h".}
 type
   dmetro* {.importc: "sp_dmetro", header: "soundpipe.h", bycopy.} = object
@@ -467,7 +494,8 @@ proc dmetro_destroy*(p: ptr ptr dmetro): cint {.importc: "sp_dmetro_destroy",
     header: "soundpipe.h".}
 proc dmetro_init*(sp: ptr data; p: ptr dmetro): cint {.importc: "sp_dmetro_init",
     header: "soundpipe.h".}
-proc dmetro_compute*(sp: ptr data; p: ptr dmetro; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc dmetro_compute*(sp: ptr data; p: ptr dmetro; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_dmetro_compute", header: "soundpipe.h".}
 type
   dtrig* {.importc: "sp_dtrig", header: "soundpipe.h", bycopy.} = object
@@ -486,7 +514,8 @@ proc dtrig_destroy*(p: ptr ptr dtrig): cint {.importc: "sp_dtrig_destroy",
                                         header: "soundpipe.h".}
 proc dtrig_init*(sp: ptr data; p: ptr dtrig; ft: ptr ftbl): cint {.
     importc: "sp_dtrig_init", header: "soundpipe.h".}
-proc dtrig_compute*(sp: ptr data; p: ptr dtrig; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc dtrig_compute*(sp: ptr data; p: ptr dtrig; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_dtrig_compute", header: "soundpipe.h".}
 type
   expon* {.importc: "sp_expon", header: "soundpipe.h", bycopy.} = object
@@ -506,19 +535,22 @@ proc expon_destroy*(p: ptr ptr expon): cint {.importc: "sp_expon_destroy",
                                         header: "soundpipe.h".}
 proc expon_init*(sp: ptr data; p: ptr expon): cint {.importc: "sp_expon_init",
     header: "soundpipe.h".}
-proc expon_compute*(sp: ptr data; p: ptr expon; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc expon_compute*(sp: ptr data; p: ptr expon; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_expon_compute", header: "soundpipe.h".}
 type
   `in`* {.importc: "sp_in", header: "soundpipe.h", bycopy.} = object
     fp* {.importc: "fp".}: ptr FILE
 
 
-proc in_create*(p: ptr ptr `in`): cint {.importc: "sp_in_create", header: "soundpipe.h".}
+proc in_create*(p: ptr ptr `in`): cint {.importc: "sp_in_create",
+    header: "soundpipe.h".}
 proc in_destroy*(p: ptr ptr `in`): cint {.importc: "sp_in_destroy",
                                     header: "soundpipe.h".}
 proc in_init*(sp: ptr data; p: ptr `in`): cint {.importc: "sp_in_init",
     header: "soundpipe.h".}
-proc in_compute*(sp: ptr data; p: ptr `in`; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc in_compute*(sp: ptr data; p: ptr `in`; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_in_compute", header: "soundpipe.h".}
 type
   incr* {.importc: "sp_incr", header: "soundpipe.h", bycopy.} = object
@@ -532,9 +564,10 @@ proc incr_create*(p: ptr ptr incr): cint {.importc: "sp_incr_create",
                                      header: "soundpipe.h".}
 proc incr_destroy*(p: ptr ptr incr): cint {.importc: "sp_incr_destroy",
                                       header: "soundpipe.h".}
-proc incr_init*(sp: ptr data; p: ptr incr; val: SPFLOAT): cint {.importc: "sp_incr_init",
-    header: "soundpipe.h".}
-proc incr_compute*(sp: ptr data; p: ptr incr; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc incr_init*(sp: ptr data; p: ptr incr;
+    val: SPFLOAT): cint {.importc: "sp_incr_init", header: "soundpipe.h".}
+proc incr_compute*(sp: ptr data; p: ptr incr; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_incr_compute", header: "soundpipe.h".}
 type
   jcrev* {.importc: "sp_jcrev", header: "soundpipe.h", bycopy.} = object
@@ -547,7 +580,8 @@ proc jcrev_destroy*(p: ptr ptr jcrev): cint {.importc: "sp_jcrev_destroy",
                                         header: "soundpipe.h".}
 proc jcrev_init*(sp: ptr data; p: ptr jcrev): cint {.importc: "sp_jcrev_init",
     header: "soundpipe.h".}
-proc jcrev_compute*(sp: ptr data; p: ptr jcrev; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc jcrev_compute*(sp: ptr data; p: ptr jcrev; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_jcrev_compute", header: "soundpipe.h".}
 type
   line* {.importc: "sp_line", header: "soundpipe.h", bycopy.} = object
@@ -567,7 +601,8 @@ proc line_destroy*(p: ptr ptr line): cint {.importc: "sp_line_destroy",
                                       header: "soundpipe.h".}
 proc line_init*(sp: ptr data; p: ptr line): cint {.importc: "sp_line_init",
     header: "soundpipe.h".}
-proc line_compute*(sp: ptr data; p: ptr line; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc line_compute*(sp: ptr data; p: ptr line; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_line_compute", header: "soundpipe.h".}
 proc ftbl_loadwav*(sp: ptr data; ft: ptr ptr ftbl; filename: cstring): cint {.
     importc: "sp_ftbl_loadwav", header: "soundpipe.h".}
@@ -597,9 +632,10 @@ proc lpc_destroy*(lpc: ptr ptr lpc): cint {.importc: "sp_lpc_destroy",
                                       header: "soundpipe.h".}
 proc lpc_init*(sp: ptr data; lpc: ptr lpc; framesize: cint): cint {.
     importc: "sp_lpc_init", header: "soundpipe.h".}
-proc lpc_synth*(sp: ptr data; lpc: ptr lpc; ft: ptr ftbl): cint {.importc: "sp_lpc_synth",
-    header: "soundpipe.h".}
-proc lpc_compute*(sp: ptr data; lpc: ptr lpc; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc lpc_synth*(sp: ptr data; lpc: ptr lpc;
+    ft: ptr ftbl): cint {.importc: "sp_lpc_synth", header: "soundpipe.h".}
+proc lpc_compute*(sp: ptr data; lpc: ptr lpc; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_lpc_compute", header: "soundpipe.h".}
 type
   maygate* {.importc: "sp_maygate", header: "soundpipe.h", bycopy.} = object
@@ -614,7 +650,8 @@ proc maygate_destroy*(p: ptr ptr maygate): cint {.importc: "sp_maygate_destroy",
     header: "soundpipe.h".}
 proc maygate_init*(sp: ptr data; p: ptr maygate): cint {.importc: "sp_maygate_init",
     header: "soundpipe.h".}
-proc maygate_compute*(sp: ptr data; p: ptr maygate; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc maygate_compute*(sp: ptr data; p: ptr maygate; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_maygate_compute", header: "soundpipe.h".}
 type
   metro* {.importc: "sp_metro", header: "soundpipe.h", bycopy.} = object
@@ -630,7 +667,8 @@ proc metro_destroy*(p: ptr ptr metro): cint {.importc: "sp_metro_destroy",
                                         header: "soundpipe.h".}
 proc metro_init*(sp: ptr data; p: ptr metro): cint {.importc: "sp_metro_init",
     header: "soundpipe.h".}
-proc metro_compute*(sp: ptr data; p: ptr metro; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc metro_compute*(sp: ptr data; p: ptr metro; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_metro_compute", header: "soundpipe.h".}
 type
   noise* {.importc: "sp_noise", header: "soundpipe.h", bycopy.} = object
@@ -641,7 +679,8 @@ proc noise_create*(ns: ptr ptr noise): cint {.importc: "sp_noise_create",
                                         header: "soundpipe.h".}
 proc noise_init*(sp: ptr data; ns: ptr noise): cint {.importc: "sp_noise_init",
     header: "soundpipe.h".}
-proc noise_compute*(sp: ptr data; ns: ptr noise; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc noise_compute*(sp: ptr data; ns: ptr noise; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_noise_compute", header: "soundpipe.h".}
 proc noise_destroy*(ns: ptr ptr noise): cint {.importc: "sp_noise_destroy",
     header: "soundpipe.h".}
@@ -679,9 +718,11 @@ proc nsmp_create*(p: ptr ptr nsmp): cint {.importc: "sp_nsmp_create",
                                      header: "soundpipe.h".}
 proc nsmp_destroy*(p: ptr ptr nsmp): cint {.importc: "sp_nsmp_destroy",
                                       header: "soundpipe.h".}
-proc nsmp_init*(sp: ptr data; p: ptr nsmp; ft: ptr ftbl; sr: cint; ini: cstring): cint {.
+proc nsmp_init*(sp: ptr data; p: ptr nsmp; ft: ptr ftbl; sr: cint;
+    ini: cstring): cint {.
     importc: "sp_nsmp_init", header: "soundpipe.h".}
-proc nsmp_compute*(sp: ptr data; p: ptr nsmp; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc nsmp_compute*(sp: ptr data; p: ptr nsmp; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_nsmp_compute", header: "soundpipe.h".}
 proc nsmp_print_index*(sp: ptr data; p: ptr nsmp): cint {.
     importc: "sp_nsmp_print_index", header: "soundpipe.h".}
@@ -700,10 +741,12 @@ proc osc_destroy*(osc: ptr ptr osc): cint {.importc: "sp_osc_destroy",
                                       header: "soundpipe.h".}
 proc osc_init*(sp: ptr data; osc: ptr osc; ft: ptr ftbl; iphs: SPFLOAT): cint {.
     importc: "sp_osc_init", header: "soundpipe.h".}
-proc osc_compute*(sp: ptr data; osc: ptr osc; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc osc_compute*(sp: ptr data; osc: ptr osc; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_osc_compute", header: "soundpipe.h".}
 type
-  paulstretch* {.importc: "sp_paulstretch", header: "soundpipe.h", bycopy.} = object
+  paulstretch* {.importc: "sp_paulstretch", header: "soundpipe.h",
+      bycopy.} = object
     windowsize* {.importc: "windowsize".}: uint32_t
     half_windowsize* {.importc: "half_windowsize".}: uint32_t
     stretch* {.importc: "stretch".}: SPFLOAT
@@ -753,7 +796,8 @@ proc peaklim_destroy*(p: ptr ptr peaklim): cint {.importc: "sp_peaklim_destroy",
     header: "soundpipe.h".}
 proc peaklim_init*(sp: ptr data; p: ptr peaklim): cint {.importc: "sp_peaklim_init",
     header: "soundpipe.h".}
-proc peaklim_compute*(sp: ptr data; p: ptr peaklim; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc peaklim_compute*(sp: ptr data; p: ptr peaklim; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_peaklim_compute", header: "soundpipe.h".}
 type
   phaser* {.importc: "sp_phaser", header: "soundpipe.h", bycopy.} = object
@@ -794,7 +838,8 @@ proc phasor_destroy*(p: ptr ptr phasor): cint {.importc: "sp_phasor_destroy",
     header: "soundpipe.h".}
 proc phasor_init*(sp: ptr data; p: ptr phasor; iphs: SPFLOAT): cint {.
     importc: "sp_phasor_init", header: "soundpipe.h".}
-proc phasor_compute*(sp: ptr data; p: ptr phasor; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc phasor_compute*(sp: ptr data; p: ptr phasor; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_phasor_compute", header: "soundpipe.h".}
 type
   pinknoise* {.importc: "sp_pinknoise", header: "soundpipe.h", bycopy.} = object
@@ -872,9 +917,10 @@ proc prop_destroy*(p: ptr ptr prop): cint {.importc: "sp_prop_destroy",
                                       header: "soundpipe.h".}
 proc prop_reset*(sp: ptr data; p: ptr prop): cint {.importc: "sp_prop_reset",
     header: "soundpipe.h".}
-proc prop_init*(sp: ptr data; p: ptr prop; str: cstring): cint {.importc: "sp_prop_init",
-    header: "soundpipe.h".}
-proc prop_compute*(sp: ptr data; p: ptr prop; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc prop_init*(sp: ptr data; p: ptr prop;
+    str: cstring): cint {.importc: "sp_prop_init", header: "soundpipe.h".}
+proc prop_compute*(sp: ptr data; p: ptr prop; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_prop_compute", header: "soundpipe.h".}
 type
   pshift* {.importc: "sp_pshift", header: "soundpipe.h", bycopy.} = object
@@ -892,7 +938,8 @@ proc pshift_destroy*(p: ptr ptr pshift): cint {.importc: "sp_pshift_destroy",
     header: "soundpipe.h".}
 proc pshift_init*(sp: ptr data; p: ptr pshift): cint {.importc: "sp_pshift_init",
     header: "soundpipe.h".}
-proc pshift_compute*(sp: ptr data; p: ptr pshift; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc pshift_compute*(sp: ptr data; p: ptr pshift; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_pshift_compute", header: "soundpipe.h".}
 type
   randmt* {.importc: "sp_randmt", header: "soundpipe.h", bycopy.} = object
@@ -916,7 +963,8 @@ proc random_destroy*(p: ptr ptr random): cint {.importc: "sp_random_destroy",
     header: "soundpipe.h".}
 proc random_init*(sp: ptr data; p: ptr random): cint {.importc: "sp_random_init",
     header: "soundpipe.h".}
-proc random_compute*(sp: ptr data; p: ptr random; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc random_compute*(sp: ptr data; p: ptr random; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_random_compute", header: "soundpipe.h".}
 type
   randh* {.importc: "sp_randh", header: "soundpipe.h", bycopy.} = object
@@ -934,7 +982,8 @@ proc randh_destroy*(p: ptr ptr randh): cint {.importc: "sp_randh_destroy",
                                         header: "soundpipe.h".}
 proc randh_init*(sp: ptr data; p: ptr randh): cint {.importc: "sp_randh_init",
     header: "soundpipe.h".}
-proc randh_compute*(sp: ptr data; p: ptr randh; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc randh_compute*(sp: ptr data; p: ptr randh; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_randh_compute", header: "soundpipe.h".}
 type
   reverse* {.importc: "sp_reverse", header: "soundpipe.h", bycopy.} = object
@@ -950,7 +999,8 @@ proc reverse_destroy*(p: ptr ptr reverse): cint {.importc: "sp_reverse_destroy",
     header: "soundpipe.h".}
 proc reverse_init*(sp: ptr data; p: ptr reverse; delay: SPFLOAT): cint {.
     importc: "sp_reverse_init", header: "soundpipe.h".}
-proc reverse_compute*(sp: ptr data; p: ptr reverse; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc reverse_compute*(sp: ptr data; p: ptr reverse; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_reverse_compute", header: "soundpipe.h".}
 type
   rpt* {.importc: "sp_rpt", header: "soundpipe.h", bycopy.} = object
@@ -969,11 +1019,12 @@ type
     maxlen* {.importc: "maxlen".}: uint32_t
 
 
-proc rpt_create*(p: ptr ptr rpt): cint {.importc: "sp_rpt_create", header: "soundpipe.h".}
+proc rpt_create*(p: ptr ptr rpt): cint {.importc: "sp_rpt_create",
+    header: "soundpipe.h".}
 proc rpt_destroy*(p: ptr ptr rpt): cint {.importc: "sp_rpt_destroy",
                                     header: "soundpipe.h".}
-proc rpt_init*(sp: ptr data; p: ptr rpt; maxdur: SPFLOAT): cint {.importc: "sp_rpt_init",
-    header: "soundpipe.h".}
+proc rpt_init*(sp: ptr data; p: ptr rpt;
+    maxdur: SPFLOAT): cint {.importc: "sp_rpt_init", header: "soundpipe.h".}
 proc rpt_compute*(sp: ptr data; p: ptr rpt; trig: ptr SPFLOAT; `in`: ptr SPFLOAT;
                  `out`: ptr SPFLOAT): cint {.importc: "sp_rpt_compute",
     header: "soundpipe.h".}
@@ -1021,7 +1072,8 @@ proc scale_destroy*(p: ptr ptr scale): cint {.importc: "sp_scale_destroy",
                                         header: "soundpipe.h".}
 proc scale_init*(sp: ptr data; p: ptr scale): cint {.importc: "sp_scale_init",
     header: "soundpipe.h".}
-proc scale_compute*(sp: ptr data; p: ptr scale; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc scale_compute*(sp: ptr data; p: ptr scale; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_scale_compute", header: "soundpipe.h".}
 proc gen_scrambler*(sp: ptr data; src: ptr ftbl; dest: ptr ptr ftbl): cint {.
     importc: "sp_gen_scrambler", header: "soundpipe.h".}
@@ -1038,7 +1090,8 @@ proc sdelay_destroy*(p: ptr ptr sdelay): cint {.importc: "sp_sdelay_destroy",
     header: "soundpipe.h".}
 proc sdelay_init*(sp: ptr data; p: ptr sdelay; size: cint): cint {.
     importc: "sp_sdelay_init", header: "soundpipe.h".}
-proc sdelay_compute*(sp: ptr data; p: ptr sdelay; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc sdelay_compute*(sp: ptr data; p: ptr sdelay; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_sdelay_compute", header: "soundpipe.h".}
 type
   slice* {.importc: "sp_slice", header: "soundpipe.h", bycopy.} = object
@@ -1053,12 +1106,15 @@ proc slice_create*(p: ptr ptr slice): cint {.importc: "sp_slice_create",
                                        header: "soundpipe.h".}
 proc slice_destroy*(p: ptr ptr slice): cint {.importc: "sp_slice_destroy",
                                         header: "soundpipe.h".}
-proc slice_init*(sp: ptr data; p: ptr slice; vals: ptr ftbl; buf: ptr ftbl): cint {.
+proc slice_init*(sp: ptr data; p: ptr slice; vals: ptr ftbl;
+    buf: ptr ftbl): cint {.
     importc: "sp_slice_init", header: "soundpipe.h".}
-proc slice_compute*(sp: ptr data; p: ptr slice; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc slice_compute*(sp: ptr data; p: ptr slice; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_slice_compute", header: "soundpipe.h".}
 type
-  smoothdelay* {.importc: "sp_smoothdelay", header: "soundpipe.h", bycopy.} = object
+  smoothdelay* {.importc: "sp_smoothdelay", header: "soundpipe.h",
+      bycopy.} = object
     del* {.importc: "del".}: SPFLOAT
     maxdel* {.importc: "maxdel".}: SPFLOAT
     pdel* {.importc: "pdel".}: SPFLOAT
@@ -1115,12 +1171,14 @@ type
     spa* {.importc: "spa".}: audio
 
 
-proc spa_create*(p: ptr ptr spa): cint {.importc: "sp_spa_create", header: "soundpipe.h".}
+proc spa_create*(p: ptr ptr spa): cint {.importc: "sp_spa_create",
+    header: "soundpipe.h".}
 proc spa_destroy*(p: ptr ptr spa): cint {.importc: "sp_spa_destroy",
                                     header: "soundpipe.h".}
 proc spa_init*(sp: ptr data; p: ptr spa; filename: cstring): cint {.
     importc: "sp_spa_init", header: "soundpipe.h".}
-proc spa_compute*(sp: ptr data; p: ptr spa; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc spa_compute*(sp: ptr data; p: ptr spa; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_spa_compute", header: "soundpipe.h".}
 type
   sparec* {.importc: "sp_sparec", header: "soundpipe.h", bycopy.} = object
@@ -1136,7 +1194,8 @@ proc sparec_destroy*(p: ptr ptr sparec): cint {.importc: "sp_sparec_destroy",
     header: "soundpipe.h".}
 proc sparec_init*(sp: ptr data; p: ptr sparec; filename: cstring): cint {.
     importc: "sp_sparec_init", header: "soundpipe.h".}
-proc sparec_compute*(sp: ptr data; p: ptr sparec; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc sparec_compute*(sp: ptr data; p: ptr sparec; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_sparec_compute", header: "soundpipe.h".}
 proc sparec_close*(sp: ptr data; p: ptr sparec): cint {.importc: "sp_sparec_close",
     header: "soundpipe.h".}
@@ -1177,7 +1236,8 @@ proc tadsr_destroy*(p: ptr ptr tadsr): cint {.importc: "sp_tadsr_destroy",
                                         header: "soundpipe.h".}
 proc tadsr_init*(sp: ptr data; p: ptr tadsr): cint {.importc: "sp_tadsr_init",
     header: "soundpipe.h".}
-proc tadsr_compute*(sp: ptr data; p: ptr tadsr; trig: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc tadsr_compute*(sp: ptr data; p: ptr tadsr; trig: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_tadsr_compute", header: "soundpipe.h".}
 when not defined(SP_TALKBOX_BUFMAX):
   const
@@ -1246,7 +1306,8 @@ proc tdiv_destroy*(p: ptr ptr tdiv): cint {.importc: "sp_tdiv_destroy",
                                       header: "soundpipe.h".}
 proc tdiv_init*(sp: ptr data; p: ptr tdiv): cint {.importc: "sp_tdiv_init",
     header: "soundpipe.h".}
-proc tdiv_compute*(sp: ptr data; p: ptr tdiv; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc tdiv_compute*(sp: ptr data; p: ptr tdiv; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_tdiv_compute", header: "soundpipe.h".}
 type
   tenv* {.importc: "sp_tenv", header: "soundpipe.h", bycopy.} = object
@@ -1272,7 +1333,8 @@ proc tenv_destroy*(p: ptr ptr tenv): cint {.importc: "sp_tenv_destroy",
                                       header: "soundpipe.h".}
 proc tenv_init*(sp: ptr data; p: ptr tenv): cint {.importc: "sp_tenv_init",
     header: "soundpipe.h".}
-proc tenv_compute*(sp: ptr data; p: ptr tenv; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc tenv_compute*(sp: ptr data; p: ptr tenv; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_tenv_compute", header: "soundpipe.h".}
 type
   tenv2* {.importc: "sp_tenv2", header: "soundpipe.h", bycopy.} = object
@@ -1291,7 +1353,8 @@ proc tenv2_destroy*(p: ptr ptr tenv2): cint {.importc: "sp_tenv2_destroy",
                                         header: "soundpipe.h".}
 proc tenv2_init*(sp: ptr data; p: ptr tenv2): cint {.importc: "sp_tenv2_init",
     header: "soundpipe.h".}
-proc tenv2_compute*(sp: ptr data; p: ptr tenv2; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc tenv2_compute*(sp: ptr data; p: ptr tenv2; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_tenv2_compute", header: "soundpipe.h".}
 type
   tenvx* {.importc: "sp_tenvx", header: "soundpipe.h", bycopy.} = object
@@ -1314,7 +1377,8 @@ proc tenvx_destroy*(p: ptr ptr tenvx): cint {.importc: "sp_tenvx_destroy",
                                         header: "soundpipe.h".}
 proc tenvx_init*(sp: ptr data; p: ptr tenvx): cint {.importc: "sp_tenvx_init",
     header: "soundpipe.h".}
-proc tenvx_compute*(sp: ptr data; p: ptr tenvx; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc tenvx_compute*(sp: ptr data; p: ptr tenvx; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_tenvx_compute", header: "soundpipe.h".}
 type
   tgate* {.importc: "sp_tgate", header: "soundpipe.h", bycopy.} = object
@@ -1328,7 +1392,8 @@ proc tgate_destroy*(p: ptr ptr tgate): cint {.importc: "sp_tgate_destroy",
                                         header: "soundpipe.h".}
 proc tgate_init*(sp: ptr data; p: ptr tgate): cint {.importc: "sp_tgate_init",
     header: "soundpipe.h".}
-proc tgate_compute*(sp: ptr data; p: ptr tgate; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc tgate_compute*(sp: ptr data; p: ptr tgate; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_tgate_compute", header: "soundpipe.h".}
 type
   thresh* {.importc: "sp_thresh", header: "soundpipe.h", bycopy.} = object
@@ -1344,7 +1409,8 @@ proc thresh_destroy*(p: ptr ptr thresh): cint {.importc: "sp_thresh_destroy",
     header: "soundpipe.h".}
 proc thresh_init*(sp: ptr data; p: ptr thresh): cint {.importc: "sp_thresh_init",
     header: "soundpipe.h".}
-proc thresh_compute*(sp: ptr data; p: ptr thresh; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc thresh_compute*(sp: ptr data; p: ptr thresh; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_thresh_compute", header: "soundpipe.h".}
 type
   timer* {.importc: "sp_timer", header: "soundpipe.h", bycopy.} = object
@@ -1359,7 +1425,8 @@ proc timer_destroy*(p: ptr ptr timer): cint {.importc: "sp_timer_destroy",
                                         header: "soundpipe.h".}
 proc timer_init*(sp: ptr data; p: ptr timer): cint {.importc: "sp_timer_init",
     header: "soundpipe.h".}
-proc timer_compute*(sp: ptr data; p: ptr timer; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc timer_compute*(sp: ptr data; p: ptr timer; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_timer_compute", header: "soundpipe.h".}
 type
   tin* {.importc: "sp_tin", header: "soundpipe.h", bycopy.} = object
@@ -1367,12 +1434,14 @@ type
     val* {.importc: "val".}: SPFLOAT
 
 
-proc tin_create*(p: ptr ptr tin): cint {.importc: "sp_tin_create", header: "soundpipe.h".}
+proc tin_create*(p: ptr ptr tin): cint {.importc: "sp_tin_create",
+    header: "soundpipe.h".}
 proc tin_destroy*(p: ptr ptr tin): cint {.importc: "sp_tin_destroy",
                                     header: "soundpipe.h".}
 proc tin_init*(sp: ptr data; p: ptr tin): cint {.importc: "sp_tin_init",
     header: "soundpipe.h".}
-proc tin_compute*(sp: ptr data; p: ptr tin; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc tin_compute*(sp: ptr data; p: ptr tin; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_tin_compute", header: "soundpipe.h".}
 type
   trand* {.importc: "sp_trand", header: "soundpipe.h", bycopy.} = object
@@ -1387,7 +1456,8 @@ proc trand_destroy*(p: ptr ptr trand): cint {.importc: "sp_trand_destroy",
                                         header: "soundpipe.h".}
 proc trand_init*(sp: ptr data; p: ptr trand): cint {.importc: "sp_trand_init",
     header: "soundpipe.h".}
-proc trand_compute*(sp: ptr data; p: ptr trand; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc trand_compute*(sp: ptr data; p: ptr trand; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_trand_compute", header: "soundpipe.h".}
 type
   tseg* {.importc: "sp_tseg", header: "soundpipe.h", bycopy.} = object
@@ -1406,9 +1476,10 @@ proc tseg_create*(p: ptr ptr tseg): cint {.importc: "sp_tseg_create",
                                      header: "soundpipe.h".}
 proc tseg_destroy*(p: ptr ptr tseg): cint {.importc: "sp_tseg_destroy",
                                       header: "soundpipe.h".}
-proc tseg_init*(sp: ptr data; p: ptr tseg; ibeg: SPFLOAT): cint {.importc: "sp_tseg_init",
-    header: "soundpipe.h".}
-proc tseg_compute*(sp: ptr data; p: ptr tseg; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc tseg_init*(sp: ptr data; p: ptr tseg;
+    ibeg: SPFLOAT): cint {.importc: "sp_tseg_init", header: "soundpipe.h".}
+proc tseg_compute*(sp: ptr data; p: ptr tseg; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_tseg_compute", header: "soundpipe.h".}
 type
   tseq* {.importc: "sp_tseq", header: "soundpipe.h", bycopy.} = object
@@ -1422,9 +1493,10 @@ proc tseq_create*(p: ptr ptr tseq): cint {.importc: "sp_tseq_create",
                                      header: "soundpipe.h".}
 proc tseq_destroy*(p: ptr ptr tseq): cint {.importc: "sp_tseq_destroy",
                                       header: "soundpipe.h".}
-proc tseq_init*(sp: ptr data; p: ptr tseq; ft: ptr ftbl): cint {.importc: "sp_tseq_init",
-    header: "soundpipe.h".}
-proc tseq_compute*(sp: ptr data; p: ptr tseq; trig: ptr SPFLOAT; val: ptr SPFLOAT): cint {.
+proc tseq_init*(sp: ptr data; p: ptr tseq;
+    ft: ptr ftbl): cint {.importc: "sp_tseq_init", header: "soundpipe.h".}
+proc tseq_compute*(sp: ptr data; p: ptr tseq; trig: ptr SPFLOAT;
+    val: ptr SPFLOAT): cint {.
     importc: "sp_tseq_compute", header: "soundpipe.h".}
 
 # proc voc_create*(voc: ptr ptr voc): cint {.importc: "sp_voc_create",
@@ -1615,7 +1687,8 @@ proc fmpair_destroy*(p: ptr ptr fmpair): cint {.importc: "sp_fmpair_destroy",
     header: "soundpipe.h".}
 proc fmpair_init*(sp: ptr data; p: ptr fmpair; ft: ptr ftbl): cint {.
     importc: "sp_fmpair_init", header: "soundpipe.h".}
-proc fmpair_compute*(sp: ptr data; p: ptr fmpair; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc fmpair_compute*(sp: ptr data; p: ptr fmpair; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_fmpair_compute", header: "soundpipe.h".}
 type
   rline* {.importc: "sp_rline", header: "soundpipe.h", bycopy.} = object
@@ -1632,7 +1705,8 @@ proc rline_destroy*(p: ptr ptr rline): cint {.importc: "sp_rline_destroy",
                                         header: "soundpipe.h".}
 proc rline_init*(sp: ptr data; p: ptr rline): cint {.importc: "sp_rline_init",
     header: "soundpipe.h".}
-proc rline_compute*(sp: ptr data; p: ptr rline; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc rline_compute*(sp: ptr data; p: ptr rline; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_rline_compute", header: "soundpipe.h".}
 type
   vardelay* {.importc: "sp_vardelay", header: "soundpipe.h", bycopy.} = object
@@ -1668,7 +1742,8 @@ proc peakeq_destroy*(p: ptr ptr peakeq): cint {.importc: "sp_peakeq_destroy",
     header: "soundpipe.h".}
 proc peakeq_init*(sp: ptr data; p: ptr peakeq): cint {.importc: "sp_peakeq_init",
     header: "soundpipe.h".}
-proc peakeq_compute*(sp: ptr data; p: ptr peakeq; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc peakeq_compute*(sp: ptr data; p: ptr peakeq; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_peakeq_compute", header: "soundpipe.h".}
 type
   modalres* {.importc: "sp_modalres", header: "soundpipe.h", bycopy.} = object
@@ -1717,7 +1792,8 @@ proc tread_destroy*(p: ptr ptr tread): cint {.importc: "sp_tread_destroy",
                                         header: "soundpipe.h".}
 proc tread_init*(sp: ptr data; p: ptr tread; ft: ptr ftbl; mode: cint): cint {.
     importc: "sp_tread_init", header: "soundpipe.h".}
-proc tread_compute*(sp: ptr data; p: ptr tread; `in`: ptr SPFLOAT; `out`: ptr SPFLOAT): cint {.
+proc tread_compute*(sp: ptr data; p: ptr tread; `in`: ptr SPFLOAT;
+    `out`: ptr SPFLOAT): cint {.
     importc: "sp_tread_compute", header: "soundpipe.h".}
 type
   oscmorph* {.importc: "sp_oscmorph", header: "soundpipe.h", bycopy.} = object
@@ -1759,15 +1835,15 @@ type
   FFTwrapper* {.importc: "FFTwrapper", header: "soundpipe.h", bycopy.} = object
     fftsize* {.importc: "fftsize".}: cint
     when defined(USE_FFTW3):
-        tmpfftdata1* {.importc: "tmpfftdata1".}: ptr fftw_real
-        tmpfftdata2* {.importc: "tmpfftdata2".}: ptr fftw_real
-        planfftw* {.importc: "planfftw".}: rfftw_plan
-        planfftw_inv* {.importc: "planfftw_inv".}: rfftw_plan
+      tmpfftdata1* {.importc: "tmpfftdata1".}: ptr fftw_real
+      tmpfftdata2* {.importc: "tmpfftdata2".}: ptr fftw_real
+      planfftw* {.importc: "planfftw".}: rfftw_plan
+      planfftw_inv* {.importc: "planfftw_inv".}: rfftw_plan
     else:
-        fft* {.importc: "fft".}: kiss_fftr_cfg
-        ifft* {.importc: "ifft".}: kiss_fftr_cfg
-        tmp1* {.importc: "tmp1".}: ptr kiss_fft_cpx
-        tmp2* {.importc: "tmp2".}: ptr kiss_fft_cpx
+      fft* {.importc: "fft".}: kiss_fftr_cfg
+      ifft* {.importc: "ifft".}: kiss_fftr_cfg
+      tmp1* {.importc: "tmp1".}: ptr kiss_fft_cpx
+      tmp2* {.importc: "tmp2".}: ptr kiss_fft_cpx
 
 
 proc FFTwrapper_create*(fw: ptr ptr FFTwrapper; fftsize: cint) {.
@@ -1789,7 +1865,8 @@ type
     amps* {.importc: "amps".}: ptr ftbl
 
 
-proc gen_padsynth*(sp: ptr data; ps: ptr ftbl; amps: ptr ftbl; f: SPFLOAT; bw: SPFLOAT): cint {.
+proc gen_padsynth*(sp: ptr data; ps: ptr ftbl; amps: ptr ftbl; f: SPFLOAT;
+    bw: SPFLOAT): cint {.
     importc: "sp_gen_padsynth", header: "soundpipe.h".}
 proc padsynth_profile*(fi: SPFLOAT; bwi: SPFLOAT): SPFLOAT {.
     importc: "sp_padsynth_profile", header: "soundpipe.h".}
@@ -1802,8 +1879,11 @@ proc padsynth_normalize*(N: cint; smp: ptr SPFLOAT): cint {.
 
 proc spa_open*(sp: ptr data; spa: ptr audio; name: cstring; mode: cint): cint {.
     importc: "spa_open", header: "soundpipe.h".}
-proc spa_write_buf*(sp: ptr data; spa: ptr audio; buf: ptr SPFLOAT; size: uint32_t): csize_t {.
+proc spa_write_buf*(sp: ptr data; spa: ptr audio; buf: ptr SPFLOAT;
+    size: uint32_t): csize_t {.
     importc: "spa_write_buf", header: "soundpipe.h".}
-proc spa_read_buf*(sp: ptr data; spa: ptr audio; buf: ptr SPFLOAT; size: uint32_t): csize_t {.
+proc spa_read_buf*(sp: ptr data; spa: ptr audio; buf: ptr SPFLOAT;
+    size: uint32_t): csize_t {.
     importc: "spa_read_buf", header: "soundpipe.h".}
-proc spa_close*(spa: ptr audio): cint {.importc: "spa_close", header: "soundpipe.h".}
+proc spa_close*(spa: ptr audio): cint {.importc: "spa_close",
+    header: "soundpipe.h".}

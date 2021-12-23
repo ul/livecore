@@ -54,8 +54,8 @@ type
 ##  \ref lo_message_add_int32 "lo_message_add*()" functions.
 ##
 
-proc lo_send_message*(targ: lo_address; path: cstring; msg: lo_message): cint {.cdecl,
-    importc: "lo_send_message", dynlib: soname.}
+proc lo_send_message*(targ: lo_address; path: cstring;
+    msg: lo_message): cint {.cdecl, importc: "lo_send_message", dynlib: soname.}
 ## *
 ##  \brief Send a lo_message object to target targ from address of serv
 ##
@@ -94,7 +94,8 @@ proc lo_send_bundle*(targ: lo_address; b: lo_bundle): cint {.cdecl,
 ##  \param b    The bundle itself
 ##
 
-proc lo_send_bundle_from*(targ: lo_address; serv: lo_server; b: lo_bundle): cint {.
+proc lo_send_bundle_from*(targ: lo_address; serv: lo_server;
+    b: lo_bundle): cint {.
     cdecl, importc: "lo_send_bundle_from", dynlib: soname.}
 ## *
 ##  \brief Create a new lo_message object
@@ -144,7 +145,8 @@ proc lo_message_add*(m: lo_message; types: cstring): cint {.varargs, cdecl,
     importc: "lo_message_add", dynlib: soname.}
 ## * \internal \brief the real message_add function (don't call directly)
 
-proc lo_message_add_internal*(m: lo_message; file: cstring; line: cint; types: cstring): cint {.
+proc lo_message_add_internal*(m: lo_message; file: cstring; line: cint;
+    types: cstring): cint {.
     varargs, cdecl, importc: "lo_message_add_internal", dynlib: soname.}
 ## *
 ##  \brief Append a varargs list to a message.
@@ -165,8 +167,10 @@ proc lo_message_add_internal*(m: lo_message; file: cstring; line: cint; types: c
 ##  \return Less than 0 on failure, 0 on success.
 ##
 
-proc lo_message_add_varargs*(m: lo_message; types: cstring; ap: va_list): cint {.cdecl,
-    importc: "lo_message_add_varargs", dynlib: soname.}
+proc lo_message_add_varargs*(m: lo_message; types: cstring;
+    ap: va_list): cint {.cdecl,
+
+importc: "lo_message_add_varargs", dynlib: soname.}
 ## * \internal \brief the real message_add_varargs function (don't call directly)
 
 proc lo_message_add_varargs_internal*(m: lo_message; types: cstring; ap: va_list;
@@ -291,8 +295,8 @@ proc lo_message_add_false*(m: lo_message): cint {.cdecl,
 ##  \return Less than 0 on failure, 0 on success.
 ##
 
-proc lo_message_add_nil*(m: lo_message): cint {.cdecl, importc: "lo_message_add_nil",
-    dynlib: soname.}
+proc lo_message_add_nil*(m: lo_message): cint {.cdecl,
+    importc: "lo_message_add_nil", dynlib: soname.}
 ## *
 ##  \brief  Append a data item and typechar of the specified type to a message.
 ##  See lo_message_add_int32() for details.
@@ -367,7 +371,8 @@ proc lo_message_length*(m: lo_message; path: cstring): csize_t {.cdecl,
 ##  having the correct endianess and bit-packed structure.
 ##
 
-proc lo_message_serialise*(m: lo_message; path: cstring; to: pointer; size: ptr csize_t): pointer {.
+proc lo_message_serialise*(m: lo_message; path: cstring; to: pointer;
+    size: ptr csize_t): pointer {.
     cdecl, importc: "lo_message_serialise", dynlib: soname.}
 ## *
 ##  \brief  Deserialise a raw OSC message and return a new lo_message object.
@@ -383,7 +388,8 @@ proc lo_message_serialise*(m: lo_message; path: cstring; to: pointer; size: ptr 
 ##  Use lo_message_free() to free the resulting object.
 ##
 
-proc lo_message_deserialise*(data: pointer; size: csize_t; result: ptr cint): lo_message {.
+proc lo_message_deserialise*(data: pointer; size: csize_t;
+    result: ptr cint): lo_message {.
     cdecl, importc: "lo_message_deserialise", dynlib: soname.}
 ## *
 ##  \brief  Dispatch a raw block of memory containing an OSC message.
@@ -401,8 +407,10 @@ proc lo_message_deserialise*(data: pointer; size: csize_t; result: ptr cint): lo
 ##  Returns the number of bytes used if successful, or less than 0 otherwise.
 ##
 
-proc lo_server_dispatch_data*(s: lo_server; data: pointer; size: csize_t): cint {.cdecl,
-    importc: "lo_server_dispatch_data", dynlib: soname.}
+proc lo_server_dispatch_data*(s: lo_server; data: pointer;
+    size: csize_t): cint {.cdecl,
+
+importc: "lo_server_dispatch_data", dynlib: soname.}
 ## *
 ##  \brief  Return the hostname of a lo_address object
 ##
@@ -457,8 +465,8 @@ proc lo_address_set_ttl*(t: lo_address; ttl: cint) {.cdecl,
 ##  \return An integer specifying the scope of a multicast UDP message.
 ##
 
-proc lo_address_get_ttl*(t: lo_address): cint {.cdecl, importc: "lo_address_get_ttl",
-    dynlib: soname.}
+proc lo_address_get_ttl*(t: lo_address): cint {.cdecl,
+    importc: "lo_address_get_ttl", dynlib: soname.}
 ## *
 ##  \brief Set the network interface to use for a given target address.
 ##
@@ -477,8 +485,10 @@ proc lo_address_get_ttl*(t: lo_address): cint {.cdecl, importc: "lo_address_get_
 ##          otherwise.
 ##
 
-proc lo_address_set_iface*(t: lo_address; iface: cstring; ip: cstring): cint {.cdecl,
-    importc: "lo_address_set_iface", dynlib: soname.}
+proc lo_address_set_iface*(t: lo_address; iface: cstring;
+    ip: cstring): cint {.cdecl,
+
+importc: "lo_address_set_iface", dynlib: soname.}
 ## *
 ##  \brief  Get the name of the network interface assigned to an OSC address.
 ##
@@ -521,8 +531,8 @@ proc lo_address_set_stream_slip*(t: lo_address; enable: cint): cint {.cdecl,
 ##            the bundle as soon as it receives it.
 ##
 
-proc lo_bundle_new*(tt: lo_timetag): lo_bundle {.cdecl, importc: "lo_bundle_new",
-    dynlib: soname.}
+proc lo_bundle_new*(tt: lo_timetag): lo_bundle {.cdecl,
+    importc: "lo_bundle_new", dynlib: soname.}
 ## *
 ##  \brief  Add one to a bundle's reference count.
 ##
@@ -543,8 +553,10 @@ proc lo_bundle_incref*(b: lo_bundle) {.cdecl, importc: "lo_bundle_incref",
 ##  \return 0 if successful, less than 0 otherwise.
 ##
 
-proc lo_bundle_add_message*(b: lo_bundle; path: cstring; m: lo_message): cint {.cdecl,
-    importc: "lo_bundle_add_message", dynlib: soname.}
+proc lo_bundle_add_message*(b: lo_bundle; path: cstring;
+    m: lo_message): cint {.cdecl,
+
+importc: "lo_bundle_add_message", dynlib: soname.}
 ## *
 ##  \brief  Adds an OSC bundle to an existing bundle.
 ##
@@ -564,8 +576,8 @@ proc lo_bundle_add_bundle*(b: lo_bundle; n: lo_bundle): cint {.cdecl,
 ##  \param b The bundle to be sized
 ##
 
-proc lo_bundle_length*(b: lo_bundle): csize_t {.cdecl, importc: "lo_bundle_length",
-    dynlib: soname.}
+proc lo_bundle_length*(b: lo_bundle): csize_t {.cdecl,
+    importc: "lo_bundle_length", dynlib: soname.}
 ## *
 ##  \brief  Return the number of top-level elements in a bundle.
 ##
@@ -603,7 +615,8 @@ proc lo_bundle_get_bundle*(b: lo_bundle; index: cint): lo_bundle {.cdecl,
 ##  \return The requested lo_message if successful, otherwise 0.
 ##
 
-proc lo_bundle_get_message*(b: lo_bundle; index: cint; path: cstringArray): lo_message {.
+proc lo_bundle_get_message*(b: lo_bundle; index: cint;
+    path: cstringArray): lo_message {.
     cdecl, importc: "lo_bundle_get_message", dynlib: soname.}
 ## *
 ##  \brief  Get the timestamp associated with a bundle.
@@ -629,8 +642,10 @@ proc lo_bundle_get_timestamp*(b: lo_bundle): lo_timetag {.cdecl,
 ##  having the correct endianess and bit-packed structure.
 ##
 
-proc lo_bundle_serialise*(b: lo_bundle; to: pointer; size: ptr csize_t): pointer {.cdecl,
-    importc: "lo_bundle_serialise", dynlib: soname.}
+proc lo_bundle_serialise*(b: lo_bundle; to: pointer;
+    size: ptr csize_t): pointer {.cdecl,
+
+importc: "lo_bundle_serialise", dynlib: soname.}
 ## *
 ##  \brief  Frees the memory taken by a bundle object.
 ##
@@ -690,7 +705,8 @@ proc lo_is_string_type*(a: lo_type): cint {.cdecl, importc: "lo_is_string_type",
 ##  \param from      A pointer to the source variable.
 ##
 
-proc lo_coerce*(type_to: lo_type; to: ptr lo_arg; type_from: lo_type; `from`: ptr lo_arg): cint {.
+proc lo_coerce*(type_to: lo_type; to: ptr lo_arg; type_from: lo_type;
+    `from`: ptr lo_arg): cint {.
     cdecl, importc: "lo_coerce", dynlib: soname.}
 ## *
 ##  \brief Return the numerical value of the given argument with the
@@ -735,7 +751,8 @@ proc lo_server_new*(port: cstring; err_h: lo_err_handler): lo_server {.cdecl,
 ##  error handling.
 ##
 
-proc lo_server_new_with_proto*(port: cstring; proto: cint; err_h: lo_err_handler): lo_server {.
+proc lo_server_new_with_proto*(port: cstring; proto: cint;
+    err_h: lo_err_handler): lo_server {.
     cdecl, importc: "lo_server_new_with_proto", dynlib: soname.}
 ## *
 ##  \brief Create a new server instance, and join a UDP multicast group.
@@ -750,7 +767,8 @@ proc lo_server_new_with_proto*(port: cstring; proto: cint; err_h: lo_err_handler
 ##  error handling.
 ##
 
-proc lo_server_new_multicast*(group: cstring; port: cstring; err_h: lo_err_handler): lo_server {.
+proc lo_server_new_multicast*(group: cstring; port: cstring;
+    err_h: lo_err_handler): lo_server {.
     cdecl, importc: "lo_server_new_multicast", dynlib: soname.}
 ## *
 ##  \brief Create a new server instance, and join a UDP multicast
@@ -772,7 +790,8 @@ proc lo_server_new_multicast*(group: cstring; port: cstring; err_h: lo_err_handl
 ##
 
 proc lo_server_new_multicast_iface*(group: cstring; port: cstring; iface: cstring;
-                                   ip: cstring; err_h: lo_err_handler): lo_server {.
+                                   ip: cstring;
+                                       err_h: lo_err_handler): lo_server {.
     cdecl, importc: "lo_server_new_multicast_iface", dynlib: soname.}
 ## *
 ##  \brief Create a new server instance, taking port and the optional
@@ -785,8 +804,10 @@ proc lo_server_new_multicast_iface*(group: cstring; port: cstring; iface: cstrin
 ##  \return A new lo_server instance.
 ##
 
-proc lo_server_new_from_url*(url: cstring; err_h: lo_err_handler): lo_server {.cdecl,
-    importc: "lo_server_new_from_url", dynlib: soname.}
+proc lo_server_new_from_url*(url: cstring;
+    err_h: lo_err_handler): lo_server {.cdecl,
+
+importc: "lo_server_new_from_url", dynlib: soname.}
 ## *
 ##  \brief Enables or disables type coercion during message dispatch.
 ##  \param server The server to toggle this option for.
@@ -856,7 +877,8 @@ proc lo_server_recv*(s: lo_server): cint {.cdecl, importc: "lo_server_recv",
 ##
 
 proc lo_server_add_method*(s: lo_server; path: cstring; typespec: cstring;
-                          h: lo_method_handler; user_data: pointer): lo_method {.
+                          h: lo_method_handler;
+                              user_data: pointer): lo_method {.
     cdecl, importc: "lo_server_add_method", dynlib: soname.}
 ## *
 ##  \brief Delete an OSC method from the specified server.
@@ -867,8 +889,10 @@ proc lo_server_add_method*(s: lo_server; path: cstring; typespec: cstring;
 ##  \param typespec The typespec the method accepts.
 ##
 
-proc lo_server_del_method*(s: lo_server; path: cstring; typespec: cstring) {.cdecl,
-    importc: "lo_server_del_method", dynlib: soname.}
+proc lo_server_del_method*(s: lo_server; path: cstring;
+    typespec: cstring) {.cdecl,
+
+importc: "lo_server_del_method", dynlib: soname.}
 ## *
 ##  \brief Delete a specific OSC method from the specified server.
 ##
@@ -893,7 +917,8 @@ proc lo_server_del_lo_method*(s: lo_server; m: lo_method): cint {.cdecl,
 ##
 
 proc lo_server_add_bundle_handlers*(s: lo_server; sh: lo_bundle_start_handler;
-                                   eh: lo_bundle_end_handler; user_data: pointer): cint {.
+                                   eh: lo_bundle_end_handler;
+                                       user_data: pointer): cint {.
     cdecl, importc: "lo_server_add_bundle_handlers", dynlib: soname.}
 ## *
 ##  \brief Return the file descriptor of the server socket.
@@ -917,8 +942,8 @@ proc lo_server_get_socket_fd*(s: lo_server): cint {.cdecl,
 ##  address the server.
 ##
 
-proc lo_server_get_port*(s: lo_server): cint {.cdecl, importc: "lo_server_get_port",
-    dynlib: soname.}
+proc lo_server_get_port*(s: lo_server): cint {.cdecl,
+    importc: "lo_server_get_port", dynlib: soname.}
 ## *
 ##  \brief  Return the protocol that the server is using.
 ##
@@ -933,8 +958,8 @@ proc lo_server_get_protocol*(s: lo_server): cint {.cdecl,
 ##  The return value should be free()'d when it is no longer needed.
 ##
 
-proc lo_server_get_url*(s: lo_server): cstring {.cdecl, importc: "lo_server_get_url",
-    dynlib: soname.}
+proc lo_server_get_url*(s: lo_server): cstring {.cdecl,
+    importc: "lo_server_get_url", dynlib: soname.}
 ## *
 ##  \brief Toggle event queue.
 ##  If queueing is enabled, timetagged messages that are sent in
@@ -1031,16 +1056,16 @@ proc lo_url_get_hostname*(url: cstring): cstring {.cdecl,
 ##  The return value should be free()'d when it is no longer needed.
 ##
 
-proc lo_url_get_port*(url: cstring): cstring {.cdecl, importc: "lo_url_get_port",
-    dynlib: soname.}
+proc lo_url_get_port*(url: cstring): cstring {.cdecl,
+    importc: "lo_url_get_port", dynlib: soname.}
 ## *
 ##  \brief Return the path portion of an OSC URL.
 ##
 ##  The return value should be free()'d when it is no longer needed.
 ##
 
-proc lo_url_get_path*(url: cstring): cstring {.cdecl, importc: "lo_url_get_path",
-    dynlib: soname.}
+proc lo_url_get_path*(url: cstring): cstring {.cdecl,
+    importc: "lo_url_get_path", dynlib: soname.}
 ##  utility functions
 ## *
 ##  \brief A function to calculate the amount of OSC message space required by a
@@ -1049,7 +1074,8 @@ proc lo_url_get_path*(url: cstring): cstring {.cdecl, importc: "lo_url_get_path"
 ##  Returns the storage size in bytes, which will always be a multiple of four.
 ##
 
-proc lo_strsize*(s: cstring): cint {.cdecl, importc: "lo_strsize", dynlib: soname.}
+proc lo_strsize*(s: cstring): cint {.cdecl, importc: "lo_strsize",
+    dynlib: soname.}
 ## *
 ##  \brief A function to calculate the amount of OSC message space required by a
 ##  lo_blob object.
@@ -1076,12 +1102,14 @@ proc lo_send_internal*(t: lo_address; file: cstring; line: cint; path: cstring;
 ## * \internal \brief the real send_timestamped function (don't call directly)
 
 proc lo_send_timestamped_internal*(t: lo_address; file: cstring; line: cint;
-                                  ts: lo_timetag; path: cstring; types: cstring): cint {.
+                                  ts: lo_timetag; path: cstring;
+                                      types: cstring): cint {.
     varargs, cdecl, importc: "lo_send_timestamped_internal", dynlib: soname.}
 ## * \internal \brief the real lo_send_from() function (don't call directly)
 
 proc lo_send_from_internal*(targ: lo_address; `from`: lo_server; file: cstring;
-                           line: cint; ts: lo_timetag; path: cstring; types: cstring): cint {.
+                           line: cint; ts: lo_timetag; path: cstring;
+                               types: cstring): cint {.
     varargs, cdecl, importc: "lo_send_from_internal", dynlib: soname.}
 ## * \brief Find the time difference between two timetags
 ##
@@ -1147,7 +1175,8 @@ proc lo_arg_network_endian*(`type`: lo_type; data: pointer) {.cdecl,
 ##
 ## * \brief Pretty-print a lo_bundle object.
 
-proc lo_bundle_pp*(b: lo_bundle) {.cdecl, importc: "lo_bundle_pp", dynlib: soname.}
+proc lo_bundle_pp*(b: lo_bundle) {.cdecl, importc: "lo_bundle_pp",
+    dynlib: soname.}
 ## * \brief Pretty-print a lo_message object.
 
 proc lo_message_pp*(m: lo_message) {.cdecl, importc: "lo_message_pp",
@@ -1162,10 +1191,12 @@ proc lo_arg_pp*(`type`: lo_type; data: pointer) {.cdecl, importc: "lo_arg_pp",
     dynlib: soname.}
 ## * \brief Pretty-print a lo_server object.
 
-proc lo_server_pp*(s: lo_server) {.cdecl, importc: "lo_server_pp", dynlib: soname.}
+proc lo_server_pp*(s: lo_server) {.cdecl, importc: "lo_server_pp",
+    dynlib: soname.}
 ## * \brief Pretty-print a lo_method object.
 
-proc lo_method_pp*(m: lo_method) {.cdecl, importc: "lo_method_pp", dynlib: soname.}
+proc lo_method_pp*(m: lo_method) {.cdecl, importc: "lo_method_pp",
+    dynlib: soname.}
 ## * \brief Pretty-print a lo_method object, but prepend a given prefix
 ##  to all field names.
 
