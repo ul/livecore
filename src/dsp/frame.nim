@@ -2,10 +2,7 @@
 
 import atomics, math
 
-when defined(bela):
-  const SAMPLE_RATE_INT* = 44100
-else:
-  const SAMPLE_RATE_INT* = 48000
+const SAMPLE_RATE_INT* = 48000
 
 const
   CHANNELS* = 2
