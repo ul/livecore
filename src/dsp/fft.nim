@@ -9,15 +9,15 @@ proc phase*(x: Complex): float = arctan2(x.i, x.r)
 proc polarize*(magnitude, phase: float): Complex = Complex(r: magnitude*cos(phase), i: magnitude*sin(phase))
 
 proc hann*(N: static[Natural]): array[N, float] =
-  let k = PI / N.to_float
+  let k = PI / N.float
   for n in 0..<N:
-    let x = sin(k * n.to_float)
+    let x = sin(k * n.float)
     result[n] = x * x
 
 proc fft_bins*(N: static[Natural]): array[N, float] =
-  let k = TAU / N.to_float
+  let k = TAU / N.float
   for n in 0..<N:
-    result[n] = k * n.to_float
+    result[n] = k * n.float
 
 proc wrap_phase(x: float): float =
   let p = copy_sign(PI, x)
@@ -41,11 +41,11 @@ template defFFT*(window_size: static[Natural]) =
     fft_size = (window_size div 2) + 1
     # To keep amplitude the same during resynth we should compensate for window loss and overlap gain.
     hann_window_scale_factor = 2.0
-    overlap_scale_factor = 1.0 / overlap_factor.to_float
+    overlap_scale_factor = 1.0 / overlap_factor.float
     # TODO: figure out why do we need 1.5 to even amplitude with the source!
     output_scale_factor = 1.5 * hann_window_scale_factor * overlap_scale_factor
     output_buffer_size = 16 * window_size # Minimum is window_size + hop_size but let's have some leeway.
-    norm = sqrt(1.0 / window_size.to_float) # muFFT returns non-normalized from both forward and inverse transformations.
+    norm = sqrt(1.0 / window_size.float) # muFFT returns non-normalized from both forward and inverse transformations.
     window = hann(window_size)
     bin_frequencies = fft_bins(window_size)
 
@@ -152,9 +152,9 @@ template defFFT*(window_size: static[Natural]) =
           # Subtract the amount of phase increment we'd expect to see based
           # on the centre frequency of this bin (2*pi*n/window_size) for this
           # hop size, then wrap to the range -pi to pi.
-          phase_diff = wrap_phase(phase_diff - bin_frequencies[n] * hop_size.to_float)
+          phase_diff = wrap_phase(phase_diff - bin_frequencies[n] * hop_size.float)
           # Find deviation from the centre frequency.
-          let frequency_deviation = phase_diff / hop_size.to_float
+          let frequency_deviation = phase_diff / hop_size.float
           # Add the original bin number to get the fractional bin where this partial belongs.
           s.analysis_frequencies[n] = bin_frequencies[n] + frequency_deviation
           s.analysis_magnitudes[n] = amplitude
@@ -163,7 +163,7 @@ template defFFT*(window_size: static[Natural]) =
         body
 
         for n in 0..<fft_size:
-          let phase_diff = s.synthesis_frequencies[n] * hop_size.to_float
+          let phase_diff = s.synthesis_frequencies[n] * hop_size.float
           let out_phase = wrap_phase(s.last_output_phases[n] + phase_diff)
           f[n] = polarize(s.synthesis_magnitudes[n], out_phase)
           s.last_output_phases[n] = out_phase

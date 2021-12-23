@@ -249,7 +249,7 @@ if adc_id >= 0:
 
   state.input = sio.ring_buffer_create(cast[cint](4 * (
     max(input_stream.software_latency, output_stream.software_latency) * SAMPLE_RATE *
-    (CHANNELS * (sizeof float)).to_float
+    (CHANNELS * (sizeof float)).float
   ).to_int))
 
   input_stream.read_callback = read_callback

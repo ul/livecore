@@ -17,8 +17,8 @@ template arc_op(op) =
   proc op*(a: Arc, b: Arc): Arc = (op(a[0], b[0]), op(a[1], b[1]))
   proc op*(a: Arc, b: float): Arc = (op(a[0], b), op(a[1], b))
   proc op*(a: float, b: Arc): Arc = (op(a, b[0]), op(a, b[1]))
-  proc op*(a: Arc, b: int): Arc = (op(a[0], b.to_float), op(a[1], b.to_float))
-  proc op*(a: int, b: Arc): Arc = (op(a.to_float, b[0]), op(a.to_float, b[1]))
+  proc op*(a: Arc, b: int): Arc = (op(a[0], b.float), op(a[1], b.float))
+  proc op*(a: int, b: Arc): Arc = (op(a.float, b[0]), op(a.float, b[1]))
 
 arc_op(`+`)
 arc_op(`-`)
@@ -36,9 +36,9 @@ proc parallel*[T](patterns: openArray[Pattern[T]]): Pattern[T] =
     result.add(tiles)
 
 proc toPattern*[T](colors: openArray[T]): Pattern[T] =
-  let n = colors.len.to_float
+  let n = colors.len.float
   for i, color in colors:
-    result.add(((i.to_float / n, (i + 1).to_float / n), color))
+    result.add(((i.float / n, (i + 1).float / n), color))
 
 proc sample*[T](pattern: Pattern[T], time: float): seq[T] =
   for tile in pattern:
