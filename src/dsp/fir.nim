@@ -89,6 +89,7 @@ template defFIR*(name: untyped, block_size: static[Natural], ir_path: static[str
       var fd: FrequencyData
       for i in 0..<sub_filters:
         for j in 0..<fft_size:
+          # TODO Interleave kernel_blocks and input_fdl to make it cache-friendly?
           fd[j] += s.kernel_blocks[i][j] * s.input_fdl[i][j]
 
       var td: TimeData
