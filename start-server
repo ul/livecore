@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # This should minimize overhead of the write_callback's glue code.
-NIM_FLAGS="--gc:orc -d:danger --passC:-ffast-math"
+NIM_FLAGS="--gc:arc -d:danger --passC:-ffast-math"
 
 # Loop is an attempt to minimize disruption to the performance caused by
 # crashing the server. There will be a silent gap, and state is lost
