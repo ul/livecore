@@ -32,7 +32,7 @@ template defConv*(block_size, sub_filters: static[Natural]) =
       iplan: ptr mufft_plan_1d
       inputs: array[2, Input]
       windows: array[2, TimeData]
-      inputs_fdl: array[2, Blocks]
+      inputs_fdl: array[2*sub_filters, FrequencyData]
       output: Output
 
     `Conv block_size x sub_filters`* {.inject.} = Conv
@@ -61,20 +61,18 @@ template defConv*(block_size, sub_filters: static[Natural]) =
 
     if unlikely(s.output.cursor == 0):
       for n in 0..1:
-        for i in 0..<block_size:
-          s.windows[n][i] = s.windows[n][i + block_size]
-          s.windows[n][i + block_size] = s.inputs[n].buffer[i]
+        copy_mem(s.windows[n][0].addr, s.windows[n][block_size].addr, block_size * cfloat.sizeof)
+        copy_mem(s.windows[n][block_size].addr, s.inputs[n].buffer[0].addr, block_size * cfloat.sizeof)
 
-        for i in countdown(sub_filters-1, 1):
-          s.inputs_fdl[n][i] = s.inputs_fdl[n][i-1]
+      move_mem(s.inputs_fdl[2].addr, s.inputs_fdl[0].addr, 2 * (sub_filters-1) * FrequencyData.sizeof)
 
-        mufft_execute_plan_1d(s.plan, s.inputs_fdl[n][0].addr, s.windows[n].addr)
+      mufft_execute_plan_1d(s.plan, s.inputs_fdl[0].addr, s.windows[0].addr)
+      mufft_execute_plan_1d(s.plan, s.inputs_fdl[1].addr, s.windows[1].addr)
 
       var fd: FrequencyData
-      for i in 0..<sub_filters:
-        for j in 0..<fft_size:
-          # TODO Interleave inputs_fdl to make it cache-friendly?
-          fd[j] += s.inputs_fdl[0][i][j] * s.inputs_fdl[1][i][j]
+      for i in 0..<fft_size:
+        for j in 0..<sub_filters:
+          fd[i] += s.inputs_fdl[2*j][i] * s.inputs_fdl[2*j+1][i]
 
       var td: TimeData
       mufft_execute_plan_1d(s.iplan, td.addr, fd.addr)

@@ -79,20 +79,16 @@ template defFIR*(name: untyped, block_size: static[Natural], ir_path: static[str
     write_input_sample(s.input, x)
 
     if unlikely(s.output.cursor == 0):
-      for i in 0..<block_size:
-        s.window[i] = s.window[i + block_size]
-        s.window[i + block_size] = s.input.buffer[i]
-
-      for i in countdown(sub_filters-1, 1):
-        s.input_fdl[i] = s.input_fdl[i-1]
+      copy_mem(s.window[0].addr, s.window[block_size].addr, block_size * cfloat.sizeof)
+      copy_mem(s.window[block_size].addr, s.input.buffer[0].addr, block_size * cfloat.sizeof)
+      move_mem(s.input_fdl[1].addr, s.input_fdl[0].addr, (sub_filters-1) * FrequencyData.sizeof)
 
       mufft_execute_plan_1d(s.plan, s.input_fdl[0].addr, s.window.addr)
 
       var fd: FrequencyData
-      for i in 0..<sub_filters:
-        for j in 0..<fft_size:
-          # TODO Interleave kernel_blocks and input_fdl to make it cache-friendly?
-          fd[j] += s.kernel_blocks[i][j] * s.input_fdl[i][j]
+      for i in 0..<fft_size:
+        for j in 0..<sub_filters:
+          fd[i] += s.kernel_blocks[j][i] * s.input_fdl[j][i]
 
       var td: TimeData
       mufft_execute_plan_1d(s.iplan, td.addr, fd.addr)
