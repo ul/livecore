@@ -69,6 +69,14 @@ make_bi_quad(bqhpf, make_hpf_coefficients)
 make_bi_quad(bqbpf, make_bpf_coefficients)
 make_bi_quad(bqnotch, make_notch_coefficients)
 
+type Conv* = array[2, float]
+
+proc conv*(x, k0, k1, k2: float, s: var Conv): float =
+  result = k0 * s[0] + k1 * s[1] + k2 * x
+  s[0] = s[1]
+  s[1] = x
+lift4(conv, Conv)
+
 proc iir*[NX, NY: static[Natural]](x: float, a: array[NY, float], b: array[NX,
     float], s: var array[NX+NY-1, float]): float =
   for i in countdown(NX-1, 1):
