@@ -26,7 +26,6 @@ type
     choose: array[medium_pool, Choose]
     clock: array[medium_pool, Clock]
     compressor: array[medium_pool, Compressor]
-    conv: array[medium_pool, Conv]
     delay: array[medium_pool, Delay1]
     diode: array[medium_pool, Diode]
     hpf: array[medium_pool, HPF]
@@ -64,7 +63,6 @@ type
       choose,
       clock,
       compressor,
-      conv,
       delay,
       diode,
       hpf,
@@ -187,7 +185,6 @@ def3(fm_bltriangle)
 def3(fm_blsquare)
 def3(gaussian, sample)
 def4(autowah)
-def4(conv)
 def4(peaklim)
 def4(pshift)
 def4(wpkorg35)

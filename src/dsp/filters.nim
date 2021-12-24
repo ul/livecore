@@ -69,31 +69,6 @@ make_bi_quad(bqhpf, make_hpf_coefficients)
 make_bi_quad(bqbpf, make_bpf_coefficients)
 make_bi_quad(bqnotch, make_notch_coefficients)
 
-type Conv* = array[2, float]
-
-proc conv*(x, k0, k1, k2: float, s: var Conv): float =
-  result = k0 * s[0] + k1 * s[1] + k2 * x
-  s[0] = s[1]
-  s[1] = x
-lift4(conv, Conv)
-
-proc gaussian_kernel*[N: static[Natural]](): array[N, float] =
-  var s = 0.0
-  for i in 0..<N:
-    let k = exp(-0.5 * (i^2).float)
-    s += k
-    result[i] = k
-  for i in 0..<N:
-    result[i] /= s
-
-proc conv*[N: static[Natural]](x: float, kernel: array[N, float], s: var array[
-    N, float]): float =
-  for i in 1..<N:
-    s[i] = s[i-1]
-  s[0] = x
-  for i in 0..<N:
-    result += kernel[i] * s[i]
-
 proc iir*[NX, NY: static[Natural]](x: float, a: array[NY, float], b: array[NX,
     float], s: var array[NX+NY-1, float]): float =
   for i in countdown(NX-1, 1):
