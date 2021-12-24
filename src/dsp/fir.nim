@@ -64,13 +64,15 @@ template defFIR*(name: untyped, block_size: static[Natural], ir_path: static[str
     s.plan = mufft_create_plan_1d_r2c(window_size, 0)
     s.iplan = mufft_create_plan_1d_c2r(window_size, 0)
     if not s.ready:
+      let plan = mufft_create_plan_1d_r2c(window_size, MUFFT_FLAG_ZERO_PAD_UPPER_HALF)
       let ptr_kernel = cast[int](kernel.cstring)
       var td: TimeData
       for i in 0..<kernel_samples:
         let idx = i mod block_size
         td[idx] = cast[ptr cfloat](ptr_kernel + i * cfloat.sizeof)[]
         if idx == block_size - 1 or idx == kernel_samples - 1:
-          mufft_execute_plan_1d(s.plan, s.kernel_blocks[i div block_size].addr, td.addr)
+          mufft_execute_plan_1d(plan, s.kernel_blocks[i div block_size].addr, td.addr)
+      mufft_free_plan_1d(plan)
       s.ready = true
 
   proc process*(x: float, s: var Conv): float =

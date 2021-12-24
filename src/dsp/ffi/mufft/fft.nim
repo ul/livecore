@@ -2,6 +2,8 @@
 {.compile: "kernel.c".}
 {.compile: "fft.c".}
 
+const MUFFT_FLAG_ZERO_PAD_UPPER_HALF* = (1 shl 17)
+
 type
   mufft_cpx* {.final, pure.} = object
     r*: cfloat
