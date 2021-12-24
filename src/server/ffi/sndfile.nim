@@ -278,10 +278,10 @@ type
   sf_count_t* = int64_t
 const
   SF_COUNT_MAX* = 0x7FFFFFFFFFFFFFFF'i64
- ##  A pointer to a SF_INFO structure is passed to sf_open () and filled in.
- ## * On write, the SF_INFO structure is filled in by the user and passed into
- ## * sf_open ().
- ##
+  ##  A pointer to a SF_INFO structure is passed to sf_open () and filled in.
+  ## * On write, the SF_INFO structure is filled in by the user and passed into
+  ## * sf_open ().
+  ##
 
 type
   SF_INFO* {.importc: "SF_INFO", header: "sndfile.h", bycopy.} = object

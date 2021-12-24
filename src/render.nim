@@ -1,4 +1,4 @@
-import math, parseopt, session, strutils, times, dsp/frame, ffi/sndfile
+import math, parseopt, session, strutils, times, dsp/frame, server/ffi/sndfile
 
 let t0 = epoch_time()
 
@@ -28,7 +28,7 @@ info.samplerate = SAMPLE_RATE_INT
 info.channels = CHANNELS
 info.format = SF_FORMAT_WAV or SF_FORMAT_PCM_16
 
-let h = path.sf_open(SFM_WRITE, info)
+let h = path.cstring.sf_open(SFM_WRITE, info)
 if h.is_nil:
   quit "Failed to create " & path
 
@@ -41,6 +41,7 @@ let buffer = alloc(frames_chunk * CHANNELS * cdouble.sizeof)
 
 var cc: Controls
 var notes: Notes
+var input: Frame
 
 var frames_left = frames
 const bar_len = 40
@@ -49,7 +50,7 @@ stdout.flushFile
 while frames_left > 0:
   var frames_to_write = min(frames_left, frames_chunk)
   for frame in 0..<frames_to_write:
-    let data = state.process(cc, notes)
+    let data = state.process(cc, notes, input)
     for channel in 0..<CHANNELS:
       let i = (channel + frame * CHANNELS).int
       let offset = cast[int](buffer) + i * cdouble.sizeof
