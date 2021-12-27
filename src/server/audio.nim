@@ -3,6 +3,7 @@ import
   context,
   ../dsp/frame,
   ffi/soundio,
+  math,
   strformat
 
 proc write_callback(out_stream: ptr SoundIoOutStream, frame_count_min: cint,
@@ -176,6 +177,7 @@ proc start_audio*(ctx: ptr Context, param_dac_id, param_adc_id: int) =
   if err > 0:
     quit "Unable to start stream."
 
+  echo fmt"Output latency:{'\t'}{output_stream.software_latency.mul(1000.0).round.int} ms / {(SAMPLE_RATE*output_stream.software_latency).round.int} frames"
 
   # Open input device
   var input_device: ptr SoundIoDevice
@@ -229,5 +231,7 @@ proc start_audio*(ctx: ptr Context, param_dac_id, param_adc_id: int) =
     err = input_stream.start
     if err > 0:
       quit "Unable to start stream."
+
+    echo fmt"Input latency:{'\t'}{input_stream.software_latency.mul(1000.0).round.int} ms / {(SAMPLE_RATE*input_stream.software_latency).round.int} frames"
 
   sio.flush_events
