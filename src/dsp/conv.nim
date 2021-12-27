@@ -17,7 +17,6 @@ template defConv*(block_size, sub_filters: static[Natural]) =
   type
     TimeData = array[window_size, cfloat]
     FrequencyData = array[fft_size, mufft_cpx]
-    Blocks = array[sub_filters, FrequencyData]
 
     Input = object
       cursor: int
