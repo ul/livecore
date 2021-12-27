@@ -29,6 +29,7 @@ proc load*(s: var State) {.nimcall, exportc, dynlib.} =
   # s.pool.addr.zero_mem(Pool.size_of)
   # s.addr.zero_mem(State.size_of)
   sp_create()
+  nanotidal_create()
 
   [1.0, 2.5, 3.0, 3.5, 4.0].init(s.p1)
 
@@ -36,3 +37,4 @@ proc load*(s: var State) {.nimcall, exportc, dynlib.} =
 # Beware access to the state is not guarded and may happen simultaneously with `process`.
 proc unload*(s: var State) {.nimcall, exportc, dynlib.} =
   sp_destroy()
+  nanotidal_destroy()
