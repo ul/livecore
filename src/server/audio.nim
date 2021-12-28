@@ -165,6 +165,7 @@ proc start_audio*(ctx: ptr Context, param_dac_id, param_adc_id: int) =
   output_stream.write_callback = write_callback
   output_stream.userdata = ctx
   output_stream.format = SoundIoFormatFloat32NE
+  output_stream.sample_rate = SAMPLE_RATE_INT
 
   err = output_stream.open
   if err > 0:
@@ -220,6 +221,7 @@ proc start_audio*(ctx: ptr Context, param_dac_id, param_adc_id: int) =
     input_stream.read_callback = read_callback
     input_stream.userdata = ctx
     input_stream.format = SoundIoFormatFloat32NE
+    input_stream.sample_rate = SAMPLE_RATE_INT
 
     err = input_stream.open
     if err > 0:
