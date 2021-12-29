@@ -35,6 +35,11 @@ proc next*(p: var PSeq) =
   if unlikely(p.index >= p.list_len):
     p.index = 0
 
+proc prev*(p: var PSeq) =
+  p.index -= 1
+  if unlikely(p.index < 0):
+    p.index = p.list_len - 1
+
 type PRand* = object of PList
 
 proc next*(p: var PRand) =
