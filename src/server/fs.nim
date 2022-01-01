@@ -9,6 +9,18 @@ const SESSION_FILTER = "session\\.so\\.[0-9]+$"
 const ALL_FILTER = ".*"
 const SESSION_GLOB = TARGET_PATH & "/session.so.*"
 
+proc find_newest_session(): string =
+  ## Find the newest version of session library.
+  for path in walk_files(SESSION_GLOB):
+    if result == "" or path.file_newer(result):
+      result = path
+
+proc load_newest_session(ctx: ptr Context) =
+  let path = find_newest_session()
+  if path != "":
+    ctx.load_session(path)
+    echo "<= ", path.extract_filename
+
 proc watch_session*(ctx: ptr Context) =
   if fsw_init_library() != 0:
     quit "Failed to init FSWatch."
@@ -30,27 +42,9 @@ proc watch_session*(ctx: ptr Context) =
   if fsw.fsw_add_filter(fsw_filter2) != 0:
     quit "Failed to add watch filter."
 
-  var initial_path = ""
-  # Find the newest version of session library.
-  for path in walk_files(SESSION_GLOB):
-    if initial_path == "" or path.file_newer(initial_path):
-      if initial_path != "":
-        discard initial_path.try_remove_file
-      initial_path = path
+  ctx.load_newest_session
 
-  if initial_path != "":
-    ctx.load_session(initial_path)
-    echo "<= ", initial_path.extract_filename
-
-  proc monitor(event: fsw_cevent, num: cuint) =
-    for i in 0..<event.flags_num:
-      let flag = cast[ptr fsw_event_flag](cast[int](event.flags) + cast[int](
-          i) * fsw_event_flag.sizeof)[]
-      if flag == fsw_event_flag.Removed:
-        return
-    let path = relative_path($event.path, ".")
-    ctx.load_session(path)
-    echo "<= ", path.extract_filename
+  proc monitor(event: fsw_cevent, num: cuint) = ctx.load_newest_session
 
   if fsw.fsw_set_callback(monitor) != 0:
     quit "Failed add target to watch paths"

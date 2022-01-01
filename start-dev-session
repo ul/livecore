@@ -9,12 +9,13 @@ NIM_FLAGS="--gc:arc -d:danger --passC:-ffast-math --cincludes:dsp/ffi/mufft"
 # to workaround it on macOS is to build the library with a different name each
 # time. Just "double-buffer" copying as clive does didn't work, I assume because
 # not only the filename/inode is checked but LC_ID_DYLIB baked into the file
-# too. We also have to "triple-buffer" the naming and remove unloaded libs to
+# too. We also have to randomize the naming and remove unloaded libs to
 # make it work.
-SO_VERSION=0
 
-nim c $NIM_FLAGS --app:lib -o:target/session.so.$((SO_VERSION++ % 3)) src/session.nim
+rm target/session.so.*
+nim c $NIM_FLAGS --app:lib -o:target/session.so.$RANDOM src/session.nim
 
 fswatch -o src | while read num; do
-	nim c $NIM_FLAGS --app:lib -o:target/session.so.$((SO_VERSION++ % 3)) src/session.nim
+	rm target/session.so.*
+	nim c $NIM_FLAGS --app:lib -o:target/session.so.$RANDOM src/session.nim
 done
