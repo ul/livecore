@@ -4,7 +4,7 @@
 # are only for testing other code changes and don't need to be preserved.
 
 # In the session code we want as much performance as possible.
-NIM_FLAGS="--gc:arc -d:danger --passC:-ffast-math --cincludes:dsp/ffi/mufft"
+NIM_FLAGS="--mm:arc -d:danger --passC:-ffast-math --cincludes:dsp/ffi/mufft --passC:-flto --passL:-flto"
 # dlopen tries really hard to reuse shared objects. The simplest way I've found
 # to workaround it on macOS is to build the library with a different name each
 # time. Just "double-buffer" copying as clive does didn't work, I assume because
