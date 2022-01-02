@@ -81,7 +81,8 @@ template defFIR*(name: untyped, block_size: static[Natural], ir_path: static[str
     if unlikely(s.output.cursor == 0):
       copy_mem(s.window[0].addr, s.window[block_size].addr, block_size * cfloat.sizeof)
       copy_mem(s.window[block_size].addr, s.input.buffer[0].addr, block_size * cfloat.sizeof)
-      move_mem(s.input_fdl[1].addr, s.input_fdl[0].addr, (sub_filters-1) * FrequencyData.sizeof)
+      move_mem(s.input_fdl[1].addr, s.input_fdl[0].addr, (sub_filters-1) *
+          FrequencyData.sizeof)
 
       mufft_execute_plan_1d(s.plan, s.input_fdl[0].addr, s.window.addr)
 

@@ -60,10 +60,13 @@ template defConv*(block_size, sub_filters: static[Natural]) =
 
     if unlikely(s.output.cursor == 0):
       for n in 0..1:
-        copy_mem(s.windows[n][0].addr, s.windows[n][block_size].addr, block_size * cfloat.sizeof)
-        copy_mem(s.windows[n][block_size].addr, s.inputs[n].buffer[0].addr, block_size * cfloat.sizeof)
+        copy_mem(s.windows[n][0].addr, s.windows[n][block_size].addr,
+            block_size * cfloat.sizeof)
+        copy_mem(s.windows[n][block_size].addr, s.inputs[n].buffer[0].addr,
+            block_size * cfloat.sizeof)
 
-      move_mem(s.inputs_fdl[2].addr, s.inputs_fdl[0].addr, 2 * (sub_filters-1) * FrequencyData.sizeof)
+      move_mem(s.inputs_fdl[2].addr, s.inputs_fdl[0].addr, 2 * (sub_filters-1) *
+          FrequencyData.sizeof)
 
       mufft_execute_plan_1d(s.plan, s.inputs_fdl[0].addr, s.windows[0].addr)
       mufft_execute_plan_1d(s.plan, s.inputs_fdl[1].addr, s.windows[1].addr)
