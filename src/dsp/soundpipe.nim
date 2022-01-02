@@ -17,12 +17,12 @@ proc sp_destroy*() =
 template sp_t(name, T) =
   type T* = object
     p: soundpipe.name
-    ready: bool
+    is_ready: bool
 
 template sp_init(name, s) =
-  if unlikely(not s.ready):
+  if unlikely(not s.is_ready):
     discard `name init`(sp, s.p.addr)
-    s.ready = true
+    s.is_ready = true
 
 template sp_compute(name, s, x) =
   var i, o: cfloat
