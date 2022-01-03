@@ -17,7 +17,7 @@ proc find_newest_session(): string =
       result = path
 
 proc fms(x: float): string =
-  $(round(x * 1e6)/1e3) & "ms"
+  $round(x, 3) & "ms"
 
 proc load_newest_session(ctx: ptr Context) =
   let path = find_newest_session()
