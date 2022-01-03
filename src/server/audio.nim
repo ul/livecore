@@ -68,7 +68,7 @@ proc write_callback(out_stream: ptr SoundIoOutStream, frame_count_min: cint,
   ctx.stats.sum += t
   ctx.stats.min = min(ctx.stats.min, t)
   ctx.stats.max = max(ctx.stats.max, t)
-  ctx.stats.n += 1
+  ctx.stats.n.inc
   ctx.in_process.store(false)
 
 proc read_callback(in_stream: ptr SoundIoInStream, frame_count_min: cint,

@@ -31,12 +31,12 @@ proc value*(p: PList): float =
 type PSeq* = object of PList
 
 proc next*(p: var PSeq) =
-  p.index += 1
+  p.index.inc
   if unlikely(p.index >= p.list_len):
     p.index = 0
 
 proc prev*(p: var PSeq) =
-  p.index -= 1
+  p.index.dec
   if unlikely(p.index < 0):
     p.index = p.list_len - 1
 
@@ -84,5 +84,5 @@ proc next*(p: var PWRand) =
   let x = rand(1.0)
   var index = 0
   while (index < p.weights_len) and (p.weights[index] < x):
-    index += 1
+    index.inc
   p.index = index

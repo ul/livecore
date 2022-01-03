@@ -48,7 +48,7 @@ template defSampler*(max_duration: static[Natural]) =
       s.cursor = 0
     if s.cursor < s.length:
       s.table[s.cursor] = x
-      s.cursor += 1
+      s.cursor.inc
 
   lift2(write_table_trigger, Sampler)
   proc wtt*(x, trigger: float, s: var Sampler): float {.inline.} = write_table_trigger(

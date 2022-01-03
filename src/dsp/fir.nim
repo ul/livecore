@@ -47,13 +47,13 @@ template defFIR*(name: untyped, block_size: static[Natural], ir_path: static[str
 
   proc write_input_sample(s: var Input, x: float) {.inline.} =
     s.buffer[s.cursor] = x
-    s.cursor += 1
+    s.cursor.inc
     if unlikely(s.cursor >= window_size):
       s.cursor = 0
 
   proc read_output_sample(s: var Output): float {.inline.} =
     result = s.buffer[s.cursor]
-    s.cursor += 1
+    s.cursor.inc
     if unlikely(s.cursor >= block_size):
       s.cursor = 0
 

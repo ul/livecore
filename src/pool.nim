@@ -99,7 +99,7 @@ proc init*(s: var Pool) =
 template def0(op, t) =
   proc op*(): float =
     result = op(pool.data.t[pool.index.t])
-    pool.index.t += 1
+    pool.index.t.inc
   lift0(op)
 
 template def0(op) = def0(op, op)
@@ -107,7 +107,7 @@ template def0(op) = def0(op, op)
 template def1(op, t) =
   proc op*(a: float): float =
     result = op(a, pool.data.t[pool.index.t])
-    pool.index.t += 1
+    pool.index.t.inc
   lift1(op)
 
 template def1(op) = def1(op, op)
@@ -115,7 +115,7 @@ template def1(op) = def1(op, op)
 template def2(op, t) =
   proc op*(a, b: float): float =
     result = op(a, b, pool.data.t[pool.index.t])
-    pool.index.t += 1
+    pool.index.t.inc
   lift2(op)
 
 template def2(op) = def2(op, op)
@@ -123,7 +123,7 @@ template def2(op) = def2(op, op)
 template def3(op, t) =
   proc op*(a, b, c: float): float =
     result = op(a, b, c, pool.data.t[pool.index.t])
-    pool.index.t += 1
+    pool.index.t.inc
   lift3(op)
 
 template def3(op) = def3(op, op)
@@ -131,13 +131,13 @@ template def3(op) = def3(op, op)
 template def4(op) =
   proc op*(a, b, c, d: float): float =
     result = op(a, b, c, d, pool.data.op[pool.index.op])
-    pool.index.op += 1
+    pool.index.op.inc
   lift4(op)
 
 template def5(op) =
   proc op*(a, b, c, d, e: float): float =
     result = op(a, b, c, d, e, pool.data.op[pool.index.op])
-    pool.index.op += 1
+    pool.index.op.inc
   lift5(op)
 
 def0(brown, brown_noise)
@@ -196,31 +196,31 @@ def5(compressor)
 
 proc bigverb*(x: Frame, feedback, lpfreq: float): Frame =
   result = bigverb(x, feedback, lpfreq, pool.data.bigverb[pool.index.bigverb])
-  pool.index.bigverb += 1
+  pool.index.bigverb.inc
 
 proc delay*(x, dt: float): float =
   result = delay(x, dt, pool.data.delay[pool.index.delay])
-  pool.index.delay += 1
+  pool.index.delay.inc
 lift2(delay)
 
 proc fb*(x, dt, k: float): float =
   result = fb(x, dt, k, pool.data.delay[pool.index.delay])
-  pool.index.delay += 1
+  pool.index.delay.inc
 lift3(fb)
 
 proc long_delay*(x, dt: float): float =
   result = delay(x, dt, pool.data.long_delay[pool.index.long_delay])
-  pool.index.long_delay += 1
+  pool.index.long_delay.inc
 lift2(long_delay)
 
 proc long_fb*(x, dt, k: float): float =
   result = fb(x, dt, k, pool.data.long_delay[pool.index.long_delay])
-  pool.index.long_delay += 1
+  pool.index.long_delay.inc
 lift3(long_fb)
 
 proc sequence*(seq: openArray[float], t: float): float =
   result = sequence(seq, t, pool.data.sequence[pool.index.sequence])
-  pool.index.sequence += 1
+  pool.index.sequence.inc
 
 proc sequence*(seq: openArray[Frame], t: Frame): Frame =
   for i in 0..<CHANNELS:
@@ -228,11 +228,11 @@ proc sequence*(seq: openArray[Frame], t: Frame): Frame =
 
 proc choose*[T](xs: openArray[T], t: float): T =
   result = choose(xs, t, pool.data.choose[pool.index.choose])
-  pool.index.choose += 1
+  pool.index.choose.inc
 
 proc choose*[T](xs: openArray[T], t: float, ps: openArray[float]): T =
   result = choose(xs, t, ps, pool.data.choose[pool.index.choose])
-  pool.index.choose += 1
+  pool.index.choose.inc
 
 proc phaser*(
   x: Frame,
@@ -259,7 +259,7 @@ proc phaser*(
     level,
     lfobpm,
     pool.data.phaser[pool.index.phaser])
-  pool.index.phaser += 1
+  pool.index.phaser.inc
 
 proc zitarev*(
   x: Frame,
@@ -288,4 +288,4 @@ proc zitarev*(
     mix,
     level,
     pool.data.zitarev[pool.index.zitarev])
-  pool.index.zitarev += 1
+  pool.index.zitarev.inc

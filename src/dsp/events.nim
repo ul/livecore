@@ -47,7 +47,7 @@ lift2(sample_and_hold_end, SH)
 
 proc sequence*(seq: openArray[float], t: float, s: var int): float =
   if unlikely(t > 0.0):
-    s += 1
+    s.inc
   if unlikely(s > seq.high):
     s = 0
   result = seq[s]
@@ -55,7 +55,7 @@ proc sequence*(seq: openArray[float], t: float, s: var int): float =
 proc sequence*(seq: openArray[Frame], t: Frame, s: var array[CHANNELS, int]): Frame =
   for ch in 0..<CHANNELS:
     if unlikely(t[ch] > 0.0):
-      s[ch] += 1
+      s[ch].inc
     if unlikely(s[ch] > seq.high):
       s[ch] = 0
     result[ch] = seq[s[ch]][ch]

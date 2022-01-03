@@ -22,7 +22,7 @@ template transition(name; curve: proc(a, dx: float): float) =
     else:
       result = x
     s.current_value = result
-    s.frame += 1
+    s.frame.inc
   lift2(name, Transition)
 
 proc linear_curve(a, dx: float): float =

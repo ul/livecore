@@ -32,7 +32,7 @@ template defDelay(max_duration: static[Natural]) =
       i = s.cursor - dtsi.int
     if f < 0.0 or i < 0:
       f += 1.0
-      i -= 1
+      i.dec
       while i < 0:
         i += N
     else:
@@ -54,7 +54,7 @@ template defDelay(max_duration: static[Natural]) =
       c = tmp_0 - tmp_1
       b = tmp_1 - f
     result = (a*x_0 + b*x_1 + c*x_2 + d*x_3) * f + x_1
-    s.cursor += 1
+    s.cursor.inc
     if unlikely(s.cursor >= N):
       s.cursor = 0
 

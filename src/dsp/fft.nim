@@ -81,7 +81,7 @@ template defFFT*(window_size: static[Natural]) =
 
   proc write_input_sample(s: var Input, x: float) {.inline.} =
     s.buffer[s.cursor] = x
-    s.cursor += 1
+    s.cursor.inc
     if unlikely(s.cursor >= window_size):
       s.cursor = 0
 
@@ -89,7 +89,7 @@ template defFFT*(window_size: static[Natural]) =
     var j = s.cursor
     for i in 0..<window_size:
       result[i] = window[i] * s.buffer[j]
-      j += 1
+      j.inc
       if unlikely(j >= window_size):
         j = 0
 
@@ -97,7 +97,7 @@ template defFFT*(window_size: static[Natural]) =
     var cursor = s.write_cursor
     for i in 0..<window_size:
       s.buffer[cursor] += window[i] * a[i]
-      cursor += 1
+      cursor.inc
       if unlikely(cursor >= output_buffer_size):
         cursor = 0
     s.write_cursor = (s.write_cursor + hop_size) mod output_buffer_size
@@ -105,7 +105,7 @@ template defFFT*(window_size: static[Natural]) =
   proc read_output_sample(s: var Output): float {.inline.} =
     result = s.buffer[s.read_cursor] * output_scale_factor
     s.buffer[s.read_cursor] = 0.0
-    s.read_cursor += 1
+    s.read_cursor.inc
     if unlikely(s.read_cursor >= output_buffer_size):
       s.read_cursor = 0
 
@@ -138,7 +138,7 @@ template defFFT*(window_size: static[Natural]) =
     block:
       write_input_sample(s.input, x)
 
-      s.hop_cursor += 1
+      s.hop_cursor.inc
       if unlikely(s.hop_cursor >= hop_size):
         s.hop_cursor = 0
         var w = read_input_window(s.input)

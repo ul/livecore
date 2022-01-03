@@ -14,7 +14,7 @@ for kind, key, val in getopt():
     of 0: duration = key.parse_int
     of 1: path = key
     else: discard
-    arg += 1
+    arg.inc
   of cmdLongOption, cmdShortOption: discard
   of cmdEnd: assert(false) # cannot happen
 

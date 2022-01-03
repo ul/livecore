@@ -11,14 +11,14 @@ proc metro*(freq: float, s: var Metro): float =
   if unlikely(s.frame >= s.nextTrigger):
     s.nextTrigger = s.frame + (SAMPLE_RATE / freq).int
     result = 1.0
-  s.frame += 1
+  s.frame.inc
 lift1(metro, Metro)
 
 proc dmetro*(dt: float, s: var Metro): float =
   if unlikely(s.frame >= s.nextTrigger):
     s.nextTrigger = s.frame + (SAMPLE_RATE * dt).int
     result = 1.0
-  s.frame += 1
+  s.frame.inc
 lift1(dmetro, Metro)
 
 proc phsclk*(x, n: float, s: var float): float =
