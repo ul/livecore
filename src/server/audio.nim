@@ -5,11 +5,13 @@ import
   ffi/soundio,
   math,
   strformat,
-  ../benchy
+  std/monotimes
+
+proc now(): float64 = get_mono_time().ticks.float64 / 1e6 # milliseconds
 
 proc write_callback(out_stream: ptr SoundIoOutStream, frame_count_min: cint,
     frame_count_max: cint) {.cdecl.} =
-  let start = nowMs()
+  let start = now()
   let ctx = cast[ptr Context](out_stream.userdata)
   ctx.in_process.store(true)
 
@@ -62,7 +64,7 @@ proc write_callback(out_stream: ptr SoundIoOutStream, frame_count_min: cint,
     if frames_left <= 0:
       break
 
-  let t = nowMs() - start
+  let t = now() - start
   ctx.stats.sum += t
   ctx.stats.min = min(ctx.stats.min, t)
   ctx.stats.max = max(ctx.stats.max, t)
