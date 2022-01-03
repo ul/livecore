@@ -4,10 +4,12 @@ import
   ../dsp/frame,
   ffi/soundio,
   math,
-  strformat
+  strformat,
+  times
 
 proc write_callback(out_stream: ptr SoundIoOutStream, frame_count_min: cint,
     frame_count_max: cint) {.cdecl.} =
+  let start = cpuTime()
   let ctx = cast[ptr Context](out_stream.userdata)
   ctx.in_process.store(true)
 
@@ -60,6 +62,11 @@ proc write_callback(out_stream: ptr SoundIoOutStream, frame_count_min: cint,
     if frames_left <= 0:
       break
 
+  let t = cpuTime() - start
+  ctx.stats.sum += t
+  ctx.stats.min = min(ctx.stats.min, t)
+  ctx.stats.max = max(ctx.stats.max, t)
+  ctx.stats.n += 1
   ctx.in_process.store(false)
 
 proc read_callback(in_stream: ptr SoundIoInStream, frame_count_min: cint,

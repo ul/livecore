@@ -2,6 +2,7 @@ import
   context,
   dll,
   ffi/fswatch,
+  math,
   os
 
 const TARGET_PATH = "./target"
@@ -15,9 +16,14 @@ proc find_newest_session(): string =
     if result == "" or path.file_newer(result):
       result = path
 
+proc fms(x: float): string =
+  $(round(x * 1e6)/1e3) & "ms"
+
 proc load_newest_session(ctx: ptr Context) =
   let path = find_newest_session()
   if path != "":
+    if ctx.stats.n > 0:
+      echo ">", fms(ctx.stats.min), " ", fms(ctx.stats.sum / ctx.stats.n.float) , " ", fms(ctx.stats.max), "<"
     ctx.load_session(path)
     echo "<= ", path.extract_filename
 

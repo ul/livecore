@@ -9,6 +9,11 @@ type
       input: Frame): Frame {.nimcall.}
   Load* = proc(arena: pointer) {.nimcall.}
   Unload* = proc(arena: pointer) {.nimcall.}
+  Stats* = object
+    min*: float
+    max*: float
+    sum*: float
+    n*: int
   Context* = object
     process*: Atomic[Process]
     arena*: pointer
@@ -19,6 +24,7 @@ type
     in_process*: Atomic[bool]
     lib_path*: string
     lib*: LibHandle
+    stats*: Stats
 
 proc default_process*(arena: pointer, cc: var Controls, n: var Notes,
     input: Frame): Frame = 0.0

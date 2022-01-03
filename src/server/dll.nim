@@ -25,6 +25,11 @@ proc load_session*(ctx: ptr Context, new_path: string) =
   # `process` call.
   while ctx.in_process.load: discard
 
+  ctx.stats.sum = 0.0
+  ctx.stats.min = Inf
+  ctx.stats.max = 0.0
+  ctx.stats.n = 0
+
   if not ctx.lib.is_nil:
     let onunload = cast[Unload](ctx.lib.sym_addr("unload"))
     if not onunload.is_nil:
