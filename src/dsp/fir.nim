@@ -42,6 +42,8 @@ template defFIR*(name: untyped, block_size: static[Natural], ir_path: static[str
       window: TimeData
       kernel_blocks: Blocks
       input_fdl: Blocks
+      aot_cursor: int
+      fd: FrequencyData
 
     name* = Conv
 
@@ -78,6 +80,15 @@ template defFIR*(name: untyped, block_size: static[Natural], ir_path: static[str
   proc process*(x: float, s: var Conv): float =
     write_input_sample(s.input, x)
 
+    # Compute partial sum for the next convolution ahead of time.
+    # This helps to smooth out computational load over frames.
+    # kernel_blocks[1] must be convolved with input_fdl[0] and so on
+    # as input will be shifted once buffer is filled in.
+    if s.aot_cursor < sub_filters - 2:
+      for i in 0..<fft_size:
+        s.fd[i] += s.kernel_blocks[s.aot_cursor + 1][i] * s.input_fdl[s.aot_cursor][i]
+      s.aot_cursor.inc
+
     if unlikely(s.output.cursor == 0):
       copy_mem(s.window[0].addr, s.window[block_size].addr, block_size * cfloat.sizeof)
       copy_mem(s.window[block_size].addr, s.input.buffer[0].addr, block_size * cfloat.sizeof)
@@ -86,16 +97,17 @@ template defFIR*(name: untyped, block_size: static[Natural], ir_path: static[str
 
       mufft_execute_plan_1d(s.plan, s.input_fdl[0].addr, s.window.addr)
 
-      var fd: FrequencyData
       for i in 0..<fft_size:
-        for j in 0..<sub_filters:
-          fd[i] += s.kernel_blocks[j][i] * s.input_fdl[j][i]
+        s.fd[i] += s.kernel_blocks[0][i] * s.input_fdl[0][i]
 
       var td: TimeData
-      mufft_execute_plan_1d(s.iplan, td.addr, fd.addr)
+      mufft_execute_plan_1d(s.iplan, td.addr, s.fd.addr)
 
       for i in 0..<block_size:
         s.output.buffer[i] = norm * td[i + block_size]
+
+      s.aot_cursor = 0
+      zero_mem(s.fd.addr, FrequencyData.sizeof)
 
     read_output_sample(s.output)
 
