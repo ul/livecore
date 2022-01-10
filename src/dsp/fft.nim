@@ -26,7 +26,7 @@ proc wrap_phase(x: float): float =
 
 template defFFT*(window_size: static[Natural]) =
   ## `window_size` must be a power of two.
-  ## Generated type will be `FFT_{window_size}` with `init` and `process` "methods" available.
+  ## Generated type will be `FFT_{window_size}` with `init`, `resynth` and `process` "methods" available.
   ## Hop size is 1/16 of window size.
   ## Applies Hann window to the input before passing to forward FFT.
   ##
@@ -53,6 +53,7 @@ template defFFT*(window_size: static[Natural]) =
   type
     TimeData = array[window_size, cfloat]
     FrequencyData = array[fft_size, Complex]
+    ReSynthData = array[fft_size, float]
 
     Input = object
       cursor: int
@@ -63,19 +64,14 @@ template defFFT*(window_size: static[Natural]) =
       buffer: array[output_buffer_size, float]
 
     FFT = object
-      bins*: int
       ready: bool
       plan: ptr mufft_plan_1d
       iplan: ptr mufft_plan_1d
       hop_cursor: int
       input: Input
       output: Output
-      last_input_phases: array[fft_size, float]
-      last_output_phases: array[fft_size, float]
-      analysis_magnitudes: array[fft_size, float]
-      analysis_frequencies: array[fft_size, float]
-      synthesis_magnitudes: array[fft_size, float]
-      synthesis_frequencies: array[fft_size, float]
+      last_input_phases: ReSynthData
+      last_output_phases: ReSynthData
 
     `FFT window_size`* {.inject.} = FFT
 
@@ -115,13 +111,10 @@ template defFFT*(window_size: static[Natural]) =
     s.plan = mufft_create_plan_1d_r2c(window_size, 0)
     s.iplan = mufft_create_plan_1d_c2r(window_size, 0)
     if not s.ready:
-      s.bins = fft_size
       s.output.write_cursor = hop_size
       for n in 0..<fft_size:
         s.last_input_phases[n] = 0.0
         s.last_output_phases[n] = 0.0
-        s.synthesis_magnitudes[n] = 0.0
-        s.synthesis_frequencies[n] = bin_frequencies[n]
       s.ready = true
 
   proc fft(s: var FFT, timedata: var TimeData): FrequencyData =
@@ -134,7 +127,7 @@ template defFFT*(window_size: static[Natural]) =
     for i in 0..<window_size:
       result[i] *= norm
 
-  template process*(x: float, s: var FFT; body: untyped): float =
+  template resynth*(x: float, s: var FFT; body: untyped): float =
     block:
       write_input_sample(s.input, x)
 
@@ -143,6 +136,10 @@ template defFFT*(window_size: static[Natural]) =
         s.hop_cursor = 0
         var w = read_input_window(s.input)
         var f = fft(s, w)
+        var analysis_frequencies {.inject.},
+          analysis_magnitudes {.inject.},
+          synthesis_frequencies {.inject.},
+          synthesis_magnitudes {.inject.}: ReSynthData
         for n in 0..<fft_size:
           let amplitude = f[n].magnitude
           let phase = f[n].phase
@@ -157,19 +154,37 @@ template defFFT*(window_size: static[Natural]) =
           # Find deviation from the centre frequency.
           let frequency_deviation = phase_diff / hop_size.float
           # Add the original bin number to get the fractional bin where this partial belongs.
-          s.analysis_frequencies[n] = bin_frequencies[n] + frequency_deviation
-          s.analysis_magnitudes[n] = amplitude
+          analysis_frequencies[n] = bin_frequencies[n] + frequency_deviation
+          analysis_magnitudes[n] = amplitude
           s.last_input_phases[n] = phase
+
+        copy_mem(synthesis_frequencies.addr, analysis_frequencies.addr, ReSynthData.sizeof)
+        copy_mem(synthesis_magnitudes.addr, analysis_magnitudes.addr, ReSynthData.sizeof)
 
         body
 
         for n in 0..<fft_size:
-          let phase_diff = s.synthesis_frequencies[n] * hop_size.float
+          let phase_diff = synthesis_frequencies[n] * hop_size.float
           let out_phase = wrap_phase(s.last_output_phases[n] + phase_diff)
-          f[n] = polarize(s.synthesis_magnitudes[n], out_phase)
+          f[n] = polarize(synthesis_magnitudes[n], out_phase)
           s.last_output_phases[n] = out_phase
 
         var t = ifft(s, f)
+        write_output_window(s.output, t)
+
+      read_output_sample(s.output)
+
+  template process*(x: float, s: var FFT; body: untyped): float =
+    block:
+      write_input_sample(s.input, x)
+
+      s.hop_cursor.inc
+      if unlikely(s.hop_cursor >= hop_size):
+        s.hop_cursor = 0
+        var w = read_input_window(s.input)
+        var frequency_data {.inject.} = fft(s, w)
+        body
+        var t = ifft(s, frequency_data)
         write_output_window(s.output, t)
 
       read_output_sample(s.output)
