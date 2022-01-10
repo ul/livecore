@@ -3,6 +3,8 @@
 {.compile: "fft.c".}
 
 const MUFFT_FLAG_ZERO_PAD_UPPER_HALF* = (1 shl 17)
+const MUFFT_FORWARD* = -1
+const MUFFT_INVERSE* = 1
 
 type
   mufft_cpx* {.final, pure.} = object
@@ -12,6 +14,8 @@ type
   mufft_plan_1d* {.final, pure, incompleteStruct.} = object
   mufft_plan_conv* {.final, pure, incompleteStruct.} = object
 
+proc mufft_create_plan_1d_c2c*(N, direction: cint, flags: cuint): ptr mufft_plan_1d {.importc,
+    header: "fft.h".}
 proc mufft_create_plan_1d_r2c*(N, flags: cuint): ptr mufft_plan_1d {.importc,
     header: "fft.h".}
 proc mufft_create_plan_1d_c2r*(N, flags: cuint): ptr mufft_plan_1d {.importc,
@@ -32,6 +36,14 @@ proc mufft_free_plan_conv*(plan: ptr mufft_plan_1d) {.importc, header: "fft.h".}
 proc `*=`*(a: var mufft_cpx; b: cfloat) {.inline.} =
   a.r *= b
   a.i *= b
+
+proc `*`*(a: mufft_cpx; b: cfloat): mufft_cpx {.inline.} =
+  result.r = a.r * b
+  result.i = a.i * b
+
+proc `*`*(a: cfloat; b: mufft_cpx): mufft_cpx {.inline.} =
+  result.r = a * b.r
+  result.i = a * b.i
 
 proc `*`*(a, b: mufft_cpx): mufft_cpx {.inline.} =
   result.r = a.r * b.r - a.i * b.i
