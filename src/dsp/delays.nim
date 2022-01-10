@@ -7,7 +7,7 @@ proc prime*(x: float, s: var float): float =
   s = x
 lift1(prime, float)
 
-template defDelay(max_duration: static[Natural]) =
+template defDelay*(max_duration: static[Natural]) =
   ## Nim's array generics are PITA as they don't play nice with type inference
   ## and templates. `defDelay` avoids these problems for the cost of producing
   ## family of types instead of a single generic type.
