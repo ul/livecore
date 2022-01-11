@@ -32,8 +32,8 @@ template defBadFFT*(window_size: static[Natural], hop_size: static[Natural]) =
       s.cursor = 0
 
   proc init*(s: var FFT) =
-    mufft_free_plan_1d(s.plan)
-    mufft_free_plan_1d(s.iplan)
+    #mufft_free_plan_1d(s.plan)
+    #mufft_free_plan_1d(s.iplan)
     s.plan = mufft_create_plan_1d_c2c(window_size, MUFFT_FORWARD, 0)
     s.iplan = mufft_create_plan_1d_c2c(window_size, MUFFT_INVERSE, 0)
 

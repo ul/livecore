@@ -60,9 +60,9 @@ template defFIR*(name: untyped, block_size: static[Natural], ir_path: static[str
       s.cursor = 0
 
   proc init*(s: var Conv) =
-    if s.ready:
-      mufft_free_plan_1d(s.plan)
-      mufft_free_plan_1d(s.iplan)
+    #if s.ready:
+    #  mufft_free_plan_1d(s.plan)
+    #  mufft_free_plan_1d(s.iplan)
     s.plan = mufft_create_plan_1d_r2c(window_size, 0)
     s.iplan = mufft_create_plan_1d_c2r(window_size, 0)
     if not s.ready:

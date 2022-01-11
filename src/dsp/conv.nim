@@ -51,8 +51,8 @@ template defConv*(block_size, sub_filters: static[Natural]) =
       s.cursor = 0
 
   proc init*(s: var Conv) =
-    mufft_free_plan_1d(s.plan)
-    mufft_free_plan_1d(s.iplan)
+    #mufft_free_plan_1d(s.plan)
+    #mufft_free_plan_1d(s.iplan)
     s.plan = mufft_create_plan_1d_r2c(window_size, 0)
     s.iplan = mufft_create_plan_1d_c2r(window_size, 0)
 
