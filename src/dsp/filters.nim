@@ -89,3 +89,15 @@ proc iir*[NX, NY: static[Natural]](x: float, a: array[NY, float], b: array[NX,
   for i in countdown(NX+NY-1, NX+1):
     s[i] = s[i-1]
   s[NX] = result
+
+type
+  DC_Block* = object
+    xm: float
+    ym: float
+
+proc dc_block*(x: float, s: var DC_Block): float =
+  # https://ccrma.stanford.edu/~jos/filters/DC_Blocker_Software_Implementations.html
+  result = x - s.xm + 0.995 * s.ym;
+  s.ym = result
+  s.xm = x
+lift1(dc_block, DC_Block)
