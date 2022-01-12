@@ -27,6 +27,7 @@ type
     clock: array[medium_pool, Clock]
     compressor: array[medium_pool, Compressor]
     conv: array[medium_pool, Conv]
+    dc_block: array[small_pool, DC_Block]
     delay: array[medium_pool, Delay1]
     diode: array[medium_pool, Diode]
     hpf: array[medium_pool, HPF]
@@ -65,6 +66,7 @@ type
       clock,
       compressor,
       conv,
+      dc_block,
       delay,
       diode,
       hpf,
@@ -144,6 +146,7 @@ def0(brown, brown_noise)
 def0(pink_noise)
 def1(blsaw)
 def1(bltriangle)
+def1(dc_block)
 def1(dmetro, metro)
 def1(jcrev)
 def1(osc, sample)
