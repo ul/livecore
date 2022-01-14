@@ -147,6 +147,11 @@ lift2(pow)
 lift1(sqrt)
 lift1(exp)
 
+proc sinc*(x: float): float =
+  if unlikely(x == 0.0): 1.0 else: sin(x)/x
+
+lift1(sinc)
+
 proc project*(x, a, b, c, d: float): float = (d - c) * (x - a) / (b - a) + c
 proc scale*(x, a, b: float): float = x.project(0.0, 1.0, a, b)
 proc biscale*(x, a, b: float): float = x.project(-1.0, 1.0, a, b)
