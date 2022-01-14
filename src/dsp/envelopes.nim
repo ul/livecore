@@ -60,7 +60,7 @@ proc adsr*(t, a, d, s, r: float; p: var ADSR): float =
       result = p.time / a
       p.time += SAMPLE_PERIOD
     else:
-      p.time = 0.0
+      p.time -= a
       p.state = ADSRState.Decay
       result = 1.0
   of ADSRState.Decay:
@@ -68,7 +68,7 @@ proc adsr*(t, a, d, s, r: float; p: var ADSR): float =
       result = 1.0 - (1.0 - s) * p.time / d
       p.time += SAMPLE_PERIOD
     else:
-      p.time = 0.0
+      p.time -= d
       p.state = ADSRState.Sustain
       result = s
   of ADSRState.Sustain:
