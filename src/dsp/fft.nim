@@ -158,8 +158,10 @@ template defFFT*(window_size: static[Natural]) =
           analysis_magnitudes[n] = amplitude
           s.last_input_phases[n] = phase
 
-        copy_mem(synthesis_frequencies.addr, analysis_frequencies.addr, ReSynthData.sizeof)
-        copy_mem(synthesis_magnitudes.addr, analysis_magnitudes.addr, ReSynthData.sizeof)
+        copy_mem(synthesis_frequencies.addr, analysis_frequencies.addr,
+            ReSynthData.sizeof)
+        copy_mem(synthesis_magnitudes.addr, analysis_magnitudes.addr,
+            ReSynthData.sizeof)
 
         body
 

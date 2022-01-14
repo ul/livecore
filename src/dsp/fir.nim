@@ -86,7 +86,8 @@ template defFIR*(name: untyped, block_size: static[Natural], ir_path: static[str
     # as input will be shifted once buffer is filled in.
     if s.aot_cursor < sub_filters - 2:
       for i in 0..<fft_size:
-        s.fd[i] += s.kernel_blocks[s.aot_cursor + 1][i] * s.input_fdl[s.aot_cursor][i]
+        s.fd[i] += s.kernel_blocks[s.aot_cursor + 1][i] * s.input_fdl[
+            s.aot_cursor][i]
       s.aot_cursor.inc
 
     if unlikely(s.output.cursor == 0):

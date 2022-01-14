@@ -14,8 +14,8 @@ type
   mufft_plan_1d* {.final, pure, incompleteStruct.} = object
   mufft_plan_conv* {.final, pure, incompleteStruct.} = object
 
-proc mufft_create_plan_1d_c2c*(N, direction: cint, flags: cuint): ptr mufft_plan_1d {.importc,
-    header: "fft.h".}
+proc mufft_create_plan_1d_c2c*(N, direction: cint,
+    flags: cuint): ptr mufft_plan_1d {.importc, header: "fft.h".}
 proc mufft_create_plan_1d_r2c*(N, flags: cuint): ptr mufft_plan_1d {.importc,
     header: "fft.h".}
 proc mufft_create_plan_1d_c2r*(N, flags: cuint): ptr mufft_plan_1d {.importc,

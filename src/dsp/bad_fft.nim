@@ -52,7 +52,8 @@ template defBadFFT*(window_size: static[Natural], hop_size: static[Natural]) =
         s.hop_cursor = 0
         var w: TimeData
         for i in 0..<window_size:
-          w[i] = window[i] * s.input.buffer[(s.input.cursor + i) mod window_size]
+          w[i] = window[i] * s.input.buffer[(s.input.cursor +
+              i) mod window_size]
         var frequency_data {.inject.} = fft(s, w)
         body
         s.output = ifft(s, frequency_data)
