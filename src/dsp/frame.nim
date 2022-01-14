@@ -189,3 +189,5 @@ lift1(`@`)
 
 proc `%%`*(x, y: float): float = quantize(x, y)
 lift2(`%%`)
+
+const silence* = 0.0
