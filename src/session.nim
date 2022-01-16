@@ -9,17 +9,105 @@ import
 type
   State* = object
     pool: Pool
-    p1: PSeq
+    convos: array[0x10, Conv8192x64]
+
+proc sum(xs: openArray[float]): float =
+  for x in xs:
+    result += x
 
 proc process*(s: var State, cc: var Controls, n: var Notes,
     input: Frame): Frame {.nimcall, exportc, dynlib.} =
   s.pool.init
 
-  let freq = 2.dmetro.step(s.p1).mul(55.0)
-  let sig = 0.1 * freq.osc
-  let env = 1.metro.impulse(0.1)
+  template voice(root, fmm, fmi, overtones, durs, cycle): float =
+    block:
+      template inst(freq: float): float =
+        freq.fm_osc(fmm, fmi)
+          .add(freq.mul(2.0).fm_bltriangle(fmm, fmi).mul(0.05))
+          .add(freq.mul(3/2).fm_osc(fmm, fmi).mul(0.1))
+          .add(freq.mul(4/3).fm_osc(fmm, fmi).mul(0.1))
+          .add(freq.mul(1/2).fm_blsaw(fmm, fmi).mul(0.02))
 
-  sig.mul(env).simple_saturator
+      var sig = 0.0
+      for i, a in overtones:
+        sig += a * inst((i+1).float * root)
+      sig /= overtones.sum
+
+      let durc = durs.choose(cycle.dmetro)
+      let dm = durc.mul(4.0).dmetro.maytrig(0.8)
+      let dur = durc.sh(dm)
+      # let env = dm.adsr(0.1*dur, 0.1*dur, 0.9, 0.8*dur)
+      let env = dm.gaussian(0.5*dur, (1/4).saw.mul(1/32).osc.biscale(0.05, 0.2))
+      sig.mul(env)
+
+  # let root = (1/512).osc.add((1/300).osc).mul(0.5).biscale(12.0, 48.0).quantize(8.0)
+  let root = rline(30.0).scale(24.0, 48.0).quantize(4.0)
+
+  let voices = [
+    voice(
+      @(root + 24.0),
+      3/2,
+      1/3,
+      [1.0,
+       (1/1).osc.biscale(0.1, 0.5),
+       (1/2).osc.biscale(0.1, 0.5),
+       (1/3).osc.biscale(0.1, 0.5),
+       (1/4).osc.biscale(0.1, 0.5),
+       (1/5).osc.biscale(0.1, 0.5),
+       ],
+      [1/4, 1, 1/4, 1, 1/4, 1],
+      2
+    ).mul(0.1),
+    voice(
+      @(root + 12.0),
+      4/3,
+      1/3,
+      [1.0,
+       (1/6).osc.biscale(0.1, 0.5),
+       (1/7).osc.biscale(0.1, 0.5),
+       (1/8).osc.biscale(0.1, 0.5),
+       (1/9).osc.biscale(0.1, 0.5),
+       (1/10).osc.biscale(0.1, 0.5),
+       ],
+      [1/2, 1, 2, 2, 1, 1/2],
+      4
+    ).mul(0.2),
+    voice(
+      @root,
+      5/4,
+      1/3,
+      [1.0,
+       (1/11).osc.biscale(0.1, 0.5),
+       (1/12).osc.biscale(0.1, 0.5),
+       (1/13).osc.biscale(0.1, 0.5),
+       (1/14).osc.biscale(0.1, 0.5),
+       (1/15).osc.biscale(0.1, 0.5),
+       ],
+      [4/1, 2, 1, 1, 2, 4],
+      8
+    ).mul(0.3)
+  ]
+
+  let k1 = @root.tline(1.0).osc
+    .mul(whitenoise().scale(60.0, 120.0).round.dmetro.impulse(2.0))
+    .mul(0.0001)
+
+  let k2 = @(root + 12.0).tline(1.0).osc
+    .mul(whitenoise().scale(30.0, 45.0).round.dmetro.impulse(0.5))
+    .mul(0.0001)
+
+  var z = silence
+    .add(voices[0])
+    .add(voices[1])
+    .add(voices[2])
+  z += z.process(k1, s.convos[2]).mul(0.25)
+  z += z.process(k2, s.convos[1]).mul(0.25)
+  z += z.process(pinknoise().decim(0.99).mul(0.01), s.convos[0]).mul(0.5)
+  z
+    .dc_block
+    .bqhpf(30.0, 0.7071)
+    .bigverb(0.9, @(root+48.0))
+    .wpkorg35(@(root+36.0), 0.95, 0.0)
 
 # A place for heavy init logic, like reading tables from the disk.
 # Beware access to the state is not guarded and may happen simultaneously with `process`.
@@ -31,7 +119,8 @@ proc load*(s: var State) {.nimcall, exportc, dynlib.} =
   sp_create()
   nanotidal_create()
 
-  [1.0, 2.5, 3.0, 3.5, 4.0].init(s.p1)
+  for x in s.convos.mitems:
+    x.init
 
 # Clean up any garbage allocated outside of the State arena.
 # Beware access to the state is not guarded and may happen simultaneously with `process`.
