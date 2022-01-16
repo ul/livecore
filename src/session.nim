@@ -34,10 +34,10 @@ proc process*(s: var State, cc: var Controls, n: var Notes,
       sig /= overtones.sum
 
       let durc = durs.choose(cycle.dmetro)
-      let dm = durc.mul(4.0).dmetro.maytrig(0.8)
+      let dm = durc.mul(4.0).dmetro.maytrig(0.5)
       let dur = durc.sh(dm)
       # let env = dm.adsr(0.1*dur, 0.1*dur, 0.9, 0.8*dur)
-      let env = dm.gaussian(0.5*dur, (1/4).saw.mul(1/32).osc.biscale(0.05, 0.2))
+      let env = dm.gaussian(0.5*dur, (1/40).saw.mul(1/32).osc.biscale(0.05, 0.2))
       sig.mul(env)
 
   # let root = (1/512).osc.add((1/300).osc).mul(0.5).biscale(12.0, 48.0).quantize(8.0)
@@ -88,26 +88,27 @@ proc process*(s: var State, cc: var Controls, n: var Notes,
     ).mul(0.3)
   ]
 
-  let k1 = @root.tline(1.0).osc
-    .mul(whitenoise().scale(60.0, 120.0).round.dmetro.impulse(2.0))
-    .mul(0.0001)
+  let k1 = @root.tline(1.0).saw
+    .mul(whitenoise().scale(1.0, 3.0).dmetro.impulse(0.02))
+    .mul(0.001)
 
-  let k2 = @(root + 12.0).tline(1.0).osc
-    .mul(whitenoise().scale(30.0, 45.0).round.dmetro.impulse(0.5))
-    .mul(0.0001)
+  # let k2 = @(root + 12.0).tline(1.0).tri
+  #   .mul(whitenoise().scale(0.30, 0.45).dmetro.impulse(0.05))
+  #   .mul(0.001)
 
-  var z = silence
+  silence
     .add(voices[0])
     .add(voices[1])
     .add(voices[2])
-  z += z.process(k1, s.convos[2]).mul(0.25)
-  z += z.process(k2, s.convos[1]).mul(0.25)
-  z += z.process(pinknoise().decim(0.99).mul(0.01), s.convos[0]).mul(0.5)
-  z
+    .mul(0.25)
+    .process(pinknoise().decim(0.95).mul(0.05), s.convos[0])
+    .process(k1, s.convos[2])
+    # .process(k2, s.convos[1])
     .dc_block
+    .bigverb(0.8, @(root+48.0))
+    .wpkorg35(@(root+36.0), 0.95, 0.5)
     .bqhpf(30.0, 0.7071)
-    .bigverb(0.9, @(root+48.0))
-    .wpkorg35(@(root+36.0), 0.95, 0.0)
+    .saturator
 
 # A place for heavy init logic, like reading tables from the disk.
 # Beware access to the state is not guarded and may happen simultaneously with `process`.
