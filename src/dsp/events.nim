@@ -88,3 +88,26 @@ proc maytrig*(t, p: float): float =
       return t
   return 0.0
 lift2(maytrig)
+
+type Event* = object
+  trigger*: float
+  trigger_frame: float
+  current_frame: float
+
+type EventPool* = array[1024, Event]
+
+proc tick*(e: var Event, step: float = 1) =
+  if unlikely(e.trigger > 0.0):
+    e.trigger = 0.0
+  if unlikely(e.current_frame >= e.trigger_frame):
+    e.trigger = 1.0
+  e.current_frame += step
+
+proc tick*(pool: var EventPool, step: float = 1) =
+  for e in pool.mitems:
+    e.tick(step)
+
+proc triggered*(e: Event): bool = e.trigger > 0.0
+
+proc schedule*(e: var Event, samples: float) =
+  e.trigger_frame = e.current_frame + samples

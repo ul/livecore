@@ -9,17 +9,26 @@ import
 type
   State* = object
     pool: Pool
-    p1: PSeq
+    p1: PRand
+    events: EventPool
+    durations: PRand
 
 proc process*(s: var State, cc: var Controls, n: var Notes,
     input: Frame): Frame {.nimcall, exportc, dynlib.} =
   s.pool.init
+  let event_speed = (1/80).osc.biscale(0.5, 5.5)
+  s.events.tick(event_speed)
 
-  let freq = 2.dmetro.step(s.p1).mul(55.0)
-  let sig = 0.1 * freq.osc
-  let env = 1.metro.impulse(0.1)
+  if s.events[0].triggered:
+    let delay = s.durations.value.seconds
+    s.durations.next
+    s.events[0].schedule(delay)
 
-  sig.mul(env).simple_saturator
+  let freq = s.events[0].trigger.step(s.p1).mul(110.0)
+  let sig = 0.2 * freq.osc
+  let env = s.events[0].trigger.impulse(0.08 / event_speed)
+
+  sig.mul(env).zitarev(mix = 0.3, level = -3.0).simple_saturator
 
 # A place for heavy init logic, like reading tables from the disk.
 # Beware access to the state is not guarded and may happen simultaneously with `process`.
@@ -32,6 +41,7 @@ proc load*(s: var State) {.nimcall, exportc, dynlib.} =
   nanotidal_create()
 
   [1.0, 2.5, 3.0, 3.5, 4.0].init(s.p1)
+  [1/2, 1/2, 5/8, 3/4, 3/4, 1].init(s.durations)
 
 # Clean up any garbage allocated outside of the State arena.
 # Beware access to the state is not guarded and may happen simultaneously with `process`.

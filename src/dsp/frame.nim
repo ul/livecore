@@ -13,6 +13,9 @@ const
 proc seconds*(t: Natural): Natural =
   t * SAMPLE_RATE_INT
 
+proc seconds*(t: float): float =
+  t * SAMPLE_RATE
+
 type
   Frame* = array[CHANNELS, float]
   Controls* = array[0x100, Atomic[float]]
