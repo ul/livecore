@@ -91,17 +91,17 @@ lift2(maytrig)
 
 type Event* = object
   trigger*: float
-  trigger_frame: float
-  current_frame: float
+  trigger_time: float
+  current_time: float
 
 type EventPool* = array[1024, Event]
 
 proc tick*(e: var Event, step: float = 1) =
   if unlikely(e.trigger > 0.0):
     e.trigger = 0.0
-  if unlikely(e.current_frame >= e.trigger_frame):
+  if unlikely(e.current_time >= e.trigger_time):
     e.trigger = 1.0
-  e.current_frame += step
+  e.current_time += step * SAMPLE_PERIOD
 
 proc tick*(pool: var EventPool, step: float = 1) =
   for e in pool.mitems:
@@ -109,5 +109,13 @@ proc tick*(pool: var EventPool, step: float = 1) =
 
 proc triggered*(e: Event): bool = e.trigger > 0.0
 
-proc schedule*(e: var Event, samples: float) =
-  e.trigger_frame = e.current_frame + samples
+proc schedule*(e: var Event, seconds: float) =
+  e.trigger_time = e.current_time + seconds
+
+proc schedule*(e: var Event, after: Event, seconds: float) =
+  e.trigger_time = after.trigger_time + seconds
+
+template repeat*(e: var Event, body: float) =
+  if e.triggered:
+    let x = body
+    e.schedule(x)

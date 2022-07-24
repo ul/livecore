@@ -19,10 +19,7 @@ proc process*(s: var State, cc: var Controls, n: var Notes,
   let event_speed = (1/80).osc.biscale(0.5, 5.5)
   s.events.tick(event_speed)
 
-  if s.events[0].triggered:
-    let delay = s.durations.value.seconds
-    s.durations.next
-    s.events[0].schedule(delay)
+  s.events[0].repeat: s.durations.step
 
   let freq = s.events[0].trigger.step(s.p1).mul(110.0)
   let sig = 0.2 * freq.osc

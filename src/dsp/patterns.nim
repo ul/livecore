@@ -5,9 +5,13 @@ from random import rand
 type Pattern* {.inheritable.} = object
 
 proc step*[T: Pattern](t: float; p: var T): float =
+  result = p.value
   if unlikely(t > 0.0):
     p.next
-  p.value
+
+proc step*[T: Pattern](p: var T): float =
+  result = p.value
+  p.next
 
 const max_list_length = 256
 
