@@ -43,5 +43,6 @@ proc load*(s: var State) {.nimcall, exportc, dynlib.} =
 # Clean up any garbage allocated outside of the State arena.
 # Beware access to the state is not guarded and may happen simultaneously with `process`.
 proc unload*(s: var State) {.nimcall, exportc, dynlib.} =
-  sp_destroy()
-  nanotidal_destroy()
+  discard
+  # sp_destroy()
+  # nanotidal_destroy()
