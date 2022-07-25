@@ -64,7 +64,7 @@ template defFFT*(window_size: static[Natural]) =
       buffer: array[output_buffer_size, float]
 
     FFT = object
-      ready: bool
+      is_ready: bool
       plan: ptr mufft_plan_1d
       iplan: ptr mufft_plan_1d
       hop_cursor: int
@@ -110,12 +110,12 @@ template defFFT*(window_size: static[Natural]) =
     #mufft_free_plan_1d(s.iplan)
     s.plan = mufft_create_plan_1d_r2c(window_size, 0)
     s.iplan = mufft_create_plan_1d_c2r(window_size, 0)
-    if not s.ready:
+    if not s.is_ready:
       s.output.write_cursor = hop_size
       for n in 0..<fft_size:
         s.last_input_phases[n] = 0.0
         s.last_output_phases[n] = 0.0
-      s.ready = true
+      s.is_ready = true
 
   proc fft(s: var FFT, timedata: var TimeData): FrequencyData =
     mufft_execute_plan_1d(s.plan, result.addr, timedata.addr)

@@ -34,7 +34,7 @@ template defFIR*(name: untyped, block_size: static[Natural], ir_path: static[str
       buffer: array[block_size, float]
 
     Conv = object
-      ready: bool
+      is_ready: bool
       plan: ptr mufft_plan_1d
       iplan: ptr mufft_plan_1d
       input: Input
@@ -60,12 +60,12 @@ template defFIR*(name: untyped, block_size: static[Natural], ir_path: static[str
       s.cursor = 0
 
   proc init*(s: var Conv) =
-    #if s.ready:
+    #if s.is_ready:
     #  mufft_free_plan_1d(s.plan)
     #  mufft_free_plan_1d(s.iplan)
     s.plan = mufft_create_plan_1d_r2c(window_size, 0)
     s.iplan = mufft_create_plan_1d_c2r(window_size, 0)
-    if not s.ready:
+    if not s.is_ready:
       let plan = mufft_create_plan_1d_r2c(window_size, MUFFT_FLAG_ZERO_PAD_UPPER_HALF)
       let ptr_kernel = cast[int](kernel.cstring)
       var td: TimeData
@@ -75,7 +75,7 @@ template defFIR*(name: untyped, block_size: static[Natural], ir_path: static[str
         if idx == block_size - 1 or idx == kernel_samples - 1:
           mufft_execute_plan_1d(plan, s.kernel_blocks[i div block_size].addr, td.addr)
       mufft_free_plan_1d(plan)
-      s.ready = true
+      s.is_ready = true
 
   proc process*(x: float, s: var Conv): float =
     write_input_sample(s.input, x)
