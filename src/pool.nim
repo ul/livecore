@@ -3,7 +3,7 @@
 
 import
   dsp/[
-    frame, delays, envelopes, events, filters, metro, modules, noise, osc, soundpipe
+    frame, delays, envelopes, events, filters, metro, modules, noise, osc, soundpipe, stereo
   ]
 
 const
@@ -40,6 +40,7 @@ type
     maygate: array[medium_pool, MayGate]
     metro: array[medium_pool, Metro]
     peaklim: array[medium_pool, PeakLimiter]
+    peakeq: array[medium_pool, PeakEq]
     phaser: array[medium_pool, Phaser]
     pink_noise: array[medium_pool, PinkNoise]
     pshift: array[medium_pool, PShift]
@@ -79,6 +80,7 @@ type
       maygate,
       metro,
       peaklim,
+      peakeq,
       phaser,
       pink_noise,
       pshift,
@@ -181,6 +183,10 @@ def3(bqbpf, biquad)
 def3(bqhpf, biquad)
 def3(bqlpf, biquad)
 def3(bqnotch, biquad)
+def3(bqbpf_bw, biquad)
+def3(bqhpf_bw, biquad)
+def3(bqlpf_bw, biquad)
+def3(bqnotch_bw, biquad)
 def3(diode)
 def3(fm_osc, fms)
 def3(fm_tri, fms)
@@ -193,6 +199,7 @@ def3(gaussian, sample)
 def4(autowah)
 def4(conv)
 def4(peaklim)
+def4(peakeq)
 def4(pshift)
 def4(wpkorg35)
 def5(adsr)
@@ -221,6 +228,10 @@ proc long_fb*(x, dt, k: float): float =
   result = fb(x, dt, k, pool.data.long_delay[pool.index.long_delay])
   pool.index.long_delay.inc
 lift3(long_fb)
+
+proc stereo_width(x, w: float): Frame =
+  result = stereo_width(x, w, pool.data.fms[pool.index.fms])
+  pool.index.fms.inc
 
 proc sequence*(seq: openArray[float], t: float): float =
   result = sequence(seq, t, pool.data.sequence[pool.index.sequence])

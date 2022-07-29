@@ -46,6 +46,23 @@ template make_bi_quad(name; make_coefficients: proc(sinω, cosω,
     y
   lift3(name, BiQuad)
 
+template make_bi_quad_bw(name; make_coefficients: proc(sinω, cosω,
+    α: float): BiQuadCoeffs) =
+  proc name*(x, freq, BW: float, s: var BiQuad): float =
+    let
+      xx = x.prime(s.xx)
+      xxx = xx.prime(s.xxx)
+      ω = freq * SAMPLE_ANGULAR_PERIOD
+      sinω = ω.sin
+      cosω = ω.cos
+      α = sinω * sinh( 0.5*ln(2.0) * BW * ω / sinω )
+      (b0, b1, b2, a0, a1, a2) = make_coefficients(sinω, cosω, α)
+      y = (b0*x + b1*xx + b2*xxx - a1*s.yy - a2*s.yyy) / a0
+    s.yyy = s.yy
+    s.yy = y
+    y
+  lift3(name, BiQuad)
+
 proc make_lpf_coefficients(sinω, cosω, α: float): BiQuadCoeffs =
   let
     b1 = 1.0 - cosω
@@ -68,6 +85,11 @@ make_bi_quad(bqlpf, make_lpf_coefficients)
 make_bi_quad(bqhpf, make_hpf_coefficients)
 make_bi_quad(bqbpf, make_bpf_coefficients)
 make_bi_quad(bqnotch, make_notch_coefficients)
+
+make_bi_quad_bw(bqlpf_bw, make_lpf_coefficients)
+make_bi_quad_bw(bqhpf_bw, make_hpf_coefficients)
+make_bi_quad_bw(bqbpf_bw, make_bpf_coefficients)
+make_bi_quad_bw(bqnotch_bw, make_notch_coefficients)
 
 type Conv* = array[2, float]
 

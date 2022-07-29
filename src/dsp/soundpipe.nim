@@ -166,6 +166,8 @@ spi_lift(maygate, MayGate, prob)
 # thresh: Threshold, in dB
 spi_lift(peaklim, PeakLimiter, atk, rel, thresh)
 
+spi_lift(peakeq, PeakEq, freq, bw, gain)
+
 # shift: Pitch shift (in semitones), range -24/24.
 # window: Window size (in samples), max 10000, try 1000
 # xfade: Crossfade (in samples), max 10000, try 10
