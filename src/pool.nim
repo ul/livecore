@@ -229,8 +229,8 @@ proc long_fb*(x, dt, k: float): float =
   pool.index.long_delay.inc
 lift3(long_fb)
 
-proc stereo_width(x, w: float): Frame =
-  result = stereo_width(x, w, pool.data.fms[pool.index.fms])
+proc mono_width*(x, w: float): Frame =
+  result = mono_width(x, w, pool.data.fms[pool.index.fms])
   pool.index.fms.inc
 
 proc sequence*(seq: openArray[float], t: float): float =

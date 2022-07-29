@@ -24,7 +24,7 @@ proc stereo_width*(x: Frame, w: float): Frame =
   result[0] = a*x[0] + b*x[1]
   result[1] = b*x[0] + a*x[1]
 
-proc stereo_width*(x, w: float, s: var array[2, float]): Frame =
+proc mono_width*(x, w: float, s: var array[2, float]): Frame =
   var f: Frame = x
   f[0] = x.prime(s[0]).prime(s[1])
   stereo_width(f, w)
