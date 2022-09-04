@@ -14,7 +14,6 @@ WIP with
 ## Dependencies
 
 - [Nim](https://nim-lang.org) 1.6.2
-- [libsoundio](http://libsound.io) 2.0.0
 - [fswatch](http://emcrisostomo.github.io/fswatch/) 1.16.0
 - [Soundpipe](https://pbat.ch/proj/soundpipe.html) 233c9646
 - [libsndfile](http://www.mega-nerd.com/libsndfile/) 1.0.31
@@ -23,9 +22,9 @@ WIP with
 On macOS:
 
 ```
-$ brew install libsoundio fswatch libsndfile liblo
+$ brew install fswatch libsndfile liblo
 or
-$ port install libsoundio fswatch libsndfile liblo
+$ port install fswatch libsndfile liblo
 ```
 
 For Nim try [choosenim](https://github.com/dom96/choosenim#choosenim),

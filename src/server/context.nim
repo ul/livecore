@@ -1,8 +1,7 @@
 import
   atomics,
   ../dsp/frame,
-  dynlib,
-  ffi/soundio
+  dynlib
 
 type
   Process* = proc(arena: pointer, cc: var Controls, n: var Notes,
@@ -20,7 +19,6 @@ type
     controls*: Controls
     notes*: Notes
     note_cursor*: int
-    input*: ptr SoundIoRingBuffer
     in_process*: Atomic[bool]
     lib_path*: string
     lib*: LibHandle

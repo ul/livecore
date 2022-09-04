@@ -3,7 +3,8 @@
 
 import
   dsp/[
-    frame, delays, envelopes, events, filters, metro, modules, noise, osc, soundpipe, stereo
+    frame, delays, envelopes, events, filters, metro, modules, noise, osc,
+    soundpipe, stereo
   ]
 
 const

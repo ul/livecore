@@ -55,7 +55,7 @@ template make_bi_quad_bw(name; make_coefficients: proc(sinω, cosω,
       ω = freq * SAMPLE_ANGULAR_PERIOD
       sinω = ω.sin
       cosω = ω.cos
-      α = sinω * sinh( 0.5*ln(2.0) * BW * ω / sinω )
+      α = sinω * sinh(0.5*ln(2.0) * BW * ω / sinω)
       (b0, b1, b2, a0, a1, a2) = make_coefficients(sinω, cosω, α)
       y = (b0*x + b1*xx + b2*xxx - a1*s.yy - a2*s.yyy) / a0
     s.yyy = s.yy
