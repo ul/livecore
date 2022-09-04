@@ -15,7 +15,6 @@ WIP with
 
 - [Nim](https://nim-lang.org) 1.6.2
 - [fswatch](http://emcrisostomo.github.io/fswatch/) 1.16.0
-- [Soundpipe](https://pbat.ch/proj/soundpipe.html) 233c9646
 - [libsndfile](http://www.mega-nerd.com/libsndfile/) 1.0.31
 - [liblo](http://liblo.sourceforge.net/) 0.28
 
@@ -27,8 +26,7 @@ or
 $ port install fswatch libsndfile liblo
 ```
 
-For Nim try [choosenim](https://github.com/dom96/choosenim#choosenim),
-and it's easy to install Soundpipe from the sources.
+For Nim try [choosenim](https://github.com/dom96/choosenim#choosenim).
 
 ## Configuration
 
