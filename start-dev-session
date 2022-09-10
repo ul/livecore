@@ -6,13 +6,11 @@
 # In the session code we want as much performance as possible.
 NIM_FLAGS=$(
 	tr '\n' ' ' <<EOF
---mm:arc -d:danger
+--mm:arc -d:danger -d:lto
 --cincludes:dsp/ffi/mufft
 --cincludes:dsp/ffi/soundpipe
 --cincludes:dsp/ffi/soundpipe/h
 --passC:-ffast-math
---passC:-flto
---passL:-flto
 --styleCheck:usages
 EOF
 )

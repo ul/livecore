@@ -3,11 +3,9 @@
 # This should minimize overhead of the write_callback's glue code.
 NIM_FLAGS=$(
 	tr '\n' ' ' <<EOF
---mm:arc -d:danger
+--mm:arc -d:danger -d:lto
 --cincludes:server/ffi
 --passC:-ffast-math
---passC:-flto
---passL:-flto
 --styleCheck:usages
 EOF
 )
