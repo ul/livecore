@@ -10,7 +10,7 @@ template defFIR*(name: untyped, block_size: static[Natural], ir_path: static[str
   ## ffmpeg -i ir.wav -map_channel 0.0.0 -f f32le -ar 48000 -acodec pcm_f32le ir.pcm
   ##
   ## Generated type will be `name` with `init` and `process` "methods" available.
-  ## Call `init` in session's `load` and `process` *once* in session's `process`
+  ## Call `init` in session's `load` and `process` *once* in session's `audio`
   ## for each instance of the filter.
 
   const window_size = 2 * block_size

@@ -13,10 +13,10 @@ WIP with
 
 ## Dependencies
 
-- [Nim](https://nim-lang.org) 1.6.2
-- [fswatch](http://emcrisostomo.github.io/fswatch/) 1.16.0
-- [libsndfile](http://www.mega-nerd.com/libsndfile/) 1.0.31
-- [liblo](http://liblo.sourceforge.net/) 0.28
+- [Nim](https://nim-lang.org) 1.7.3 (d26b1232ee7a69c2a71db81aa0185499321c54fe)
+- [fswatch](http://emcrisostomo.github.io/fswatch/) 1.17.1
+- [libsndfile](http://www.mega-nerd.com/libsndfile/) 1.1.0
+- [liblo](http://liblo.sourceforge.net/) 0.31
 
 On macOS:
 
@@ -27,6 +27,11 @@ $ port install fswatch libsndfile liblo
 ```
 
 For Nim try [choosenim](https://github.com/dom96/choosenim#choosenim).
+You'll need to use `devel` version as the latest stable at the time of writing
+(1.6.10) had a GC bug crashing LiveCore.
+
+There is also `shell.nix` for Nix users but bear in mind that at the time of
+writing it's installing a version with GC bug (1.6.8).
 
 ## Configuration
 

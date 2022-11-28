@@ -10,9 +10,15 @@ proc load_session*(ctx: ptr Context, new_path: string) =
     echo "Failed to load session library."
     return
 
-  let new_process = cast[Process](new_lib.sym_addr("process"))
-  if new_process.is_nil:
-    echo "Didn't find `process` in session library."
+  let new_control = cast[Control](new_lib.sym_addr("control"))
+  if new_control.is_nil:
+    echo "Didn't find `control` in session library."
+    new_lib.unload_lib
+    return
+
+  let new_audio = cast[Audio](new_lib.sym_addr("audio"))
+  if new_audio.is_nil:
+    echo "Didn't find `audio` in session library."
     new_lib.unload_lib
     return
 
@@ -20,9 +26,10 @@ proc load_session*(ctx: ptr Context, new_path: string) =
   if not onload.is_nil:
     ctx.arena.onload
 
-  ctx.process.store(new_process)
+  ctx.audio.store(new_audio)
+  ctx.control.store(new_control)
   # Spin-lock to ensure that we don't try to unload old lib in the middle of old
-  # `process` call.
+  # `audio` call.
   while ctx.in_process.load: discard
 
   ctx.stats.sum = 0.0

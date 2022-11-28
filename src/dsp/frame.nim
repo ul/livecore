@@ -18,7 +18,7 @@ proc seconds*(t: float): float =
 
 type
   Frame* = array[CHANNELS, float]
-  Controls* = array[0x100, Atomic[float]]
+  Controllers* = array[0x100, Atomic[float]]
   Notes* = array[0x10, Atomic[uint16]]
 
 converter to_frame*(x: float): Frame =

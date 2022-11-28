@@ -8,5 +8,6 @@ mkShell.override { stdenv = llvmPackages_14.stdenv; } {
     libsndfile
     darwin.apple_sdk.frameworks.CoreAudio
     darwin.apple_sdk.frameworks.AudioUnit
+    entr
   ];
 }

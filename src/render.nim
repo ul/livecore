@@ -39,7 +39,7 @@ state.load
 const frames_chunk = 60 * SAMPLE_RATE_INT
 let buffer = alloc(frames_chunk * CHANNELS * cdouble.sizeof)
 
-var cc: Controls
+var cc: Controllers
 var notes: Notes
 var input: Frame
 
@@ -50,7 +50,8 @@ stdout.flushFile
 while frames_left > 0:
   var frames_to_write = min(frames_left, frames_chunk)
   for frame in 0..<frames_to_write:
-    let data = state.process(cc, notes, input)
+    state.control(cc, notes, 1)
+    let data = state.audio(cc, notes, input)
     for channel in 0..<CHANNELS:
       let i = (channel + frame * CHANNELS).int
       let offset = cast[int](buffer) + i * cdouble.sizeof

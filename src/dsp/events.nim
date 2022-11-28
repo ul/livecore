@@ -31,6 +31,11 @@ lift1(stopwatch, float)
 
 type SH* = array[2, float]
 
+proc zero_cross_up*(x: float, s: var float): float =
+  ## Trigger when `x` crosses zero in positive direction.
+  if unlikely(x.prime(s) <= 0.0 and x > 0.0): 1.0 else: 0.0
+lift1(zero_cross_up, float)
+
 proc sample_and_hold_start*(x, t: float, s: var SH): float =
   ## Sample when trigger crosses zero in positive direction.
   let p = t.prime(s[0])

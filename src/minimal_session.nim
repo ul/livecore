@@ -4,7 +4,11 @@ import dsp/frame
 
 type State* = object
 
-proc process*(s: var State, cc: var Controls, n: var Notes,
+proc control*(s: var State, cc: var Controllers, n: var Notes,
+    frame_count: int) {.nimcall, exportc, dynlib.} =
+  discard
+
+proc audio*(s: var State, cc: var Controllers, n: var Notes,
     input: Frame): Frame {.nimcall, exportc, dynlib.} =
   discard
 

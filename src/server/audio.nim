@@ -23,10 +23,13 @@ proc data_callback(device, output, input: pointer,
   ctx.in_process.store(true)
 
   let arena = ctx.arena
-  let process = ctx.process.load
+  let audio = ctx.audio.load
+  let control = ctx.control.load
 
   let ptr_output = cast[int](output)
   let ptr_input = cast[int](input)
+
+  control(arena, ctx.controllers, ctx.notes, cast[int](frame_count))
 
   for frame in 0..<frame_count.int:
     var input_frame: array[CHANNELS, float]
@@ -35,7 +38,7 @@ proc data_callback(device, output, input: pointer,
         input_frame[channel] = cast[ptr float32](ptr_input + (frame*CHANNELS +
             channel)*(sizeof float32))[]
 
-    let samples = process(arena, ctx.controls, ctx.notes, input_frame)
+    let samples = audio(arena, ctx.controllers, ctx.notes, input_frame)
     for channel in 0..<CHANNELS:
       var ptr_sample = cast[ptr float32](ptr_output + (frame*CHANNELS +
           channel)*(sizeof float32))

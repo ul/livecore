@@ -99,7 +99,7 @@ var pool: ptr Pool
 
 proc init*(s: var Pool) =
   pool = s.addr
-  pool.index.addr.zero_mem(Index.size_of)
+  s.index.addr.zero_mem(Index.size_of)
 
 template def0(op, t) =
   proc op*(): float =
@@ -161,6 +161,7 @@ def1(saturator)
 def1(saw, sample)
 def1(tri, sample)
 def1(square, sample)
+def1(zero_cross_up, sample)
 def2(blsquare)
 def2(chaos_noise)
 def2(detune_osc, fms)
