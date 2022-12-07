@@ -22,12 +22,12 @@ proc control*(s: var State, cc: var Controllers, n: var Notes,
 
   s.notes = (--[
     //[!1/1, 3/2, 5/3],
-    @@[(1//2, !1/1), (1//3, !3/2), (1//5, !5/3)],
+    @@[(2//1, !1/1), (3/2)!3, 5/3],
     //[
       <>[!1/1, 0.0, 3/2, 0.0, 5/3],
       <>[!1/1, 3/2, 5/3]
     ],
-    //[!1/1, 3/2],
+    (//[!1/1, 3/2]).euclid(3, 8),
     //[!3/2, 5/3],
     //[!1/1, 5/3],
   ]).haps(s.cycler)
@@ -44,10 +44,11 @@ proc audio*(s: var State, cc: var Controllers, n: var Notes,
     let t = note.gate(s.cycler).zero_cross_up
     let dur = note.duration(s.cycler)
     let env = t.impulse(dur / 5)
-    x += note.value
-      .mul(220.0)
-      .fm_bltriangle(1/2, 3/4)
-      .mul(env)
+    if note.value > 0.0:
+      x += note.value
+        .mul(220.0)
+        .fm_bltriangle(1/2, 3/4)
+        .mul(env)
 
   let sig = x + x.mono_width(0.5).fb((1/60).tri.biscale(5.0, 60.0), 0.2,
       s.looong_delay).mul(0.5)

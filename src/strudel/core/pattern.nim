@@ -1,5 +1,5 @@
 import std/[options, sequtils, sugar]
-import state, hap
+import state, hap, euclid
 export hap
 
 type Query* = State -> seq[Hap]
@@ -22,10 +22,10 @@ func with_value(p: Pattern, f: float -> float): Pattern =
 
 # func fmap(p: Pattern, f: float -> float): Pattern = with_value(p, f)
 
-func with_query_span(p: Pattern, f: TimeSpan -> TimeSpan): Pattern =
-  ## Returns a new pattern, where the given function is applied to the query
-  ## timespan before passing it to the original pattern.
-  pattern(s => p.query(s.with_span(f)))
+# func with_query_span(p: Pattern, f: TimeSpan -> TimeSpan): Pattern =
+#   ## Returns a new pattern, where the given function is applied to the query
+#   ## timespan before passing it to the original pattern.
+#   pattern(s => p.query(s.with_span(f)))
 
 func with_query_span_maybe(p: Pattern, f: TimeSpan -> Option[
     TimeSpan]): Pattern =
@@ -163,6 +163,9 @@ func stack*(ps: openArray[Pattern]): Pattern =
     flatten(pats.map_it(it.query(s)))
   pattern(query)
 
+func polyrhythm*(ps: openArray[Pattern]): Pattern =
+  stack(ps)
+
 func time_cat*(ps: openArray[(Fraction, Pattern)]): Pattern =
   ## Like `sequence` but each step has a length, relative to the whole.
   let total = ps.map_it(it[0]).foldr(a + b)
@@ -173,6 +176,24 @@ func time_cat*(ps: openArray[(Fraction, Pattern)]): Pattern =
     pats.add(pat.compress(begin / total, `end` / total))
     begin = `end`
   stack(pats)
+
+func struct(p: Pattern, s: Pattern): Pattern =
+  ## Apply the given structure to the pattern.
+  ## `s` must consist of 0s and 1s only.
+  # TODO relying on zeros as a marker for non-events is sketchy
+  # we should filter out these events completely instead
+  # This is essentially app_right but with a func hardcoded.
+  proc query(st: State): seq[Hap] =
+    for s_hap in s.query(st):
+      for p_hap in p.query(st.set_span(s_hap.whole_or_part)):
+        let new_whole = s_hap.whole
+        let new_part = p_hap.part.intersection(s_hap.part)
+        if new_part.is_some:
+          # `*` is the hardcoded func here if you want to generalise it later
+          let new_value = p_hap.value * s_hap.value
+          result.add(Hap(whole: new_whole, part: new_part.get,
+              value: new_value))
+  pattern(query)
 
 converter to_pattern*(value: float): Pattern = pure(value)
 func to_pattern*(xs: openArray[float]): Pattern = xs.map(pure).sequence
@@ -223,13 +244,81 @@ converter `--`*(xs: array[0..14, float]): Pattern = xs.to_pattern
 converter `--`*(xs: array[0..15, float]): Pattern = xs.to_pattern
 converter `--`*(xs: array[0..16, float]): Pattern = xs.to_pattern
 
-func `*`*(p: Pattern, factor: float): Pattern = p.fast(factor)
-func `/`*(p: Pattern, factor: float): Pattern = p.slow(factor)
+func `*`*(p: Pattern, factor: Fraction): Pattern = p.fast(factor)
+func `/`*(p: Pattern, factor: Fraction): Pattern = p.slow(factor)
 func `<>`*(xs: openArray[Pattern]): Pattern = xs.slowcat
 func `//`*(xs: openArray[Pattern]): Pattern = xs.stack
 func `@@`*(xs: openArray[(Fraction, Pattern)]): Pattern = xs.time_cat
 
-# TODO elongation, replication, euclidean
+# For elongation just use time_cat directly.
+# Converters should help to keep syntax light for simple cases:
+# @@[(2//1, !1.0), 2.0, 3.0] == [!1.0, 1.0, 2.0, 3.0]
+
+converter to_weighted_pattern*(p: Pattern): (Fraction, Pattern) =
+  (1.to_fraction, p)
+
+converter to_weighted_pattern*(x: float): (Fraction, Pattern) =
+  (1.to_fraction, pure(x))
+
+func replicate*(p: Pattern, factor: Fraction): (Fraction, Pattern) =
+  (factor, p * factor)
+
+func `!`*(p: Pattern, factor: Fraction): (Fraction, Pattern) =
+  p.replicate(factor)
+
+# A thirteenth century Persian rhythm called Khafif-e-ramal.
+# note("c3").euclid(2,5)
+# The archetypal pattern of the Cumbia from Colombia, as well as a Calypso rhythm from Trinidad.
+# note("c3").euclid(3,4)
+# Another thirteenth century Persian rhythm by the name of Khafif-e-ramal, as well as a Rumanian folk-dance rhythm.
+# note("c3").euclid(3,5,2)
+# A Ruchenitza rhythm used in a Bulgarian folk-dance.
+# note("c3").euclid(3,7)
+# The Cuban tresillo pattern.
+# note("c3").euclid(3,8)
+# Another Ruchenitza Bulgarian folk-dance rhythm.
+# note("c3").euclid(4,7)
+# The Aksak rhythm of Turkey.
+# note("c3").euclid(4,9)
+# The metric pattern used by Frank Zappa in his piece titled Outside Now.
+# note("c3").euclid(4,11)
+# Yields the York-Samai pattern, a popular Arab rhythm.
+# note("c3").euclid(5,6)
+# The Nawakhat pattern, another popular Arab rhythm.
+# note("c3").euclid(5,7)
+# The Cuban cinquillo pattern.
+# note("c3").euclid(5,8)
+# A popular Arab rhythm called Agsag-Samai.
+# note("c3").euclid(5,9)
+# The metric pattern used by Moussorgsky in Pictures at an Exhibition.
+# note("c3").euclid(5,11)
+# The Venda clapping pattern of a South African children’s song.
+# note("c3").euclid(5,12)
+# The Bossa-Nova rhythm necklace of Brazil.
+# note("c3").euclid(5,16)
+# A typical rhythm played on the Bendir (frame drum).
+# note("c3").euclid(7,8)
+# A common West African bell pattern.
+# note("c3").euclid(7,12)
+# A Samba rhythm necklace from Brazil.
+# note("c3").euclid(7,16,14)
+# A rhythm necklace used in the Central African Republic.
+# note("c3").euclid(9,16)
+# A rhythm necklace of the Aka Pygmies of Central Africa.
+# note("c3").euclid(11,24,14)
+# Another rhythm necklace of the Aka Pygmies of the upper Sangha.
+# note("c3").euclid(13,24,5)
+
+# TODO euclid_legato
+func euclid*(p: Pattern, pulses, steps: int, rotation: int = 0): Pattern =
+  ## Changes the structure of the pattern to form an euclidean rhythm.
+  ## Euclidian rhythms are rhythms obtained using the greatest common divisor of two numbers.
+  ## They were described in 2004 by Godfried Toussaint, a canadian computer scientist.
+  ## Euclidian rhythms are really useful for computer/algorithmic music because they can accurately
+  ## describe a large number of rhythms used in the most important music world traditions.
+  p.struct(euclid.euclid(pulses, steps, rotation).map_it(
+      it.to_float.pure).sequence)
+
 # TODO https://strudel.tidalcycles.org/tutorial/#javascript-api
 
 proc query_values*(p: Pattern, s: State): seq[float] =
@@ -413,4 +502,46 @@ when isMainModule:
             value: 2.0),
         Hap(whole: some(timespan(5//6, 1)), part: timespan(5//6, 1),
             value: 3.0),
+      ]
+    test "replicate":
+      let p = time_cat([replicate(!1.0, 3//1), (1//1, !2.0)])
+      let s = State(span: timespan(0, 1))
+      let haps = p.query(s)
+      check haps == @[
+        Hap(whole: some(timespan(0, 1//4)), part: timespan(0, 1//4),
+            value: 1.0),
+        Hap(whole: some(timespan(1//4, 2//4)), part: timespan(1//4, 2//4),
+            value: 1.0),
+        Hap(whole: some(timespan(2//4, 3//4)), part: timespan(2//4, 3//4),
+            value: 1.0),
+        Hap(whole: some(timespan(3//4, 1)), part: timespan(3//4, 1),
+            value: 2.0),
+      ]
+    test "struct":
+      let p = struct([!1.0, 2.0, 3.0], [!1.0, 0.0, 1.0])
+      let s = State(span: timespan(0, 1))
+      let haps = p.query(s)
+      check haps == @[
+        Hap(whole: some(timespan(0, 1//3)), part: timespan(0, 1//3),
+            value: 1.0),
+        Hap(whole: some(timespan(1//3, 2//3)), part: timespan(1//3, 2//3),
+            value: 0.0),
+        Hap(whole: some(timespan(2//3, 1)), part: timespan(2//3, 1),
+            value: 3.0),
+      ]
+    test "euclid":
+      let p = (!1.0).euclid(3, 5)
+      let s = State(span: timespan(0, 1))
+      let haps = p.query(s)
+      check haps == @[
+        Hap(whole: some(timespan(0, 1//5)), part: timespan(0, 1//5),
+            value: 1.0),
+        Hap(whole: some(timespan(1//5, 2//5)), part: timespan(1//5, 2//5),
+            value: 0.0),
+        Hap(whole: some(timespan(2//5, 3//5)), part: timespan(2//5, 3//5),
+            value: 1.0),
+        Hap(whole: some(timespan(3//5, 4//5)), part: timespan(3//5, 4//5),
+            value: 0.0),
+        Hap(whole: some(timespan(4//5, 1)), part: timespan(4//5, 1),
+            value: 1.0),
       ]
