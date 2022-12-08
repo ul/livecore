@@ -20,12 +20,12 @@ func with_value(p: Pattern, f: float -> float): Pattern =
   result.query = proc(s: State): seq[Hap] =
     p.query(s).map_it(it.with_value(f))
 
-# func fmap(p: Pattern, f: float -> float): Pattern = with_value(p, f)
+func fmap(p: Pattern, f: float -> float): Pattern = with_value(p, f)
 
-# func with_query_span(p: Pattern, f: TimeSpan -> TimeSpan): Pattern =
-#   ## Returns a new pattern, where the given function is applied to the query
-#   ## timespan before passing it to the original pattern.
-#   pattern(s => p.query(s.with_span(f)))
+func with_query_span(p: Pattern, f: TimeSpan -> TimeSpan): Pattern =
+  ## Returns a new pattern, where the given function is applied to the query
+  ## timespan before passing it to the original pattern.
+  pattern(s => p.query(s.with_span(f)))
 
 func with_query_span_maybe(p: Pattern, f: TimeSpan -> Option[
     TimeSpan]): Pattern =
@@ -66,11 +66,11 @@ func split_queries(p: Pattern): Pattern =
   result.query = proc(s: State): seq[Hap] =
     flatten(s.span.span_cycles.map_it(p.query(s.set_span(it))))
 
-func early(p: Pattern, offset: Fraction): Pattern =
+func early*(p: Pattern, offset: Fraction): Pattern =
   ## Nudge a pattern to start earlier in time. Equivalent of Tidal's <~ operator.
   p.with_query_time(t => t + offset).with_hap_time(t => t - offset)
 
-func late(p: Pattern, offset: Fraction): Pattern =
+func late*(p: Pattern, offset: Fraction): Pattern =
   ## Nudge a pattern to start later in time. Equivalent of Tidal's ~> operator.
   p.early(-offset)
 
@@ -142,13 +142,15 @@ func slowcat*(ps: openArray[Pattern]): Pattern =
 
   pattern(query).split_queries
 
+func cat*(ps: openArray[Pattern]): Pattern = slowcat(ps)
+
 func fastcat*(pats: openArray[Pattern]): Pattern =
   ## Concatenation: as with `slowcat`, but squashes a cycle from each pattern
   ## into one cycle.
   ## Synonyms：`sequence`.
   slowcat(pats).fast(pats.len)
 
-const sequence* = fastcat
+func sequence*(pats: openArray[Pattern]): Pattern = fastcat(pats)
 
 func pure*(value: float): Pattern =
   ## A discrete value that repeats once per cycle.
@@ -163,8 +165,8 @@ func stack*(ps: openArray[Pattern]): Pattern =
     flatten(pats.map_it(it.query(s)))
   pattern(query)
 
-func polyrhythm*(ps: openArray[Pattern]): Pattern =
-  stack(ps)
+func polyrhythm*(ps: openArray[Pattern]): Pattern = stack(ps)
+func poly*(ps: openArray[Pattern]): Pattern = stack(ps)
 
 func time_cat*(ps: openArray[(Fraction, Pattern)]): Pattern =
   ## Like `sequence` but each step has a length, relative to the whole.
@@ -176,6 +178,8 @@ func time_cat*(ps: openArray[(Fraction, Pattern)]): Pattern =
     pats.add(pat.compress(begin / total, `end` / total))
     begin = `end`
   stack(pats)
+
+func cat*(ps: openArray[(Fraction, Pattern)]): Pattern = time_cat(ps)
 
 func struct(p: Pattern, s: Pattern): Pattern =
   ## Apply the given structure to the pattern.

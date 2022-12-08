@@ -3,7 +3,7 @@
 import
   std/[atomics, math, options],
   dsp/[frame, delays, effects, envelopes, events, filters, metro, modules,
-        noise, osc, sampler, soundpipe, stereo, fft, fir, conv],
+        noise, osc, sampler, soundpipe, stereo, fft, fir, conv, notes],
   strudel/core/pattern,
   cycler, pool, control
 
@@ -20,17 +20,19 @@ proc control*(s: var State, cc: var Controllers, n: var Notes,
     frame_count: int) {.nimcall, exportc, dynlib.} =
   ## This is called each block before the audio is rendered.
 
-  s.notes = (--[
-    //[!1/1, 3/2, 5/3],
-    @@[(2//1, !1/1), (3/2)!3, 5/3],
-    //[
-      <>[!1/1, 0.0, 3/2, 0.0, 5/3],
-      <>[!1/1, 3/2, 5/3]
-    ],
-    (//[!1/1, 3/2]).euclid(3, 8),
-    //[!3/2, 5/3],
-    //[!1/1, 5/3],
-  ]).haps(s.cycler)
+  let o = !0.0
+
+  s.notes = ([
+    [!c3, a3, c4].stack,
+    [(2//1, !a4), a3!3, c4].cat,
+    [
+      [!c3, o, a3, o, c4].cat,
+      [!c3, a3, c4].cat
+    ].stack,
+    [!c3, a3].stack.euclid(3, 8),
+    [!a3, c4].stack,
+    [!c3, c4].stack,
+  ].sequence).haps(s.cycler)
 
 proc audio*(s: var State, cc: var Controllers, n: var Notes,
     input: Frame): Frame {.nimcall, exportc, dynlib.} =
@@ -46,7 +48,6 @@ proc audio*(s: var State, cc: var Controllers, n: var Notes,
     let env = t.impulse(dur / 5)
     if note.value > 0.0:
       x += note.value
-        .mul(220.0)
         .fm_bltriangle(1/2, 3/4)
         .mul(env)
 
