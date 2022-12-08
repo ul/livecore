@@ -10,6 +10,7 @@ WIP with
 - [Extempore](https://extemporelang.github.io)
 - Sound Garden [1](https://github.com/ul/sound-garden) & [2](https://github.com/ul/sound-garden-0x2)
 - [Ad Libitum](https://github.com/ul/ad-libitum)
+- [Strudel](https://github.com/tidalcycles/strudel)
 
 ## Dependencies
 
@@ -66,6 +67,13 @@ $ ./render <duration in seconds> <path/to/output.wav>
 ## Examples
 
 Peek into `src/session.nim` in `session/*` branches.
+
+## License
+
+This project is licensed under [BSD-3-Clause](./LICENSE), with the exception of
+derivative work that is covered either by licenses defined via `LICENSE` files
+in the corresponding sub-directories or via comments directly in the source code
+files.
 
 ## FAQ
 
