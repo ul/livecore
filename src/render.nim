@@ -1,4 +1,4 @@
-import math, parseopt, session, strutils, times, dsp/frame, server/ffi/sndfile
+import math, parseopt, session, strutils, times, dsp/frame, server/ffi/sndfile, server/context
 
 let t0 = epoch_time()
 
@@ -21,6 +21,8 @@ for kind, key, val in getopt():
 if arg < 2:
   quit "Usage: ./render <duration in seconds> <path/to/output.wav>"
 
+const control_frame_count = 64
+
 let frames = duration * SAMPLE_RATE_INT
 var info = cast[ptr SF_INFO](SF_INFO.sizeof.alloc)
 info.frames = frames
@@ -32,12 +34,12 @@ let h = path.cstring.sf_open(SFM_WRITE, info)
 if h.is_nil:
   quit "Failed to create " & path
 
-var state = cast[ptr State](State.sizeof.alloc)[]
-state.load
+var state = State.sizeof.alloc0
+cast[Load](load)(state)
 
 # Write at most one minute at a time to not hog the memory.
 const frames_chunk = 60 * SAMPLE_RATE_INT
-let buffer = alloc(frames_chunk * CHANNELS * cdouble.sizeof)
+let buffer = alloc0(frames_chunk * CHANNELS * cdouble.sizeof)
 
 var cc: Controllers
 var notes: Notes
@@ -50,8 +52,9 @@ stdout.flushFile
 while frames_left > 0:
   var frames_to_write = min(frames_left, frames_chunk)
   for frame in 0..<frames_to_write:
-    state.control(cc, notes, 1)
-    let data = state.audio(cc, notes, input)
+    if frame mod control_frame_count == 0:
+      cast[Control](control)(state, cc, notes, control_frame_count)
+    let data = cast[Audio](audio)(state, cc, notes, input)
     for channel in 0..<CHANNELS:
       let i = (channel + frame * CHANNELS).int
       let offset = cast[int](buffer) + i * cdouble.sizeof
@@ -66,7 +69,7 @@ stdout.write("\r[" & "#".repeat(bar_len) & "]")
 stdout.flushFile
 
 discard h.sf_close
-state.unload
+cast[Unload](unload)(state)
 state.addr.dealloc
 buffer.dealloc
 info.dealloc
