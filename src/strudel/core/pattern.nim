@@ -2,34 +2,38 @@ import std/[options, sequtils, sugar]
 import state, hap, euclid
 export hap
 
-type Query* = State -> seq[Hap]
+type Query*[T] = State -> seq[Hap[T]]
 
-type Pattern* = object
-  query*: Query
+type Pattern*[T] = object
+  query*: Query[T]
 
-func pattern(query: Query): Pattern =
+func pattern[T](query: Query[T]): Pattern[T] =
   ## Create a pattern. As an end user, you will most likely not create a Pattern
   ## directly.
   result.query = query
 
-const silence = pattern(_ => newSeq[Hap]())
+func silence[T](): Pattern[T] =
+  ## A pattern that produces no events.
+  result.query = proc(s: State): seq[Hap[T]] =
+    @[]
 
-func with_value(p: Pattern, f: float -> float): Pattern =
+func with_value[T, U](p: Pattern[T], f: T -> U): Pattern[U] =
   ## Returns a new pattern, with the function applied to the value of each hap.
   ## It has alias `fmap`.
-  result.query = proc(s: State): seq[Hap] =
+  result.query = proc(s: State): seq[Hap[U]] =
     p.query(s).map_it(it.with_value(f))
 
-func fmap(p: Pattern, f: float -> float): Pattern = with_value(p, f)
+func fmap[T, U](p: Pattern[T], f: T -> U): Pattern[U] = with_value(p, f)
 
-func with_query_span(p: Pattern, f: TimeSpan -> TimeSpan): Pattern =
+func with_query_span[T](p: Pattern[T], f: TimeSpan -> TimeSpan): Pattern[T] =
   ## Returns a new pattern, where the given function is applied to the query
   ## timespan before passing it to the original pattern.
-  pattern(s => p.query(s.with_span(f)))
+  result.query = proc(s: State): seq[Hap[T]] =
+    p.query(s.with_span(f))
 
-func with_query_span_maybe(p: Pattern, f: TimeSpan -> Option[
-    TimeSpan]): Pattern =
-  result.query = proc(s: State): seq[Hap] =
+func with_query_span_maybe[T](p: Pattern[T], f: TimeSpan -> Option[
+    TimeSpan]): Pattern[T] =
+  result.query = proc(s: State): seq[Hap[T]] =
     let new_span = f(s.span)
     if new_span.isSome:
       let new_state = s.set_span(new_span.get)
@@ -37,44 +41,47 @@ func with_query_span_maybe(p: Pattern, f: TimeSpan -> Option[
     else:
       @[]
 
-func with_hap(p: Pattern, f: Hap -> Hap): Pattern =
+func with_hap[T](p: Pattern[T], f: Hap[T] -> Hap[T]): Pattern[T] =
   ## Returns a new pattern, where the given function is applied to each hap.
-  pattern(s => p.query(s).map(f))
+  result.query = proc(s: State): seq[Hap[T]] =
+    p.query(s).map(f)
 
-func with_hap_span(p: Pattern, f: TimeSpan -> TimeSpan): Pattern =
+func with_hap_span[T](p: Pattern[T], f: TimeSpan -> TimeSpan): Pattern[T] =
   ## Similar to `with_query_span`, but the function is applied to the timespans
   ## of all haps returned by pattern queries (both `part` timespans, and where
   ## present, `whole` timespans).
-  pattern(s => p.query(s).map_it(it.with_span(f)))
+  result.query = proc(s: State): seq[Hap[T]] =
+    p.query(s).map_it(it.with_span(f))
 
-func with_hap_time(p: Pattern, f: Fraction -> Fraction): Pattern =
+func with_hap_time[T](p: Pattern[T], f: Fraction -> Fraction): Pattern[T] =
   ## As with `with_hap_span`, but the function is applied to both the
   ## begin and end time of the hap timespans.
   p.with_hap_span(span => span.with_time(f))
 
-func with_query_time(p: Pattern, f: Fraction -> Fraction): Pattern =
+func with_query_time[T](p: Pattern[T], f: Fraction -> Fraction): Pattern[T] =
   ## As with `with_query_span`, but the function is applied to both the
   ## begin and end time of the query timespan.
-  pattern(s => p.query(s.with_span(span => span.with_time(f))))
+  result.query = proc(s: State): seq[Hap[T]] =
+    p.query(s.with_span(span => span.with_time(f)))
 
 func flatten[T](seqs: varargs[seq[T]]): seq[T] = concat(seqs)
 
-func split_queries(p: Pattern): Pattern =
+func split_queries[T](p: Pattern[T]): Pattern[T] =
   ## Returns a new pattern, with queries split at cycle boundaries. This makes
   ## some calculations easier to express, as all haps are then constrained to
   ## happen within a cycle.
-  result.query = proc(s: State): seq[Hap] =
+  result.query = proc(s: State): seq[Hap[T]] =
     flatten(s.span.span_cycles.map_it(p.query(s.set_span(it))))
 
-func early*(p: Pattern, offset: Fraction): Pattern =
+func early*[T](p: Pattern[T], offset: Fraction): Pattern[T] =
   ## Nudge a pattern to start earlier in time. Equivalent of Tidal's <~ operator.
   p.with_query_time(t => t + offset).with_hap_time(t => t - offset)
 
-func late*(p: Pattern, offset: Fraction): Pattern =
+func late*[T](p: Pattern[T], offset: Fraction): Pattern[T] =
   ## Nudge a pattern to start later in time. Equivalent of Tidal's ~> operator.
   p.early(-offset)
 
-func fast_gap(p: Pattern, factor: Fraction): Pattern =
+func fast_gap[T](p: Pattern[T], factor: Fraction): Pattern[T] =
   proc qf(span: TimeSpan): Option[TimeSpan] =
     # Maybe it's better without this fallback..
     # if (factor < 1) {
@@ -89,7 +96,7 @@ func fast_gap(p: Pattern, factor: Fraction): Pattern =
       return none[TimeSpan]()
     some(TimeSpan(begin: bpos + cycle, `end`: epos + cycle))
 
-  proc ef(hap: Hap): Hap =
+  proc ef(hap: Hap[T]): Hap[T] =
     # Also fiddly, to maintain the right 'whole' relative to the part
     let begin = hap.part.begin
     let `end` = hap.part.`end`
@@ -101,30 +108,30 @@ func fast_gap(p: Pattern, factor: Fraction): Pattern =
       begin: new_part.begin - (begin - it.begin) / factor,
       `end`: new_part.`end` + (it.`end` - `end`) / factor
     ))
-    Hap(whole: new_whole, part: new_part, value: hap.value)
+    Hap[T](whole: new_whole, part: new_part, value: hap.value)
 
   p.with_query_span_maybe(qf).with_hap(ef).split_queries
 
-func compress(p: Pattern, b, e: Fraction): Pattern =
+func compress[T](p: Pattern[T], b, e: Fraction): Pattern[T] =
   ## Compress each cycle into the given timespan, leaving a gap.
   if b > e or b > 1 or e > 1 or b < 0 or e < 0:
-    return silence
+    return silence[T]()
   p.fast_gap(1.to_fraction / (e - b)).late(b)
 
-func fast*(p: Pattern, factor: Fraction): Pattern =
+func fast*[T](p: Pattern[T], factor: Fraction): Pattern[T] =
   ## Speed up a pattern by the given factor. Used by "*" in mini notation.
   let fast_query = p.with_query_time(t => t * factor)
   fast_query.with_hap_time(t => t / factor)
 
-func slow*(p: Pattern, factor: Fraction): Pattern =
+func slow*[T](p: Pattern[T], factor: Fraction): Pattern[T] =
   p.fast(1 / factor)
 
-func slowcat*(ps: openArray[Pattern]): Pattern =
+func slowcat*[T](ps: openArray[Pattern[T]]): Pattern[T] =
   ## Concatenation: combines a list of patterns, switching between them
   ## successively, one per cycle.
   ## Synonyms: `cat`.
   let pats = ps.to_seq
-  let query = proc(s: State): seq[Hap] =
+  let query = proc(s: State): seq[Hap[T]] =
     let span = s.span
     let pat_n = span.begin.sam.mod(pats.len).to_int
     # pat_n can be negative, if the span is in the past
@@ -142,36 +149,35 @@ func slowcat*(ps: openArray[Pattern]): Pattern =
 
   pattern(query).split_queries
 
-func cat*(ps: openArray[Pattern]): Pattern = slowcat(ps)
+func cat*[T](ps: openArray[Pattern[T]]): Pattern[T] = slowcat(ps)
 
-func fastcat*(pats: openArray[Pattern]): Pattern =
+func fastcat*[T](pats: openArray[Pattern[T]]): Pattern[T] =
   ## Concatenation: as with `slowcat`, but squashes a cycle from each pattern
   ## into one cycle.
   ## Synonyms：`sequence`.
   slowcat(pats).fast(pats.len)
 
-func sequence*(pats: openArray[Pattern]): Pattern = fastcat(pats)
+func sequence*[T](pats: openArray[Pattern[T]]): Pattern[T] = fastcat(pats)
 
-func pure*(value: float): Pattern =
+func pure*[T](value: T): Pattern[T] =
   ## A discrete value that repeats once per cycle.
-  let query = proc(s: State): seq[Hap] =
-    s.span.span_cycles.map_it(Hap(whole: some(it.begin.whole_cycle), part: it, value: value))
-  pattern(query)
+  result.query = proc(s: State): seq[Hap[T]] =
+    s.span.span_cycles.map_it(Hap[T](whole: some(it.begin.whole_cycle),
+        part: it, value: value))
 
-func stack*(ps: openArray[Pattern]): Pattern =
+func stack*[T](ps: openArray[Pattern[T]]): Pattern[T] =
   let pats = ps.to_seq
   ## The given items are played at the same time at the same length.
-  let query = proc(s: State): seq[Hap] =
+  result.query = proc(s: State): seq[Hap[T]] =
     flatten(pats.map_it(it.query(s)))
-  pattern(query)
 
-func polyrhythm*(ps: openArray[Pattern]): Pattern = stack(ps)
-func poly*(ps: openArray[Pattern]): Pattern = stack(ps)
+func polyrhythm*[T](ps: openArray[Pattern[T]]): Pattern[T] = stack(ps)
+func poly*[T](ps: openArray[Pattern[T]]): Pattern[T] = stack(ps)
 
-func time_cat*(ps: openArray[(Fraction, Pattern)]): Pattern =
+func time_cat*[T](ps: openArray[(Fraction, Pattern[T])]): Pattern[T] =
   ## Like `sequence` but each step has a length, relative to the whole.
   let total = ps.map_it(it[0]).foldr(a + b)
-  var pats: seq[Pattern] = @[]
+  var pats: seq[Pattern[T]] = @[]
   var begin = 0.to_fraction
   for (time, pat) in ps:
     let `end` = begin + time
@@ -179,15 +185,15 @@ func time_cat*(ps: openArray[(Fraction, Pattern)]): Pattern =
     begin = `end`
   stack(pats)
 
-func cat*(ps: openArray[(Fraction, Pattern)]): Pattern = time_cat(ps)
+func cat*[T](ps: openArray[(Fraction, Pattern[T])]): Pattern[T] = time_cat(ps)
 
-func struct(p: Pattern, s: Pattern): Pattern =
+func struct[T](p: Pattern[T], s: Pattern[T]): Pattern[T] =
   ## Apply the given structure to the pattern.
   ## `s` must consist of 0s and 1s only.
   # TODO relying on zeros as a marker for non-events is sketchy
   # we should filter out these events completely instead
   # This is essentially app_right but with a func hardcoded.
-  proc query(st: State): seq[Hap] =
+  result.query = proc(st: State): seq[Hap[T]] =
     for s_hap in s.query(st):
       for p_hap in p.query(st.set_span(s_hap.whole_or_part)):
         let new_whole = s_hap.whole
@@ -195,12 +201,11 @@ func struct(p: Pattern, s: Pattern): Pattern =
         if new_part.is_some:
           # `*` is the hardcoded func here if you want to generalise it later
           let new_value = p_hap.value * s_hap.value
-          result.add(Hap(whole: new_whole, part: new_part.get,
+          result.add(Hap[T](whole: new_whole, part: new_part.get,
               value: new_value))
-  pattern(query)
 
-converter to_pattern*(value: float): Pattern = pure(value)
-func to_pattern*(xs: openArray[float]): Pattern = xs.map(pure).sequence
+converter to_pattern*(value: float): Pattern[float] = pure(value)
+func to_pattern*(xs: openArray[float]): Pattern[float] = xs.map(pure).sequence
 
 # These symbols are available in Nim for operators.
 # We can use them as the alternative to Strudel's mini notation.
@@ -209,65 +214,65 @@ func to_pattern*(xs: openArray[float]): Pattern = xs.map(pure).sequence
 # @     $     ~     &     %     |
 # !     ?     ^     .     :     \
 
-func `!`*(x: float): Pattern = pure(x)
-func `--`*(x: float): Pattern = pure(x)
+func `!`*(x: float): Pattern[float] = pure(x)
+func `--`*(x: float): Pattern[float] = pure(x)
 
-func `--`*(xs: openArray[Pattern]): Pattern = xs.sequence
-converter `--`*(xs: array[0..1, Pattern]): Pattern = xs.sequence
-converter `--`*(xs: array[0..2, Pattern]): Pattern = xs.sequence
-converter `--`*(xs: array[0..3, Pattern]): Pattern = xs.sequence
-converter `--`*(xs: array[0..4, Pattern]): Pattern = xs.sequence
-converter `--`*(xs: array[0..5, Pattern]): Pattern = xs.sequence
-converter `--`*(xs: array[0..6, Pattern]): Pattern = xs.sequence
-converter `--`*(xs: array[0..7, Pattern]): Pattern = xs.sequence
-converter `--`*(xs: array[0..8, Pattern]): Pattern = xs.sequence
-converter `--`*(xs: array[0..9, Pattern]): Pattern = xs.sequence
-converter `--`*(xs: array[0..10, Pattern]): Pattern = xs.sequence
-converter `--`*(xs: array[0..11, Pattern]): Pattern = xs.sequence
-converter `--`*(xs: array[0..12, Pattern]): Pattern = xs.sequence
-converter `--`*(xs: array[0..13, Pattern]): Pattern = xs.sequence
-converter `--`*(xs: array[0..14, Pattern]): Pattern = xs.sequence
-converter `--`*(xs: array[0..15, Pattern]): Pattern = xs.sequence
-converter `--`*(xs: array[0..16, Pattern]): Pattern = xs.sequence
+func `--`*[T](xs: openArray[Pattern[T]]): Pattern[T] = xs.sequence
+converter `--`*[T](xs: array[0..1, Pattern[T]]): Pattern[T] = xs.sequence
+converter `--`*[T](xs: array[0..2, Pattern[T]]): Pattern[T] = xs.sequence
+converter `--`*[T](xs: array[0..3, Pattern[T]]): Pattern[T] = xs.sequence
+converter `--`*[T](xs: array[0..4, Pattern[T]]): Pattern[T] = xs.sequence
+converter `--`*[T](xs: array[0..5, Pattern[T]]): Pattern[T] = xs.sequence
+converter `--`*[T](xs: array[0..6, Pattern[T]]): Pattern[T] = xs.sequence
+converter `--`*[T](xs: array[0..7, Pattern[T]]): Pattern[T] = xs.sequence
+converter `--`*[T](xs: array[0..8, Pattern[T]]): Pattern[T] = xs.sequence
+converter `--`*[T](xs: array[0..9, Pattern[T]]): Pattern[T] = xs.sequence
+converter `--`*[T](xs: array[0..10, Pattern[T]]): Pattern[T] = xs.sequence
+converter `--`*[T](xs: array[0..11, Pattern[T]]): Pattern[T] = xs.sequence
+converter `--`*[T](xs: array[0..12, Pattern[T]]): Pattern[T] = xs.sequence
+converter `--`*[T](xs: array[0..13, Pattern[T]]): Pattern[T] = xs.sequence
+converter `--`*[T](xs: array[0..14, Pattern[T]]): Pattern[T] = xs.sequence
+converter `--`*[T](xs: array[0..15, Pattern[T]]): Pattern[T] = xs.sequence
+converter `--`*[T](xs: array[0..16, Pattern[T]]): Pattern[T] = xs.sequence
 
-func `--`*(xs: openArray[float]): Pattern = xs.to_pattern
-converter `--`*(xs: array[0..1, float]): Pattern = xs.to_pattern
-converter `--`*(xs: array[0..2, float]): Pattern = xs.to_pattern
-converter `--`*(xs: array[0..3, float]): Pattern = xs.to_pattern
-converter `--`*(xs: array[0..4, float]): Pattern = xs.to_pattern
-converter `--`*(xs: array[0..5, float]): Pattern = xs.to_pattern
-converter `--`*(xs: array[0..6, float]): Pattern = xs.to_pattern
-converter `--`*(xs: array[0..7, float]): Pattern = xs.to_pattern
-converter `--`*(xs: array[0..8, float]): Pattern = xs.to_pattern
-converter `--`*(xs: array[0..9, float]): Pattern = xs.to_pattern
-converter `--`*(xs: array[0..10, float]): Pattern = xs.to_pattern
-converter `--`*(xs: array[0..11, float]): Pattern = xs.to_pattern
-converter `--`*(xs: array[0..12, float]): Pattern = xs.to_pattern
-converter `--`*(xs: array[0..13, float]): Pattern = xs.to_pattern
-converter `--`*(xs: array[0..14, float]): Pattern = xs.to_pattern
-converter `--`*(xs: array[0..15, float]): Pattern = xs.to_pattern
-converter `--`*(xs: array[0..16, float]): Pattern = xs.to_pattern
+func `--`*(xs: openArray[float]): Pattern[float] = xs.to_pattern
+converter `--`*(xs: array[0..1, float]): Pattern[float] = xs.to_pattern
+converter `--`*(xs: array[0..2, float]): Pattern[float] = xs.to_pattern
+converter `--`*(xs: array[0..3, float]): Pattern[float] = xs.to_pattern
+converter `--`*(xs: array[0..4, float]): Pattern[float] = xs.to_pattern
+converter `--`*(xs: array[0..5, float]): Pattern[float] = xs.to_pattern
+converter `--`*(xs: array[0..6, float]): Pattern[float] = xs.to_pattern
+converter `--`*(xs: array[0..7, float]): Pattern[float] = xs.to_pattern
+converter `--`*(xs: array[0..8, float]): Pattern[float] = xs.to_pattern
+converter `--`*(xs: array[0..9, float]): Pattern[float] = xs.to_pattern
+converter `--`*(xs: array[0..10, float]): Pattern[float] = xs.to_pattern
+converter `--`*(xs: array[0..11, float]): Pattern[float] = xs.to_pattern
+converter `--`*(xs: array[0..12, float]): Pattern[float] = xs.to_pattern
+converter `--`*(xs: array[0..13, float]): Pattern[float] = xs.to_pattern
+converter `--`*(xs: array[0..14, float]): Pattern[float] = xs.to_pattern
+converter `--`*(xs: array[0..15, float]): Pattern[float] = xs.to_pattern
+converter `--`*(xs: array[0..16, float]): Pattern[float] = xs.to_pattern
 
-func `*`*(p: Pattern, factor: Fraction): Pattern = p.fast(factor)
-func `/`*(p: Pattern, factor: Fraction): Pattern = p.slow(factor)
-func `<>`*(xs: openArray[Pattern]): Pattern = xs.slowcat
-func `//`*(xs: openArray[Pattern]): Pattern = xs.stack
-func `@@`*(xs: openArray[(Fraction, Pattern)]): Pattern = xs.time_cat
+func `*`*[T](p: Pattern[T], factor: Fraction): Pattern[T] = p.fast(factor)
+func `/`*[T](p: Pattern[T], factor: Fraction): Pattern[T] = p.slow(factor)
+func `<>`*[T](xs: openArray[Pattern[T]]): Pattern[T] = xs.slowcat
+func `//`*[T](xs: openArray[Pattern[T]]): Pattern[T] = xs.stack
+func `@@`*[T](xs: openArray[(Fraction, Pattern[T])]): Pattern[T] = xs.time_cat
 
 # For elongation just use time_cat directly.
 # Converters should help to keep syntax light for simple cases:
 # @@[(2//1, !1.0), 2.0, 3.0] == [!1.0, 1.0, 2.0, 3.0]
 
-converter to_weighted_pattern*(p: Pattern): (Fraction, Pattern) =
+converter to_weighted_pattern*[T](p: Pattern[T]): (Fraction, Pattern[T]) =
   (1.to_fraction, p)
 
-converter to_weighted_pattern*(x: float): (Fraction, Pattern) =
+converter to_weighted_pattern*(x: float): (Fraction, Pattern[float]) =
   (1.to_fraction, pure(x))
 
-func replicate*(p: Pattern, factor: Fraction): (Fraction, Pattern) =
+func replicate*[T](p: Pattern[T], factor: Fraction): (Fraction, Pattern[T]) =
   (factor, p * factor)
 
-func `!`*(p: Pattern, factor: Fraction): (Fraction, Pattern) =
+func `!`*[T](p: Pattern[T], factor: Fraction): (Fraction, Pattern[T]) =
   p.replicate(factor)
 
 # A thirteenth century Persian rhythm called Khafif-e-ramal.
@@ -314,7 +319,7 @@ func `!`*(p: Pattern, factor: Fraction): (Fraction, Pattern) =
 # note("c3").euclid(13,24,5)
 
 # TODO euclid_legato
-func euclid*(p: Pattern, pulses, steps: int, rotation: int = 0): Pattern =
+func euclid*[T](p: Pattern[T], pulses, steps: int, rotation: int = 0): Pattern[T] =
   ## Changes the structure of the pattern to form an euclidean rhythm.
   ## Euclidian rhythms are rhythms obtained using the greatest common divisor of two numbers.
   ## They were described in 2004 by Godfried Toussaint, a canadian computer scientist.
@@ -325,7 +330,7 @@ func euclid*(p: Pattern, pulses, steps: int, rotation: int = 0): Pattern =
 
 # TODO https://strudel.tidalcycles.org/tutorial/#javascript-api
 
-proc query_values*(p: Pattern, s: State): seq[float] =
+proc query_values*[T](p: Pattern[T], s: State): seq[T] =
   p.query(s).map_it(it.value)
 
 when isMainModule:
@@ -335,7 +340,7 @@ when isMainModule:
       let p = pure(1.0)
       let s = State(span: timespan(0, 1//2))
       check p.query(s) == @[
-        Hap(whole: some(timespan(0, 1)), part: timespan(0, 1//2), value: 1.0)]
+        Hap[float](whole: some(timespan(0, 1)), part: timespan(0, 1//2), value: 1.0)]
     test "slowcat":
       let p1 = pure(1)
       let p2 = pure(2)
@@ -344,9 +349,9 @@ when isMainModule:
       let s = State(span: timespan(0, 3))
       let haps = p.query(s)
       check haps == @[
-        Hap(whole: some(timespan(0, 1)), part: timespan(0, 1), value: 1.0),
-        Hap(whole: some(timespan(1, 2)), part: timespan(1, 2), value: 2.0),
-        Hap(whole: some(timespan(2, 3)), part: timespan(2, 3), value: 3.0)]
+        Hap[int](whole: some(timespan(0, 1)), part: timespan(0, 1), value: 1),
+        Hap[int](whole: some(timespan(1, 2)), part: timespan(1, 2), value: 2),
+        Hap[int](whole: some(timespan(2, 3)), part: timespan(2, 3), value: 3)]
     test "fastcat":
       let p1 = pure(1)
       let p2 = pure(2)
@@ -355,42 +360,43 @@ when isMainModule:
       let s = State(span: timespan(0, 1))
       let haps = p.query(s)
       check haps == @[
-        Hap(whole: some(timespan(0, 1//3)), part: timespan(0, 1//3), value: 1),
-        Hap(whole: some(timespan(1//3, 2//3)), part: timespan(1//3, 2//3),
-            value: 2),
-        Hap(whole: some(timespan(2//3, 1)), part: timespan(2//3, 1), value: 3)]
+        Hap[int](whole: some(timespan(0, 1//3)), part: timespan(0, 1//3),
+            value: 1),
+        Hap[int](whole: some(timespan(1//3, 2//3)), part: timespan(1//3,
+            2//3), value: 2),
+        Hap[int](whole: some(timespan(2//3, 1)), part: timespan(2//3, 1), value: 3)]
     test "with_value":
       let p = pure(1)
       let p2 = p.with_value(v => v * 2)
       let s = State(span: timespan(0, 1))
       let haps = p2.query(s)
       check haps == @[
-        Hap(whole: some(timespan(0, 1)), part: timespan(0, 1), value: 2)]
+        Hap[int](whole: some(timespan(0, 1)), part: timespan(0, 1), value: 2)]
     test "with_query_span":
       let p = pure(1)
       let p2 = p.with_query_span(span => span.with_time(t => t + 2))
       let s = State(span: timespan(0, 1))
       let haps = p2.query(s)
       check haps == @[
-        Hap(whole: some(timespan(2, 3)), part: timespan(2, 3), value: 1),
+        Hap[int](whole: some(timespan(2, 3)), part: timespan(2, 3), value: 1),
       ]
     test "with_query_span_maybe":
       let p = pure(1)
       let p2 = p.with_query_span_maybe(span => some(span.with_time(t => t + 2)))
       let s = State(span: timespan(0, 1))
       check p2.query(s) == @[
-        Hap(whole: some(timespan(2, 3)), part: timespan(2, 3), value: 1),
+        Hap[int](whole: some(timespan(2, 3)), part: timespan(2, 3), value: 1),
       ]
       let p3 = p.with_query_span_maybe(span => none[TimeSpan]())
-      let empty: seq[Hap] = @[]
+      let empty: seq[Hap[int]] = @[]
       check p3.query(s) == empty
     test "with_hap":
       let p = pure(1)
-      let p2 = p.with_hap(hap => hap.with_value(v => v * 2))
+      let p2 = p.with_hap(hap => hap.with_value(proc(v: int): int = v * 2))
       let s = State(span: timespan(0, 1))
       let haps = p2.query(s)
       check haps == @[
-        Hap(whole: some(timespan(0, 1)), part: timespan(0, 1), value: 2),
+        Hap[int](whole: some(timespan(0, 1)), part: timespan(0, 1), value: 2),
       ]
     test "with_hap_span":
       let p = pure(1)
@@ -398,29 +404,29 @@ when isMainModule:
       let s = State(span: timespan(0, 1))
       let haps = p2.query(s)
       check haps == @[
-        Hap(whole: some(timespan(2, 3)), part: timespan(2, 3), value: 1)]
+        Hap[int](whole: some(timespan(2, 3)), part: timespan(2, 3), value: 1)]
     test "with_hap_time":
       let p = pure(1)
       let p2 = p.with_hap_time(t => t + 2)
       let s = State(span: timespan(0, 1))
       let haps = p2.query(s)
       check haps == @[
-        Hap(whole: some(timespan(2, 3)), part: timespan(2, 3), value: 1)]
+        Hap[int](whole: some(timespan(2, 3)), part: timespan(2, 3), value: 1)]
     test "with_query_time":
       let p = pure(1)
       let p2 = p.with_query_time(t => t + 2)
       let s = State(span: timespan(0, 1))
       let haps = p2.query(s)
       check haps == @[
-        Hap(whole: some(timespan(2, 3)), part: timespan(2, 3), value: 1)]
+        Hap[int](whole: some(timespan(2, 3)), part: timespan(2, 3), value: 1)]
     test "split_queries":
       let p = pure(1)
       let p2 = p.split_queries
       let s = State(span: timespan(0, 2))
       let haps = p2.query(s)
       check haps == @[
-        Hap(whole: some(timespan(0, 1)), part: timespan(0, 1), value: 1),
-        Hap(whole: some(timespan(1, 2)), part: timespan(1, 2), value: 1),
+        Hap[int](whole: some(timespan(0, 1)), part: timespan(0, 1), value: 1),
+        Hap[int](whole: some(timespan(1, 2)), part: timespan(1, 2), value: 1),
       ]
     test "early":
       let p = pure(1)
@@ -428,9 +434,9 @@ when isMainModule:
       let s = State(span: timespan(1, 2))
       let haps = p2.query(s)
       check haps == @[
-        Hap(whole: some(timespan(2//3, 5//3)), part: timespan(1, 5//3),
+        Hap[int](whole: some(timespan(2//3, 5//3)), part: timespan(1, 5//3),
             value: 1),
-        Hap(whole: some(timespan(5//3, 8//3)), part: timespan(5//3, 2),
+        Hap[int](whole: some(timespan(5//3, 8//3)), part: timespan(5//3, 2),
             value: 1),
       ]
     test "late":
@@ -439,9 +445,9 @@ when isMainModule:
       let s = State(span: timespan(1, 2))
       let haps = p2.query(s)
       check haps == @[
-        Hap(whole: some(timespan(1//3, 4//3)), part: timespan(1//1, 4//3),
-            value: 1),
-        Hap(whole: some(timespan(4//3, 7//3)), part: timespan(4//3, 2),
+        Hap[int](whole: some(timespan(1//3, 4//3)), part: timespan(1//1,
+            4//3), value: 1),
+        Hap[int](whole: some(timespan(4//3, 7//3)), part: timespan(4//3, 2),
             value: 1),
       ]
     test "fast_gap":
@@ -451,7 +457,8 @@ when isMainModule:
       let s = State(span: timespan(0, 1))
       let haps = p2.query(s)
       check haps == @[
-        Hap(whole: some(timespan(0, 1//3)), part: timespan(0, 1//3), value: 1),
+        Hap[int](whole: some(timespan(0, 1//3)), part: timespan(0, 1//3),
+            value: 1),
       ]
     test "compress":
       let p = pure(1)
@@ -459,8 +466,8 @@ when isMainModule:
       let s = State(span: timespan(0, 1))
       let haps = p2.query(s)
       check haps == @[
-        Hap(whole: some(timespan(1//3, 1//2)), part: timespan(1//3, 1//2),
-            value: 1),
+        Hap[int](whole: some(timespan(1//3, 1//2)), part: timespan(1//3,
+            1//2), value: 1),
       ]
     test "fast":
       let p = pure(1)
@@ -468,18 +475,22 @@ when isMainModule:
       let s = State(span: timespan(0, 1))
       let haps = p2.query(s)
       check haps == @[
-        Hap(whole: some(timespan(0, 1//2)), part: timespan(0, 1//2), value: 1),
-        Hap(whole: some(timespan(1//2, 1)), part: timespan(1//2, 1), value: 1),
+        Hap[int](whole: some(timespan(0, 1//2)), part: timespan(0, 1//2),
+            value: 1),
+        Hap[int](whole: some(timespan(1//2, 1)), part: timespan(1//2, 1),
+            value: 1),
       ]
     test "sequence":
       let p = --[!1.0, --[2.0, 3.0]]
       let s = State(span: timespan(0, 1))
       let haps = p.query(s)
       check haps == @[
-        Hap(whole: some(timespan(0, 1//2)), part: timespan(0, 1//2), value: 1),
-        Hap(whole: some(timespan(1//2, 3//4)), part: timespan(1//2, 3//4),
-            value: 2),
-        Hap(whole: some(timespan(3//4, 1)), part: timespan(3//4, 1), value: 3),
+        Hap[float](whole: some(timespan(0, 1//2)), part: timespan(0, 1//2),
+            value: 1),
+        Hap[float](whole: some(timespan(1//2, 3//4)), part: timespan(1//2,
+            3//4), value: 2),
+        Hap[float](whole: some(timespan(3//4, 1)), part: timespan(3//4, 1),
+            value: 3),
       ]
     test "query_values":
       let p = --[!1.0, --[2.0, 3.0]]
@@ -491,20 +502,23 @@ when isMainModule:
       let s = State(span: timespan(0, 1))
       let haps = p.query(s)
       check haps == @[
-        Hap(whole: some(timespan(0, 1)), part: timespan(0, 1), value: 1.0),
-        Hap(whole: some(timespan(0, 1)), part: timespan(0, 1), value: 2.0),
-        Hap(whole: some(timespan(0, 1)), part: timespan(0, 1), value: 3.0),
+        Hap[float](whole: some(timespan(0, 1)), part: timespan(0, 1),
+            value: 1.0),
+        Hap[float](whole: some(timespan(0, 1)), part: timespan(0, 1),
+            value: 2.0),
+        Hap[float](whole: some(timespan(0, 1)), part: timespan(0, 1),
+            value: 3.0),
       ]
     test "time_cat":
       let p = time_cat([(3//1, !1.0), (2//1, !2.0), (1//1, !3.0)])
       let s = State(span: timespan(0, 1))
       let haps = p.query(s)
       check haps == @[
-        Hap(whole: some(timespan(0, 1//2)), part: timespan(0, 1//2),
+        Hap[float](whole: some(timespan(0, 1//2)), part: timespan(0, 1//2),
             value: 1.0),
-        Hap(whole: some(timespan(1//2, 5//6)), part: timespan(1//2, 5//6),
-            value: 2.0),
-        Hap(whole: some(timespan(5//6, 1)), part: timespan(5//6, 1),
+        Hap[float](whole: some(timespan(1//2, 5//6)), part: timespan(1//2,
+            5//6), value: 2.0),
+        Hap[float](whole: some(timespan(5//6, 1)), part: timespan(5//6, 1),
             value: 3.0),
       ]
     test "replicate":
@@ -512,13 +526,13 @@ when isMainModule:
       let s = State(span: timespan(0, 1))
       let haps = p.query(s)
       check haps == @[
-        Hap(whole: some(timespan(0, 1//4)), part: timespan(0, 1//4),
+        Hap[float](whole: some(timespan(0, 1//4)), part: timespan(0, 1//4),
             value: 1.0),
-        Hap(whole: some(timespan(1//4, 2//4)), part: timespan(1//4, 2//4),
-            value: 1.0),
-        Hap(whole: some(timespan(2//4, 3//4)), part: timespan(2//4, 3//4),
-            value: 1.0),
-        Hap(whole: some(timespan(3//4, 1)), part: timespan(3//4, 1),
+        Hap[float](whole: some(timespan(1//4, 2//4)), part: timespan(1//4,
+            2//4), value: 1.0),
+        Hap[float](whole: some(timespan(2//4, 3//4)), part: timespan(2//4,
+            3//4), value: 1.0),
+        Hap[float](whole: some(timespan(3//4, 1)), part: timespan(3//4, 1),
             value: 2.0),
       ]
     test "struct":
@@ -526,11 +540,11 @@ when isMainModule:
       let s = State(span: timespan(0, 1))
       let haps = p.query(s)
       check haps == @[
-        Hap(whole: some(timespan(0, 1//3)), part: timespan(0, 1//3),
+        Hap[float](whole: some(timespan(0, 1//3)), part: timespan(0, 1//3),
             value: 1.0),
-        Hap(whole: some(timespan(1//3, 2//3)), part: timespan(1//3, 2//3),
-            value: 0.0),
-        Hap(whole: some(timespan(2//3, 1)), part: timespan(2//3, 1),
+        Hap[float](whole: some(timespan(1//3, 2//3)), part: timespan(1//3,
+            2//3), value: 0.0),
+        Hap[float](whole: some(timespan(2//3, 1)), part: timespan(2//3, 1),
             value: 3.0),
       ]
     test "euclid":
@@ -538,14 +552,14 @@ when isMainModule:
       let s = State(span: timespan(0, 1))
       let haps = p.query(s)
       check haps == @[
-        Hap(whole: some(timespan(0, 1//5)), part: timespan(0, 1//5),
+        Hap[float](whole: some(timespan(0, 1//5)), part: timespan(0, 1//5),
             value: 1.0),
-        Hap(whole: some(timespan(1//5, 2//5)), part: timespan(1//5, 2//5),
-            value: 0.0),
-        Hap(whole: some(timespan(2//5, 3//5)), part: timespan(2//5, 3//5),
-            value: 1.0),
-        Hap(whole: some(timespan(3//5, 4//5)), part: timespan(3//5, 4//5),
-            value: 0.0),
-        Hap(whole: some(timespan(4//5, 1)), part: timespan(4//5, 1),
+        Hap[float](whole: some(timespan(1//5, 2//5)), part: timespan(1//5,
+            2//5), value: 0.0),
+        Hap[float](whole: some(timespan(2//5, 3//5)), part: timespan(2//5,
+            3//5), value: 1.0),
+        Hap[float](whole: some(timespan(3//5, 4//5)), part: timespan(3//5,
+            4//5), value: 0.0),
+        Hap[float](whole: some(timespan(4//5, 1)), part: timespan(4//5, 1),
             value: 1.0),
       ]

@@ -2,27 +2,7 @@ import std/[options, sugar]
 import timespan
 export timespan
 
-## Ideally, we want value to be generic but that seems to be a PITA.
-## We can use the following inheritance trick for runtime polymorphism instead:
-##
-## type
-##   Pattern = object {.inheritable.}
-##     done: bool
-##   PSeq = object of Pattern
-##     list: seq[float]
-##   Stream = object
-##     value: float
-##     pattern: Pattern
-##
-## let p = PSeq(done: false, list: @[1.9, 4.5])
-## let s = Stream(value: 0.0, pattern: p)
-##
-## (copypasted example from a different exploration, need to be adapted)
-##
-## However, for practical purposes we can stick to just a single type for now.
-## Which is, unsurprisingly, a float.
-
-type Hap* = object
+type Hap*[T] = object
   ## Event class, representing a value active during the timespan 'part'. This
   ## might be a fragment of an event, in which case the timespan will be smaller
   ## than the 'whole' timespan, otherwise the two timespans will be the same.
@@ -36,7 +16,7 @@ type Hap* = object
 
   whole*: Option[TimeSpan]
   part*: TimeSpan
-  value*: float
+  value*: T
 
 func duration*(e: Hap): Fraction = e.whole.get.duration
 
@@ -46,7 +26,7 @@ func whole_or_part*(e: Hap): TimeSpan =
 proc with_span*(e: Hap, f: TimeSpan -> TimeSpan): Hap =
   Hap(whole: e.whole.map(f), part: f(e.part), value: e.value)
 
-proc with_value*(e: Hap, f: float -> float): Hap =
+proc with_value*[T](e: Hap, f: T -> T): Hap =
   Hap(whole: e.whole, part: e.part, value: f(e.value))
 
 when isMainModule:
@@ -54,22 +34,22 @@ when isMainModule:
   suite "Hap":
     test "duration":
       let span = TimeSpan(begin: 1//2, `end`: 3//2)
-      let e = Hap(whole: some(span), part: span, value: 1.0)
+      let e = Hap[float](whole: some(span), part: span, value: 1.0)
       check e.duration == 1
     test "whole_or_part":
       let span = TimeSpan(begin: 1//2, `end`: 3//2)
-      let e = Hap(whole: some(span), part: span, value: 1.0)
+      let e = Hap[float](whole: some(span), part: span, value: 1.0)
       check e.whole_or_part == span
-      let e2 = Hap(whole: none[TimeSpan](), part: span, value: 1.0)
+      let e2 = Hap[float](whole: none[TimeSpan](), part: span, value: 1.0)
       check e2.whole_or_part == span
     test "with_span":
       let span = TimeSpan(begin: 1//2, `end`: 3//2)
-      let e = Hap(whole: some(span), part: span, value: 1.0)
+      let e = Hap[float](whole: some(span), part: span, value: 1.0)
       let e2 = e.with_span(x => x.with_time(x => x + 1))
       check e2.whole == some(e.whole.get.with_time(x => x + 1))
       check e2.part == e.part.with_time(x => x + 1)
       check e2.value == e.value
-      let e3 = Hap(whole: none[TimeSpan](), part: span, value: 1.0)
+      let e3 = Hap[float](whole: none[TimeSpan](), part: span, value: 1.0)
       let e4 = e3.with_span(x => x.with_time(x => x + 1))
       check e4.whole == none[TimeSpan]()
       check e4.part == e3.part.with_time(x => x + 1)

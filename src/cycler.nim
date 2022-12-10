@@ -17,14 +17,14 @@ proc cycle_duration*(s: var Cycler): float = s.cpm.bpm2delta
 
 proc cycle_time*(s: var Cycler): float = s.clock * s.cycle_duration
 
-proc gate*(e: Hap, s: var Cycler): float =
+proc gate*(e: Hap[float], s: var Cycler): float =
   let span = e.whole.get
   if span.begin.to_float <= s.clock and s.clock < span.`end`.to_float:
     1.0
   else:
     0.0
 
-proc duration*(e: Hap, s: var Cycler): float =
+proc duration*(e: Hap[float], s: var Cycler): float =
   e.duration.to_float * s.cycle_duration
 
-proc haps*(p: Pattern, s: var Cycler): seq[Hap] = p.query(cycle)
+proc haps*(p: Pattern, s: var Cycler): seq[Hap[float]] = p.query(cycle)

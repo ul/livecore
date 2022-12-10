@@ -13,7 +13,7 @@ type
   State* = object
     pool: Pool
     cycler: Cycler
-    notes: seq[Hap]
+    notes: seq[Hap[float]]
     looong_delay: array[CHANNELS, Delay300]
 
 proc control*(s: var State, cc: var Controllers, n: var Notes,
