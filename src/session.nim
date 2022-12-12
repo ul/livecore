@@ -13,8 +13,8 @@ type
   State* = object
     pool: Pool
     cycler: Cycler
-    notes: seq[Hap[float]]
-    looong_delay: array[CHANNELS, Delay300]
+    notes: seq[FastHap]
+    melody: Frame
 
 proc control*(s: var State, cc: var Controllers, n: var Notes,
     frame_count: int) {.nimcall, exportc, dynlib.} =
@@ -23,39 +23,35 @@ proc control*(s: var State, cc: var Controllers, n: var Notes,
   let o = !0.0
 
   s.notes = ([
-    [!c3, a3, c4].stack,
-    [(2//1, !a4), a3!3, c4].cat,
-    [
-      [!c3, o, a3, o, c4].cat,
-      [!c3, a3, c4].cat
-    ].stack,
-    [!c3, a3].stack.euclid(3, 8),
-    [!a3, c4].stack,
-    [!c3, c4].stack,
-  ].sequence).haps(s.cycler)
+    [[[!g3, b3, o, d3, o, g4, ].sequence,
+    [!b4, d4].stack.euclid(3, 8), ].stack,
+    [!g5, a5, g3, b3].euclid(5, 12), ].stack,
+
+    [[[!g3, o, b3, o, d3].sequence,
+    [!g4, b4, d4].stack.euclid(2, 7), ].stack,
+    [!g2, a2, g3, b3].euclid(3, 8), ].stack,
+  ].poly).fast_haps(s.cycler)
 
 proc audio*(s: var State, cc: var Controllers, n: var Notes,
     input: Frame): Frame {.nimcall, exportc, dynlib.} =
   ## This is called each frame to render the audio.
 
   s.pool.init
-  s.cycler.tick(0.05.osc.biscale(5.0, 10.0))
+  s.cycler.tick(5.0)
 
-  var x = 0.0
+  var melody = 0.0
+  var bass = 0.0
+
   for note in s.notes:
-    let t = note.gate(s.cycler).zero_cross_up
+    let note_on = note.gate(s.cycler)
     let dur = note.duration(s.cycler)
-    let env = t.impulse(dur / 5)
-    if note.value > 0.0:
-      x += note.value
-        .fm_bltriangle(1/2, 3/4)
-        .mul(env)
+    let melody_env = note_on.adsr(0.01, 0.2, 0.8, 5.0)
+    let bass_env = note_on.adsr(1.5, 0.0, 0.9, 3.5)
+    melody += note.value.osc.mul(0.5) * melody_env
+    bass += note.value.mul(0.5).osc.mul(0.5).delay(dur) * bass_env
 
-  let sig = x + x.mono_width(0.5).fb((1/60).tri.biscale(5.0, 60.0), 0.2,
-      s.looong_delay).mul(0.5)
-
+  let sig = (melody + bass).zitarev
   sig
-    .mul(0.1)
     .simple_saturator
     .dc_block
 
