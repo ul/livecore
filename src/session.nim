@@ -43,11 +43,8 @@ proc audio*(s: var State, cc: var Controllers, n: var Notes,
   var bass = 0.0
 
   for note in s.notes:
+    let note_on = note.gate(s.cycler)
     let dur = note.duration(s.cycler)
-    # Voice duration returns 0 if the voice is not active,
-    # thus we can reuse it as a gate instead of note.gate(s.cycler)
-    # to save a few CPU cycles =)
-    let note_on = dur
     let melody_env = note_on.adsr(0.01, 0.2, 0.8, 5.0)
     let bass_env = note_on.adsr(1.5, 0.0, 0.9, 3.5)
     melody += note.value.fm_bltriangle(1/2, 2/3).mul(0.5) * melody_env

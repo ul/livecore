@@ -61,6 +61,13 @@ proc current_span*(e: Voice, s: var Cycler): FastTimeSpan =
       return span
   return FastTimeSpan(begin: 0.0, `end`: 0.0)
 
+proc last_span*(e: Voice, s: var Cycler): FastTimeSpan =
+  result = FastTimeSpan(begin: 0.0, `end`: 0.0)
+  for span in e.spans:
+    if span.begin > s.clock:
+      return
+    result = span
+
 proc duration*(span: FastTimeSpan): float = span.`end` - span.begin
 
 proc duration*(e: FastHap): float = e.span.duration
@@ -71,7 +78,7 @@ proc duration*[T](e: Hap[T], s: var Cycler): float =
 proc duration*(e: FastHap, s: var Cycler): float = e.duration * s.cycle_duration
 
 proc duration*(e: Voice, s: var Cycler): float =
-  e.current_span(s).duration * s.cycle_duration
+  e.last_span(s).duration * s.cycle_duration
 
 proc gate*(span: TimeSpan, s: var Cycler): float =
   if span.begin.to_float <= s.clock and s.clock < span.`end`.to_float:
@@ -89,4 +96,4 @@ proc gate*(span: FastTimeSpan, s: var Cycler): float =
 
 proc gate*(e: FastHap, s: var Cycler): float = e.span.gate(s)
 
-proc gate*(e: Voice, s: var Cycler): float = e.duration(s)
+proc gate*(e: Voice, s: var Cycler): float = e.current_span(s).gate(s)
