@@ -47,8 +47,8 @@ proc audio*(s: var State, cc: var Controllers, n: var Notes,
     let dur = note.duration(s.cycler)
     let melody_env = note_on.adsr(0.01, 0.2, 0.8, 5.0)
     let bass_env = note_on.adsr(1.5, 0.0, 0.9, 3.5)
-    melody += note.value.osc.mul(0.5) * melody_env
-    bass += note.value.mul(0.5).osc.mul(0.5).delay(dur) * bass_env
+    melody += note.value.fm_bltriangle(1/2, 2/3).mul(0.5) * melody_env
+    bass += note.value.mul(0.5).fm_osc(1/2, 2/3).mul(0.5).delay(dur) * bass_env
 
   let sig = (melody + bass).zitarev
   sig
