@@ -1,4 +1,4 @@
-import std/[options, sequtils]
+import std/[options, sequtils, tables]
 import dsp/[frame, metro, osc]
 import strudel/core/pattern
 
@@ -17,11 +17,21 @@ type FastHap* = object
   span*: FastTimeSpan
   value*: float
 
-proc duration(span: FastTimeSpan): float =
-  span.`end` - span.begin
+type Voice* = object
+  spans*: seq[FastTimeSpan]
+  value*: float
 
-proc duration(e: FastHap): float =
-  e.span.duration
+converter to_fast_timespan*(span: TimeSpan): FastTimeSpan =
+  FastTimeSpan(
+    begin: span.begin.to_float,
+    `end`: span.`end`.to_float
+  )
+
+converter to_fast_hap*(hap: Hap[float]): FastHap =
+  FastHap(
+    span: hap.whole.get.to_fast_timespan,
+    value: hap.value
+  )
 
 proc tick*(s: var Cycler, cpm: float = 60.0) =
   s.cpm = cpm
@@ -31,33 +41,52 @@ proc cycle_duration*(s: var Cycler): float = s.cpm.bpm2delta
 
 proc cycle_time*(s: var Cycler): float = s.clock * s.cycle_duration
 
-proc gate*(e: Hap[float], s: var Cycler): float =
-  let span = e.whole.get
+proc haps*[T](p: Pattern[T], s: var Cycler): seq[Hap[T]] = p.query(cycle)
+
+proc fast_haps*(p: Pattern[float], s: var Cycler): seq[FastHap] =
+  p.haps(s).map_it(it.to_fast_hap)
+
+proc voices*(p: Pattern[float], s: var Cycler): seq[Voice] =
+  var index = init_table[float, Voice]()
+  for hap in p.haps(s):
+    let value = hap.value
+    if not index.has_key(value):
+      index[value] = Voice(spans: @[], value: value)
+    index[value].spans.add(hap.whole.get.to_fast_timespan)
+  index.values.to_seq
+
+proc current_span*(e: Voice, s: var Cycler): FastTimeSpan =
+  for span in e.spans:
+    if span.begin <= s.clock and s.clock < span.`end`:
+      return span
+  return FastTimeSpan(begin: 0.0, `end`: 0.0)
+
+proc duration*(span: FastTimeSpan): float = span.`end` - span.begin
+
+proc duration*(e: FastHap): float = e.span.duration
+
+proc duration*[T](e: Hap[T], s: var Cycler): float =
+  e.duration.to_float * s.cycle_duration
+
+proc duration*(e: FastHap, s: var Cycler): float = e.duration * s.cycle_duration
+
+proc duration*(e: Voice, s: var Cycler): float =
+  e.current_span(s).duration * s.cycle_duration
+
+proc gate*(span: TimeSpan, s: var Cycler): float =
   if span.begin.to_float <= s.clock and s.clock < span.`end`.to_float:
     1.0
   else:
     0.0
 
-proc duration*(e: Hap[float], s: var Cycler): float =
-  e.duration.to_float * s.cycle_duration
+proc gate*[T](e: Hap[T], s: var Cycler): float = e.whole.get.gate(s)
 
-proc gate*(e: FastHap, s: var Cycler): float =
-  if e.span.begin <= s.clock and s.clock < e.span.`end`:
+proc gate*(span: FastTimeSpan, s: var Cycler): float =
+  if span.begin <= s.clock and s.clock < span.`end`:
     1.0
   else:
     0.0
 
-proc duration*(e: FastHap, s: var Cycler): float =
-  e.duration * s.cycle_duration
+proc gate*(e: FastHap, s: var Cycler): float = e.span.gate(s)
 
-proc haps*[T](p: Pattern, s: var Cycler): seq[Hap[T]] = p.query(cycle)
-
-proc fast_haps*(p: Pattern, s: var Cycler): seq[FastHap] =
-  p.query(cycle)
-   .map_it(FastHap(
-     span: FastTimeSpan(
-       begin: it.whole.get.begin.to_float,
-       `end`: it.whole.get.`end`.to_float
-     ),
-     value: it.value
-   ))
+proc gate*(e: Voice, s: var Cycler): float = e.duration(s)

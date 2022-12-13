@@ -13,7 +13,7 @@ type
   State* = object
     pool: Pool
     cycler: Cycler
-    notes: seq[FastHap]
+    notes: seq[Voice]
     melody: Frame
 
 proc control*(s: var State, cc: var Controllers, n: var Notes,
@@ -30,7 +30,7 @@ proc control*(s: var State, cc: var Controllers, n: var Notes,
     [[[!g3, o, b3, o, d3].sequence,
     [!g4, b4, d4].stack.euclid(2, 7), ].stack,
     [!g2, a2, g3, b3].euclid(3, 8), ].stack,
-  ].poly).fast_haps(s.cycler)
+  ].poly).voices(s.cycler)
 
 proc audio*(s: var State, cc: var Controllers, n: var Notes,
     input: Frame): Frame {.nimcall, exportc, dynlib.} =
@@ -43,8 +43,11 @@ proc audio*(s: var State, cc: var Controllers, n: var Notes,
   var bass = 0.0
 
   for note in s.notes:
-    let note_on = note.gate(s.cycler)
     let dur = note.duration(s.cycler)
+    # Voice duration returns 0 if the voice is not active,
+    # thus we can reuse it as a gate instead of note.gate(s.cycler)
+    # to save a few CPU cycles =)
+    let note_on = dur
     let melody_env = note_on.adsr(0.01, 0.2, 0.8, 5.0)
     let bass_env = note_on.adsr(1.5, 0.0, 0.9, 3.5)
     melody += note.value.fm_bltriangle(1/2, 2/3).mul(0.5) * melody_env
