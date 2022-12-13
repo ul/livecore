@@ -5,7 +5,7 @@
 # To render as fast as we can.
 NIM_FLAGS=$(
     tr '\n' ' ' <<EOF
---mm:arc -d:danger -d:lto
+--mm:arc -d:danger -d:lto --threads:off
 --cincludes:dsp/ffi/mufft
 --cincludes:dsp/ffi/soundpipe
 --cincludes:dsp/ffi/soundpipe/h

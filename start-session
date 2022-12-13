@@ -38,7 +38,7 @@ echo "All set, make sure server is running and edit src/session.nim to make some
 # In the session code we want as much performance as possible.
 NIM_FLAGS=$(
 	tr '\n' ' ' <<EOF
---mm:arc -d:danger -d:lto
+--mm:arc -d:danger -d:lto --threads:off
 --cincludes:dsp/ffi/mufft
 --cincludes:dsp/ffi/soundpipe
 --cincludes:dsp/ffi/soundpipe/h
