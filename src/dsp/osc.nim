@@ -55,3 +55,25 @@ detune(square, float)
 detune(blsaw, BlSaw)
 detune(bltriangle, BlTriangle)
 detune(blsquare, BlSquare)
+
+const half_1_pi = 0.5 / PI
+const half_pi = 0.5 * PI
+
+func fast_cos(x: float): float =
+  ## Approximates `cos(x)` in radians with a maximum error of `0.002`.
+  result = x
+  result *= half_1_pi
+  result -= 0.25 + (result + 0.25).floor
+  result *= 16.0 * (result.abs - 0.5)
+  result += 0.225 * result * (result.abs - 1.0)
+
+func fast_sin(x: float): float =
+  ## Approximates `sin(x)` in radians with a maximum error of `0.002`.
+  (x - half_pi).fast_cos
+
+proc fast_osc*(freq: float, phase: var float): float =
+  fast_sin(PI * freq.saw(phase))
+
+lift1(fast_osc, float)
+fm(fast_osc, float)
+detune(fast_osc, float)
