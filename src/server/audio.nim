@@ -9,7 +9,7 @@ proc audio_init(channels, sample_rate, dac_idx, adc_idx: cint,
 proc audio_start(device: pointer): int {.importc, header: "audio.h".}
 
 import
-  atomics,
+  std/atomics,
   context,
   ../dsp/frame,
   std/monotimes

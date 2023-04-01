@@ -1,6 +1,6 @@
 ## Fundamental audio frame constants, types and operations.
 
-import atomics, math
+import std/[atomics, math]
 
 const SAMPLE_RATE_INT* = 48000
 

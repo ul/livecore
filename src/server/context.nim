@@ -1,5 +1,5 @@
 import
-  atomics,
+  std/atomics,
   ../dsp/frame,
   dynlib
 
