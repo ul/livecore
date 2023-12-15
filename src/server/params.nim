@@ -12,7 +12,7 @@ proc get_params*(): Params =
   result.dac_id = -1
   result.adc_id = -1
   result.osc_addr = "7770"
-  result.arena_mb = 512
+  result.arena_mb = 2048
 
   for kind, key, val in getopt():
     case kind

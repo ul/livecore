@@ -187,7 +187,7 @@ func time_cat*[T](ps: openArray[(Fraction, Pattern[T])]): Pattern[T] =
 
 func cat*[T](ps: openArray[(Fraction, Pattern[T])]): Pattern[T] = time_cat(ps)
 
-func struct[T](p: Pattern[T], s: Pattern[T]): Pattern[T] =
+func struct*[T](p: Pattern[T], s: Pattern[T]): Pattern[T] =
   ## Apply the given structure to the pattern.
   ## `s` must consist of 0s and 1s only.
   # TODO relying on zeros as a marker for non-events is sketchy
@@ -327,8 +327,6 @@ func euclid*[T](p: Pattern[T], pulses, steps: int, rotation: int = 0): Pattern[T
   ## describe a large number of rhythms used in the most important music world traditions.
   p.struct(euclid.euclid(pulses, steps, rotation).map_it(
       it.to_float.pure).sequence)
-
-# TODO https://strudel.tidalcycles.org/tutorial/#javascript-api
 
 proc query_values*[T](p: Pattern[T], s: State): seq[T] =
   p.query(s).map_it(it.value)

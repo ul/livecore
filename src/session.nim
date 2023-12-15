@@ -20,38 +20,60 @@ proc control*(s: var State, cc: var Controllers, n: var Notes,
     frame_count: int) {.nimcall, exportc, dynlib.} =
   ## This is called each block before the audio is rendered.
 
-  let o = !0.0
+  const o = 0.0
+  const x = 1.0
 
   s.notes = ([
-    [[[!g3, b3, o, d3, o, g4, ].sequence,
-    [!b4, d4].stack.euclid(3, 8), ].stack,
-    [!g5, a5, g3, b3].euclid(5, 12), ].stack,
-
-    [[[!g3, o, b3, o, d3].sequence,
-    [!g4, b4, d4].stack.euclid(2, 7), ].stack,
-    [!g2, a2, g3, b3].euclid(3, 8), ].stack,
-  ].poly).voices(s.cycler)
+    [
+      [c3, e3, f3].struct([x, o, x, x, o, x]),
+      [c3, e3, g3].struct([x, x, o, x, o, x]),
+      [d3, e3, g3].struct([o, x, o, o, x, o]),
+    ].stack,
+    [
+      [c3, e3, f3].struct([x, o, x, x, o, x]),
+      [c3, e3, g3].struct([x, x, o, x, o, x]),
+      [d3, e3, g3].struct([o, x, o, o, x, o]),
+    ].sequence,
+  ].stack).voices(s.cycler)
 
 proc audio*(s: var State, cc: var Controllers, n: var Notes,
     input: Frame): Frame {.nimcall, exportc, dynlib.} =
   ## This is called each frame to render the audio.
 
   s.pool.init
-  s.cycler.tick(5.0)
+  s.cycler.tick((1/120).osc.biscale(1/16, 1/4).add((1/30).osc.mul(1/32)))
 
-  var melody = 0.0
-  var bass = 0.0
+  var sig = 0.0
 
   for note in s.notes:
     let note_on = note.gate(s.cycler)
     let dur = note.duration(s.cycler)
-    let melody_env = note_on.adsr(0.01, 0.2, 0.8, 5.0)
-    let bass_env = note_on.adsr(1.5, 0.0, 0.9, 3.5)
-    melody += note.value.fm_bltriangle(1/2, 2/3).mul(0.5) * melody_env
-    bass += note.value.mul(0.5).fm_fast_osc(1/2, 2/3).mul(0.5).delay(dur) * bass_env
+    let a = 1/4
+    let d = a*2
+    let s = 1/5
+    let r = dur - a - d
+    let env = note_on.adsr(a, d, s, r)
+    let n = note.value
+    let x = n.fm_bltriangle(
+        1/2.add((1/20).osc.mul(1/128)),
+        2/3.add((1/30).osc.mul(1/128)),
+      )
+      .mul(0.7071)
+      .add(n.mul(0.5).fm_osc(2/3, 1/2).mul(0.5))
+      .add(n.mul(2).fm_osc(1/2, 2/3).mul(0.25))
+      .add(n.mul(3).fm_bltriangle(1/2, 2/3).mul(0.2))
+      .mul(env)
+    let y = x.mul(0.5) + x
+      .mul(n.mul(4).bltriangle
+      .mul(0.1)
+      .mul(env)
+      .long_fb((1/30).tri.biscale(4, 16), 0.55))
+    sig += y
+      .long_fb(1.0 + dur.tline(1.0), 0.5)
 
-  let sig = (melody + bass).zitarev
   sig
+    .bqhpf(30, 0.7071)
+    .wp_korg35(c7, 0.95, 1.0)
     .simple_saturator
     .dc_block
 

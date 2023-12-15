@@ -10,7 +10,7 @@ import
 const
   large_pool = 0x100
   medium_pool = 0x80
-  small_pool = 0x10
+  small_pool = 0x40
 
 type
   Data = object
