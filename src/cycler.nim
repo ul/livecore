@@ -21,6 +21,11 @@ type Voice* = object
   spans*: seq[FastTimeSpan]
   value*: float
 
+type Note* = object
+  value*: float
+  gate*: float
+  duration*: float
+
 converter to_fast_timespan*(span: TimeSpan): FastTimeSpan =
   FastTimeSpan(
     begin: span.begin.to_float,
@@ -97,3 +102,33 @@ proc gate*(span: FastTimeSpan, s: var Cycler): float =
 proc gate*(e: FastHap, s: var Cycler): float = e.span.gate(s)
 
 proc gate*(e: Voice, s: var Cycler): float = e.current_span(s).gate(s)
+
+proc note*(e: Voice, s: var Cycler): Note =
+  Note(
+    value: e.value,
+    gate: e.gate(s),
+    duration: e.duration(s)
+  )
+
+proc set_value*(e: Note, value: float): Note =
+  Note(
+    value: value,
+    gate: e.gate,
+    duration: e.duration
+  )
+
+template with_value*(e: Note, f: untyped): Note =
+  let it {.inject.} = e.value
+  e.set_value(f)
+
+iterator as_notes*(voices: seq[Voice], s: var Cycler): Note =
+  for voice in voices:
+    yield voice.note(s)
+
+template sing*(s: var Cycler, voices: seq[Voice], f: untyped): float =
+  if voices.len == 0:
+    return 0.0
+  var result = 0.0
+  for note {.inject.} in voices.as_notes(s):
+    result = result + f
+  result / voices.len.to_float
