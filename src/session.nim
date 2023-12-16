@@ -9,16 +9,24 @@ import
 
 defDelay(300)
 
-proc adsr*(note: Note, a, d, s: float): float =
-  note.value * note.gate.adsr(a, d, s, note.duration - a - d)
+
+type Instrument = enum
+  Silence, Sine, Triangle, Square
+
+converter to_pattern*(value: (Instrument, float)): Pattern[(Instrument, float)] = pure(value)
+
+proc `*`(x: (Instrument, float), y: float): (Instrument, float) =
+  (x[0], x[1]*y)
+
+proc `*`(x: float, y: (Instrument, float)): (Instrument, float) =
+  (y[0], x*y[1])
+
 
 type
   State* = object
     pool: Pool
     cycler: Cycler
-    sines: seq[Voice]
-    triangles: seq[Voice]
-    squares: seq[Voice]
+    voices: seq[Voice[(Instrument, float)]]
 
 proc control*(s: var State, cc: var Controllers, n: var Notes,
     frame_count: int) {.nimcall, exportc, dynlib.} =
@@ -26,60 +34,69 @@ proc control*(s: var State, cc: var Controllers, n: var Notes,
 
   const o = 0.0
   const x = 1.0
+  const O = (Silence, o)
 
   const e = 8
 
-  let sines = [
-    [g3.euclid(9, e), o, o, o].sequence,
-    [c4.euclid(12, e), o, o, o, o],
-  ].sequence
+  let p = [
+    ([(Sine, c4).pure, (Triangle, e4), (Sine, g4)].euclid(3, e) * 6).struct([x, o, x, x, o, o, x, x, x, x, o, o]),
+    [(Sine, c3).pure, (Triangle, e3), (Sine, g3)].euclid(3, e) * 2
+  ].stack
 
-  let triangles = [[
-    [c3.euclid(3, e), o].sequence,
-    [e3.euclid(4, e), o, o],
-  ].sequence, sines].sequence
-
-  let squares = [[
-    g5.euclid(2, e),
-    c5.euclid(3, e),
-  ].sequence, triangles].sequence
-
-  s.sines = [sines, squares].stack.voices(s.cycler)
-  s.triangles = [triangles, sines].stack.voices(s.cycler)
-  s.squares = squares.voices(s.cycler)
+  s.voices = p.voices(s.cycler)
 
 proc audio*(s: var State, cc: var Controllers, n: var Notes,
     input: Frame): Frame {.nimcall, exportc, dynlib.} =
   ## This is called each frame to render the audio.
 
   s.pool.init
-  s.cycler.tick(6)
+  s.cycler.tick(20)
 
-  let atk = 1/128
+  let atk = 1/32
 
-  let sines = s.cycler.sing(s.sines):
-    let x = note.with_value:
-      it.fm_osc(1/2, 2/3)
-    x.adsr(atk, atk, 1/2)
+  let instruments = {
+    Sine: proc(note: Note): float =
+      let x = note.value.fm_osc(1/2, 2/3)
+      let a = atk.max(0.5*note.duration)
+      let d = 0.5*a
+      let sus = 0.8
+      note.gate
+        .adsr(a, d, sus, atk)
+        .mul(x)
+    ,
 
-  let triangles = s.cycler.sing(s.triangles):
-    let x = note.with_value:
-      it.fm_bltriangle(1/2, 2/3)
-    x.adsr(atk, atk, 1/2)
+    Triangle: proc(note: Note): float =
+      let x = note.value.fm_bltriangle(1/2, 2/3)
+      let a = atk.max(0.5*note.duration)
+      let d = 0.5*a
+      let sus = 0.8
+      note.gate
+        .adsr(a, d, sus, atk)
+        .mul(x)
+        .mul(1.2)
+    ,
 
-  let squares = s.cycler.sing(s.squares):
-    let x = note.with_value:
-      it.blsquare(0.5)
-    x.adsr(atk, atk, 1/2)
+    Square: proc(note: Note): float =
+      let x = note.value.blsquare(0.5)
+      let a = atk.max(0.5*note.duration)
+      let d = 0.5*a
+      let sus = 0.8
+      note.gate
+        .adsr(a, d, sus, atk)
+        .mul(x)
+        .mul(0.4)
+    ,
 
-  let choir =
-    sines.fb(0.2, 0.4) +
-    1.2*triangles.fb(0.3, 0.3) +
-    0.4*squares.wp_korg35(c6, 0.95, 1.0).fb(0.4, 0.6)
+    Silence: proc(note: Note): float {.closure.} =
+      0.0
+    ,
+  }
+
+  let choir = s.cycler.sing(s.voices, instruments)
 
   choir
-    .mul(0.5)
-    .long_fb(12, 0.5)
+    .mul(0.1)
+    # .long_fb(12, 0.5)
     .bqhpf(30, 0.7071)
     .wp_korg35(c7, 0.95, 1.0)
     .simple_saturator

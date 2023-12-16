@@ -187,7 +187,7 @@ func time_cat*[T](ps: openArray[(Fraction, Pattern[T])]): Pattern[T] =
 
 func cat*[T](ps: openArray[(Fraction, Pattern[T])]): Pattern[T] = time_cat(ps)
 
-func struct*[T](p: Pattern[T], s: Pattern[T]): Pattern[T] =
+func struct*[T](p: Pattern[T], s: Pattern[float]): Pattern[T] =
   ## Apply the given structure to the pattern.
   ## `s` must consist of 0s and 1s only.
   # TODO relying on zeros as a marker for non-events is sketchy

@@ -13,13 +13,13 @@ type FastTimeSpan* = object
   begin*: float
   `end`*: float
 
-type FastHap* = object
+type FastHap*[T] = object
   span*: FastTimeSpan
-  value*: float
+  value*: T
 
-type Voice* = object
+type Voice*[T] = object
   spans*: seq[FastTimeSpan]
-  value*: float
+  value*: T
 
 type Note* = object
   value*: float
@@ -32,7 +32,7 @@ converter to_fast_timespan*(span: TimeSpan): FastTimeSpan =
     `end`: span.`end`.to_float
   )
 
-converter to_fast_hap*(hap: Hap[float]): FastHap =
+converter to_fast_hap*[T](hap: Hap[T]): FastHap[T] =
   FastHap(
     span: hap.whole.get.to_fast_timespan,
     value: hap.value
@@ -51,12 +51,12 @@ proc haps*[T](p: Pattern[T], s: var Cycler): seq[Hap[T]] = p.query(cycle)
 proc fast_haps*(p: Pattern[float], s: var Cycler): seq[FastHap] =
   p.haps(s).map_it(it.to_fast_hap)
 
-proc voices*(p: Pattern[float], s: var Cycler): seq[Voice] =
-  var index = init_table[float, Voice]()
+proc voices*[T](p: Pattern[T], s: var Cycler): seq[Voice[T]] =
+  var index = init_table[T, Voice[T]]()
   for hap in p.haps(s):
     let value = hap.value
     if not index.has_key(value):
-      index[value] = Voice(spans: @[], value: value)
+      index[value] = Voice[T](spans: @[], value: value)
     index[value].spans.add(hap.whole.get.to_fast_timespan)
   index.values.to_seq
 
@@ -103,32 +103,15 @@ proc gate*(e: FastHap, s: var Cycler): float = e.span.gate(s)
 
 proc gate*(e: Voice, s: var Cycler): float = e.current_span(s).gate(s)
 
-proc note*(e: Voice, s: var Cycler): Note =
+proc note*[T](e: Voice[tuple[i: T, v: float]], s: var Cycler): Note =
   Note(
-    value: e.value,
+    value: e.value[1],
     gate: e.gate(s),
     duration: e.duration(s)
   )
 
-proc set_value*(e: Note, value: float): Note =
-  Note(
-    value: value,
-    gate: e.gate,
-    duration: e.duration
-  )
-
-template with_value*(e: Note, f: untyped): Note =
-  let it {.inject.} = e.value
-  e.set_value(f)
-
-iterator as_notes*(voices: seq[Voice], s: var Cycler): Note =
+proc sing*[T](s: var Cycler, voices: seq[Voice[tuple[i: T, v: float]]], instruments: openArray[(T, proc(n: Note): float)]): float =
   for voice in voices:
-    yield voice.note(s)
-
-template sing*(s: var Cycler, voices: seq[Voice], f: untyped): float =
-  if voices.len == 0:
-    return 0.0
-  var result = 0.0
-  for note {.inject.} in voices.as_notes(s):
-    result = result + f
-  result / voices.len.to_float
+    for instrument in instruments:
+      if voice.value[0] == instrument[0]:
+        result = result + instrument[1](voice.note(s))
