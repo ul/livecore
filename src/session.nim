@@ -39,8 +39,8 @@ proc control*(s: var State, cc: var Controllers, n: var Notes,
   const e = 8
 
   let p = [
-    ([(Sine, c4).pure, (Triangle, e4), (Sine, g4)].euclid(3, e) * 6).struct([x, o, x, x, o, o, x, x, x, x, o, o]),
-    [(Sine, c3).pure, (Triangle, e3), (Sine, g3)].euclid(3, e) * 2
+    ([!(Sine, c4), (Triangle, e4), (Sine, g4)].euclid(3, e) * 6).struct([x, o, x, x, o, o, x, x, x, x, o, o]),
+    [!(Sine, c3), (Triangle, e3), (Sine, g3)].euclid(3, e) * 2
   ].stack
 
   s.voices = p.voices(s.cycler)
@@ -50,9 +50,9 @@ proc audio*(s: var State, cc: var Controllers, n: var Notes,
   ## This is called each frame to render the audio.
 
   s.pool.init
-  s.cycler.tick(20)
+  s.cycler.tick((cc/0x14).scale(10, 30))
 
-  let atk = 1/32
+  let atk = (cc/0x10).scale(1/32, 1/4)
 
   let instruments = {
     Sine: proc(note: Note): float =

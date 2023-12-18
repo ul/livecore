@@ -1,6 +1,6 @@
 #define MINIAUDIO_IMPLEMENTATION
-#include "miniaudio.h"
 #include "audio.h"
+#include "miniaudio.h"
 #include <stddef.h>
 
 void audio_enum_devices(int dac_idx, int adx_idx) {
@@ -20,14 +20,20 @@ void audio_enum_devices(int dac_idx, int adx_idx) {
     return;
   }
 
-  printf("\nOutput devices (select with --dac:N):\n");
+  printf("\nOutput audio devices (select with --dac:N):\n");
   for (ma_uint32 idx = 0; idx < playback_count; idx += 1) {
-    printf("%d%s\t%s\n", idx, (dac_idx == -1 && playback_infos[idx].isDefault) || (dac_idx == (int)idx) ? " >>" : "", playback_infos[idx].name);
+    printf("%d%s\t%s\n", idx,
+           (dac_idx == -1 && playback_infos[idx].isDefault) ||
+                   (dac_idx == (int)idx)
+               ? " >>"
+               : "",
+           playback_infos[idx].name);
   }
 
-  printf("\nInput devices (select with --adc:N):\n");
+  printf("\nInput audio devices (select with --adc:N):\n");
   for (ma_uint32 idx = 0; idx < capture_count; idx += 1) {
-    printf("%d%s\t%s\n", idx, adx_idx == (int)idx ? " <<" : "", capture_infos[idx].name);
+    printf("%d%s\t%s\n", idx, adx_idx == (int)idx ? " <<" : "",
+           capture_infos[idx].name);
   }
 
   ma_context_uninit(&context);
@@ -55,14 +61,15 @@ ma_device *audio_init(ma_uint32 channels, ma_uint32 sample_rate, int dac_idx,
 
   int dac = dac_idx;
   if (dac < 0) {
-      for (ma_uint32 idx = 0; idx < playback_count; idx += 1) {
-        if (playback_infos[idx].isDefault) {
-          dac = idx;
-        }
+    for (ma_uint32 idx = 0; idx < playback_count; idx += 1) {
+      if (playback_infos[idx].isDefault) {
+        dac = idx;
       }
+    }
   }
 
-  ma_device_config config = ma_device_config_init(adx_idx > -1 ? ma_device_type_duplex : ma_device_type_playback);
+  ma_device_config config = ma_device_config_init(
+      adx_idx > -1 ? ma_device_type_duplex : ma_device_type_playback);
   config.playback.pDeviceID = &playback_infos[dac].id;
   config.playback.format = ma_format_f32;
   config.playback.channels = channels;

@@ -214,8 +214,8 @@ func to_pattern*(xs: openArray[float]): Pattern[float] = xs.map(pure).sequence
 # @     $     ~     &     %     |
 # !     ?     ^     .     :     \
 
-func `!`*(x: float): Pattern[float] = pure(x)
-func `--`*(x: float): Pattern[float] = pure(x)
+func `!`*[T](x: T): Pattern[T] = pure(x)
+func `--`*[T](x: T): Pattern[T] = pure(x)
 
 func `--`*[T](xs: openArray[Pattern[T]]): Pattern[T] = xs.sequence
 converter `--`*[T](xs: array[0..1, Pattern[T]]): Pattern[T] = xs.sequence
