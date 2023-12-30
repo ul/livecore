@@ -10,23 +10,21 @@ import
 defDelay(300)
 
 
-type Instrument = enum
-  Silence, Sine, Triangle, Square
-
-converter to_pattern*(value: (Instrument, float)): Pattern[(Instrument, float)] = pure(value)
-
-proc `*`(x: (Instrument, float), y: float): (Instrument, float) =
+proc `*`(x: (int, float), y: float): (int, float) =
   (x[0], x[1]*y)
 
-proc `*`(x: float, y: (Instrument, float)): (Instrument, float) =
+proc `*`(x: float, y: (int, float)): (int, float) =
   (y[0], x*y[1])
 
+{.experimental: "dotOperators".}
+proc `.`(x: int, y: float): Pattern[(int, float)] =
+  pure((x, y))
 
 type
   State* = object
     pool: Pool
     cycler: Cycler
-    voices: seq[Voice[(Instrument, float)]]
+    voices: seq[Voice[(int, float)]]
 
 proc control*(s: var State, cc: var Controllers, n: var Notes,
     frame_count: int) {.nimcall, exportc, dynlib.} =
@@ -34,13 +32,24 @@ proc control*(s: var State, cc: var Controllers, n: var Notes,
 
   const o = 0.0
   const x = 1.0
-  const O = (Silence, o)
 
-  const e = 8
+  let O = -1.o
 
-  let p = [
-    ([!(Sine, c4), (Triangle, e4), (Sine, g4)].euclid(3, e) * 6).struct([x, o, x, x, o, o, x, x, x, x, o, o]),
-    [!(Sine, c3), (Triangle, e3), (Sine, g3)].euclid(3, e) * 2
+  var p = [
+    [1.c5, 1.e5, 1.g5].euclid(12, 8),
+    [0.c4, 0.e4].sequence,
+    [0.c3, O].sequence,
+  ].euclid(3, 8) #.struct([x, x, o, x, o, x, o, x, x])
+
+  p = [
+    [
+      [1.c5, 1.e5, 1.g5].euclid(9, 8),
+      [0.c4, 0.e4].sequence,
+      [0.c3, O].sequence,
+    ].stack,
+    p,
+    p.euclid(4, 8),
+    [1.e3, O, O, O].euclid(3, 8),
   ].stack
 
   s.voices = p.voices(s.cycler)
@@ -50,12 +59,13 @@ proc audio*(s: var State, cc: var Controllers, n: var Notes,
   ## This is called each frame to render the audio.
 
   s.pool.init
-  s.cycler.tick((cc/0x14).scale(10, 30))
+  let cycle_dur = 10.0 # seconds
+  s.cycler.tick(60.0 / cycle_dur)
 
-  let atk = (cc/0x10).scale(1/32, 1/4)
+  let atk = 1/32
 
   let instruments = {
-    Sine: proc(note: Note): float =
+    0: proc(note: Note): float =
       let x = note.value.fm_osc(1/2, 2/3)
       let a = atk.max(0.5*note.duration)
       let d = 0.5*a
@@ -65,30 +75,16 @@ proc audio*(s: var State, cc: var Controllers, n: var Notes,
         .mul(x)
     ,
 
-    Triangle: proc(note: Note): float =
-      let x = note.value.fm_bltriangle(1/2, 2/3)
+    1: proc(note: Note): float =
+      let x = note.value.bl_triangle
       let a = atk.max(0.5*note.duration)
       let d = 0.5*a
       let sus = 0.8
       note.gate
-        .adsr(a, d, sus, atk)
+        .impulse(a)
         .mul(x)
-        .mul(1.2)
-    ,
-
-    Square: proc(note: Note): float =
-      let x = note.value.blsquare(0.5)
-      let a = atk.max(0.5*note.duration)
-      let d = 0.5*a
-      let sus = 0.8
-      note.gate
-        .adsr(a, d, sus, atk)
-        .mul(x)
-        .mul(0.4)
-    ,
-
-    Silence: proc(note: Note): float {.closure.} =
-      0.0
+        .mul(0.5)
+        .fb(0.5, 0.4)
     ,
   }
 
@@ -96,7 +92,7 @@ proc audio*(s: var State, cc: var Controllers, n: var Notes,
 
   choir
     .mul(0.1)
-    # .long_fb(12, 0.5)
+    .fb(0.8, 0.25)
     .bqhpf(30, 0.7071)
     .wp_korg35(c7, 0.95, 1.0)
     .simple_saturator
