@@ -35,7 +35,7 @@ proc control*(s: var State, cc: var Controllers, n: var Notes,
   let O = -1.o
 
   let p = [
-    [ 0.c4, O, 2.c5, O, 0.e4, O, 2.e5, O, 0.g4].sequence,
+    [ 0.c4, 0.e4, 2.g4].struct([x, o, x, x]),
     [ 1.c3, 1.e3, 1.g3 ].struct([o, x, x, x])
   ].poly
 
@@ -51,7 +51,7 @@ proc audio*(s: var State, cc: var Controllers, n: var Notes,
   s.pool.init
   let cycle_dur = 30.0 * (1.0 + (cc/0x1B)) # seconds
   s.cycler.tick(60.0 / cycle_dur)
-  let micro_cycle_dur = 0.01 + 4.0 * (cc/0x13)  # seconds
+  let micro_cycle_dur = 0.001 * cycle_dur * (1.0 + (cc/0x13))  # seconds
   s.micro_cycler.tick(60.0 / micro_cycle_dur)
 
   var ppp: float = 0.0
@@ -60,7 +60,7 @@ proc audio*(s: var State, cc: var Controllers, n: var Notes,
       ppp = v.value.tline(1/128)
       break
 
-  let atk = 1/128 + cc/0x17
+  let atk = 1/32 * (1.0 + 3.0 * (cc/0x17))
 
   let instruments = {
     0: proc(note: Note): float =
@@ -96,9 +96,10 @@ proc audio*(s: var State, cc: var Controllers, n: var Notes,
   }
 
   let choir = s.cycler.sing(s.voices, instruments)
+  let sig = choir.mul(0.2)
 
-  choir
-    .mul(0.2)
+  sig
+    .add(sig.delay((16/cycle_dur).osc.uni).bitcrush(8, SAMPLE_RATE / 16).mul(0.3))
     .fb(cycle_dur.tline(cycle_dur / 16), cc/0x1F, s.looong)
     .bqhpf(30 + c7*(cc/0x39), 0.7071)
     .wp_korg35(c7*(cc/0x3D), 0.95, 1.0)
