@@ -224,6 +224,11 @@ proc fb*(x, dt, k: float): float =
   pool.index.delay.inc
 lift3(fb)
 
+proc ff*(x, dt, k: float): float =
+  result = ff(x, dt, k, pool.data.delay[pool.index.delay])
+  pool.index.delay.inc
+lift3(ff)
+
 proc long_delay*(x, dt: float): float =
   result = delay(x, dt, pool.data.long_delay[pool.index.long_delay])
   pool.index.long_delay.inc
@@ -233,6 +238,11 @@ proc long_fb*(x, dt, k: float): float =
   result = fb(x, dt, k, pool.data.long_delay[pool.index.long_delay])
   pool.index.long_delay.inc
 lift3(long_fb)
+
+proc long_ff*(x, dt, k: float): float =
+  result = ff(x, dt, k, pool.data.long_delay[pool.index.long_delay])
+  pool.index.long_delay.inc
+lift3(long_ff)
 
 proc mono_width*(x, w: float): Frame =
   result = mono_width(x, w, pool.data.fms[pool.index.fms])

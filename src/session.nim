@@ -111,7 +111,7 @@ proc audio*(s: var State, cc: var Controllers, n: var Notes,
 
   sig
     .add(sig.delay((8/cycle_dur).osc.biscale(0.0, cycle_dur/32)).bitcrush(8, SAMPLE_RATE / 16).mul(0.2))
-    .fb(cycle_dur.tline(cycle_dur/8), cc/0x1F, s.looong)
+    .ff(cycle_dur.tline(cycle_dur/8), cc/0x1F, s.looong)
     .bqhpf(30 + c7*(cc/0x39), 0.7071)
     .wp_korg35(c7*(cc/0x3D), 0.95, 1.0)
     .zita_rev(level=0)
