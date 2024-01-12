@@ -3,19 +3,6 @@
 # This script is just for the development, it assumes that the session changes
 # are only for testing other code changes and don't need to be preserved.
 
-# In the session code we want as much performance as possible.
-NIM_FLAGS=$(
-	tr '\n' ' ' <<EOF
--d:danger -d:lto --threads:off
---cincludes:dsp/ffi/mufft
---cincludes:dsp/ffi/soundpipe
---cincludes:dsp/ffi/soundpipe/h
---passC:-ffast-math
---passC:-march=native
---passL:-fuse-ld=lld
---styleCheck:usages
-EOF
-)
 # dlopen tries really hard to reuse shared objects. The simplest way I've found
 # to workaround it on macOS is to build the library with a different name each
 # time. Just "double-buffer" copying as clive does didn't work, I assume because
@@ -24,9 +11,9 @@ EOF
 # make it work.
 
 rm target/session.so.*
-nim c $NIM_FLAGS --app:lib -o:target/session.so.$RANDOM src/session.nim
+nim c --app:lib -o:target/session.so.$RANDOM src/session.nim
 
 fswatch -o src | while read num; do
 	rm target/session.so.*
-	nim c $NIM_FLAGS --app:lib -o:target/session.so.$RANDOM src/session.nim
+	nim c --app:lib -o:target/session.so.$RANDOM src/session.nim
 done

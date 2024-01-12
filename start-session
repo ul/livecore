@@ -35,19 +35,6 @@ rm target/session.so.*
 
 echo "All set, make sure server is running and edit src/session.nim to make some noises."
 
-# In the session code we want as much performance as possible.
-NIM_FLAGS=$(
-	tr '\n' ' ' <<EOF
--d:danger -d:lto --threads:off
---cincludes:dsp/ffi/mufft
---cincludes:dsp/ffi/soundpipe
---cincludes:dsp/ffi/soundpipe/h
---passC:-ffast-math
---passC:-march=native
---passL:-fuse-ld=lld
---styleCheck:usages
-EOF
-)
 # dlopen tries really hard to reuse shared objects. The simplest way I've found
 # to workaround it on macOS is to build the library with a different name each
 # time. Just "double-buffer" copying as clive does didn't work, I assume because
@@ -57,7 +44,7 @@ EOF
 
 fswatch -o src | while read num; do
 	rm target/session.so.*
-	nim c $NIM_FLAGS --app:lib -o:target/session.so.$RANDOM src/session.nim && git commit -am "$(date)"
+	nim c --app:lib -o:target/session.so.$RANDOM src/session.nim && git commit -am "$(date)"
 done
 
 git commit -am "$(date)"

@@ -9,12 +9,8 @@ import
 
 defDelay(300)
 
-
 proc `*`(x: (int, float), y: float): (int, float) =
   (x[0], x[1]*y)
-
-proc `*`(x: float, y: (int, float)): (int, float) =
-  (y[0], x*y[1])
 
 {.experimental: "dotOperators".}
 proc `.`(x: int, y: float): Pattern[(int, float)] =
@@ -25,6 +21,9 @@ type
     pool: Pool
     cycler: Cycler
     voices: seq[Voice[(int, float)]]
+    micro_cycler: Cycler
+    parampat: seq[Voice[float]]
+    looong: Delay300
 
 proc control*(s: var State, cc: var Controllers, n: var Notes,
     frame_count: int) {.nimcall, exportc, dynlib.} =
@@ -35,66 +34,76 @@ proc control*(s: var State, cc: var Controllers, n: var Notes,
 
   let O = -1.o
 
-  var p = [
-    [1.c5, 1.e5, 1.g5].euclid(12, 8),
-    [0.c4, 0.e4].sequence,
-    [0.c3, O].sequence,
-  ].euclid(3, 8) #.struct([x, x, o, x, o, x, o, x, x])
+  let p = [
+    [ 0.c4, O, 2.c5, O, 0.e4, O, 2.e5, O, 0.g4].sequence,
+    [ 1.c3, 1.e3, 1.g3 ].struct([o, x, x, x])
+  ].poly
 
-  p = [
-    [
-      [1.c5, 1.e5, 1.g5].euclid(9, 8),
-      [0.c4, 0.e4].sequence,
-      [0.c3, O].sequence,
-    ].stack,
-    p,
-    p.euclid(4, 8),
-    [1.e3, O, O, O].euclid(3, 8),
-  ].stack
+  let micro_pat = [!(1/2), 1/4, 1/3, 1/5, 1/4, 1/3].euclid(3, 8)
 
   s.voices = p.voices(s.cycler)
+  s.parampat = micro_pat.voices(s.micro_cycler)
 
 proc audio*(s: var State, cc: var Controllers, n: var Notes,
     input: Frame): Frame {.nimcall, exportc, dynlib.} =
   ## This is called each frame to render the audio.
 
   s.pool.init
-  let cycle_dur = 10.0 # seconds
+  let cycle_dur = 30.0 * (1.0 + (cc/0x1B)) # seconds
   s.cycler.tick(60.0 / cycle_dur)
+  let micro_cycle_dur = 0.01 + 4.0 * (cc/0x13)  # seconds
+  s.micro_cycler.tick(60.0 / micro_cycle_dur)
 
-  let atk = 1/32
+  var ppp: float = 0.0
+  for v in s.parampat:
+    if v.gate(s.micro_cycler) > 0:
+      ppp = v.value.tline(1/128)
+      break
+
+  let atk = 1/128 + cc/0x17
 
   let instruments = {
     0: proc(note: Note): float =
-      let x = note.value.fm_osc(1/2, 2/3)
+      let x = note.value.fm_osc(1/5, ppp)
       let a = atk.max(0.5*note.duration)
       let d = 0.5*a
       let sus = 0.8
       note.gate
         .adsr(a, d, sus, atk)
         .mul(x)
+        .mul(0.7071)
     ,
 
     1: proc(note: Note): float =
-      let x = note.value.bl_triangle
+      let x = note.value.osc * note.value.saw
+      let a = atk.max(0.5*note.duration)
+      note.gate
+        .impulse(a)
+        .mul(x)
+        .mul(2)
+    ,
+
+    2: proc(note: Note): float =
+      let x = note.value.fm_bl_triangle(1/5, ppp)
       let a = atk.max(0.5*note.duration)
       let d = 0.5*a
       let sus = 0.8
       note.gate
-        .impulse(a)
+        .adsr(a, d, sus, atk)
         .mul(x)
-        .mul(0.5)
-        .fb(0.5, 0.4)
+        .mul(0.7071)
     ,
   }
 
   let choir = s.cycler.sing(s.voices, instruments)
 
   choir
-    .mul(0.1)
-    .fb(0.8, 0.25)
-    .bqhpf(30, 0.7071)
-    .wp_korg35(c7, 0.95, 1.0)
+    .mul(0.2)
+    .fb(cycle_dur.tline(cycle_dur / 16), cc/0x1F, s.looong)
+    .bqhpf(30 + c7*(cc/0x39), 0.7071)
+    .wp_korg35(c7*(cc/0x3D), 0.95, 1.0)
+    .zita_rev(level=0)
+    .mul(cc/0x3E)
     .simple_saturator
     .dc_block
 

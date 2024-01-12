@@ -10,6 +10,7 @@ proc midi_in_callback(timestamp: float64; m: openArray[byte]) =
   case m[0]
   of 0xB0: # cc
     the_ctx.controllers[m[1]].store(m[2].float / 0x7F)
+    echo  "cc/0x", m[1].to_hex, " = ", m[2].float / 0x7F
   # notes are encoded as uint16 to atomically update both pitch and velocity
   # lower byte is pitch, and higher one is velocity
   of 0x90: # note on
