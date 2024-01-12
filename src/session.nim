@@ -35,11 +35,11 @@ proc control*(s: var State, cc: var Controllers, n: var Notes,
   let O = -1.o
 
   let p = [
-    [ 0.c4, 0.e4, 2.g4].struct([x, o, x, x]),
-    [ 1.c3, 1.e3, 1.g3 ].struct([o, x, x, x])
+    [ 0.c4, 0.e4, 2.g4, O, 2.c5, O, 1.e4].sequence,
+    [ 1.c3, O, 1.e3, O, 1.g3 ].struct([o, x, x, x]).fast(6)
   ].poly
 
-  let micro_pat = [!(1/2), 1/4, 1/3, 1/5, 1/4, 1/3].euclid(3, 8)
+  let micro_pat = [!(1/2), 1/4, 1/3, 1/5, 1/4, 1/3].euclid(3, 4)
 
   s.voices = p.voices(s.cycler)
   s.parampat = micro_pat.voices(s.micro_cycler)
@@ -49,9 +49,9 @@ proc audio*(s: var State, cc: var Controllers, n: var Notes,
   ## This is called each frame to render the audio.
 
   s.pool.init
-  let cycle_dur = 30.0 * (1.0 + (cc/0x1B)) # seconds
+  let cycle_dur = 30.0 * 3.pow(cc/0x1B) # seconds
   s.cycler.tick(60.0 / cycle_dur)
-  let micro_cycle_dur = 0.001 * cycle_dur * (1.0 + (cc/0x13))  # seconds
+  let micro_cycle_dur = 0.001 * cycle_dur * 10.pow(cc/0x13)  # seconds
   s.micro_cycler.tick(60.0 / micro_cycle_dur)
 
   var ppp: float = 0.0
@@ -60,11 +60,11 @@ proc audio*(s: var State, cc: var Controllers, n: var Notes,
       ppp = v.value.tline(1/128)
       break
 
-  let atk = 1/32 * (1.0 + 3.0 * (cc/0x17))
+  let atk = 1/(1.0 + 0x7F * (cc/0x17))
 
   let instruments = {
     0: proc(note: Note): float =
-      let x = note.value.fm_osc(1/5, ppp)
+      let x = note.value.fm_osc(ppp, 1/2)
       let a = atk.max(0.5*note.duration)
       let d = 0.5*a
       let sus = 0.8
@@ -80,11 +80,11 @@ proc audio*(s: var State, cc: var Controllers, n: var Notes,
       note.gate
         .impulse(a)
         .mul(x)
-        .mul(2)
+        .mul(0.5)
     ,
 
     2: proc(note: Note): float =
-      let x = note.value.fm_bl_triangle(1/5, ppp)
+      let x = note.value.fm_bl_triangle(ppp, 1/2)
       let a = atk.max(0.5*note.duration)
       let d = 0.5*a
       let sus = 0.8
@@ -99,7 +99,7 @@ proc audio*(s: var State, cc: var Controllers, n: var Notes,
   let sig = choir.mul(0.2)
 
   sig
-    .add(sig.delay((16/cycle_dur).osc.uni).bitcrush(8, SAMPLE_RATE / 16).mul(0.3))
+    .add(sig.delay((8/cycle_dur).osc.uni).bitcrush(8, SAMPLE_RATE / 16).mul(0.3))
     .fb(cycle_dur.tline(cycle_dur / 16), cc/0x1F, s.looong)
     .bqhpf(30 + c7*(cc/0x39), 0.7071)
     .wp_korg35(c7*(cc/0x3D), 0.95, 1.0)
