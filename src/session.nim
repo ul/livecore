@@ -33,13 +33,15 @@ proc control*(s: var State, cc: var Controllers, n: var Notes,
   const x = 1.0
 
   let O = -1.o
+  let D = 3.o
 
   let p = [
-    [ 0.c4, 0.e4, 2.g4, O, 2.c5, O, 1.e4].sequence,
-    [ 1.c3, O, 1.e3, O, 1.g3 ].struct([o, x, x, x]).fast(6)
+    [ 0.c4, 0.e4, 2.g4, O, 2.c5, O, 1.e5, 0.e4 ].sequence,
+    [ 1.c3, O, 1.e3, O, 1.g3 ].struct([o, x, x, x]).fast(4),
+    [ D, O ].sequence.euclid(7, 12).fast(6)
   ].poly
 
-  let micro_pat = [!(1/2), 1/4, 1/3, 1/5, 1/4, 1/3].euclid(3, 4)
+  let micro_pat = [!(1/2), 1/3, 1/5, 1/2, 1/3].euclid(3, 4)
 
   s.voices = p.voices(s.cycler)
   s.parampat = micro_pat.voices(s.micro_cycler)
@@ -49,9 +51,9 @@ proc audio*(s: var State, cc: var Controllers, n: var Notes,
   ## This is called each frame to render the audio.
 
   s.pool.init
-  let cycle_dur = 30.0 * 3.pow(cc/0x1B) # seconds
+  let cycle_dur = 20.0 * 8.pow(cc/0x1B) # seconds
   s.cycler.tick(60.0 / cycle_dur)
-  let micro_cycle_dur = 0.001 * cycle_dur * 10.pow(cc/0x13)  # seconds
+  let micro_cycle_dur = 0.005 * cycle_dur * 10.pow(cc/0x13)  # seconds
   s.micro_cycler.tick(60.0 / micro_cycle_dur)
 
   var ppp: float = 0.0
@@ -60,38 +62,47 @@ proc audio*(s: var State, cc: var Controllers, n: var Notes,
       ppp = v.value.tline(1/128)
       break
 
-  let atk = 1/(1.0 + 0x7F * (cc/0x17))
+  let atk = 4.0/pow(256, cc/0x17)
 
   let instruments = {
     0: proc(note: Note): float =
       let x = note.value.fm_osc(ppp, 1/2)
-      let a = atk.max(0.5*note.duration)
+      let a = atk.min(0.5*note.duration.max(1/64))
       let d = 0.5*a
       let sus = 0.8
       note.gate
         .adsr(a, d, sus, atk)
-        .mul(x)
-        .mul(0.7071)
-    ,
-
-    1: proc(note: Note): float =
-      let x = note.value.osc * note.value.saw
-      let a = atk.max(0.5*note.duration)
-      note.gate
-        .impulse(a)
         .mul(x)
         .mul(0.5)
     ,
 
+    1: proc(note: Note): float =
+      let x = note.value.osc * note.value.saw
+      let a = atk.min(0.5*note.duration.max(1/64))
+      note.gate
+        .impulse(a)
+        .mul(x)
+        .mul(1.0)
+    ,
+
     2: proc(note: Note): float =
       let x = note.value.fm_bl_triangle(ppp, 1/2)
-      let a = atk.max(0.5*note.duration)
+      let a = atk.min(0.5*note.duration.max(1/64))
       let d = 0.5*a
       let sus = 0.8
       note.gate
         .adsr(a, d, sus, atk)
         .mul(x)
-        .mul(0.7071)
+        .mul(0.5)
+    ,
+
+    3: proc(note: Note): float =
+      let a = atk.min(0.5*note.duration.max(1/64)).min(1/4)
+      let x = white_noise().mul(110.osc).bqlpf(110.0, 0.7071).fb(0.5*a, 0.25).sin
+      note.gate
+        .impulse(a)
+        .mul(x)
+        .mul(2.0)
     ,
   }
 
@@ -99,8 +110,8 @@ proc audio*(s: var State, cc: var Controllers, n: var Notes,
   let sig = choir.mul(0.2)
 
   sig
-    .add(sig.delay((8/cycle_dur).osc.uni).bitcrush(8, SAMPLE_RATE / 16).mul(0.3))
-    .fb(cycle_dur.tline(cycle_dur / 16), cc/0x1F, s.looong)
+    .add(sig.delay((8/cycle_dur).osc.biscale(0.0, cycle_dur/32)).bitcrush(8, SAMPLE_RATE / 16).mul(0.2))
+    .fb(cycle_dur.tline(cycle_dur/8), cc/0x1F, s.looong)
     .bqhpf(30 + c7*(cc/0x39), 0.7071)
     .wp_korg35(c7*(cc/0x3D), 0.95, 1.0)
     .zita_rev(level=0)
