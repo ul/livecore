@@ -194,3 +194,6 @@ proc `%%`*(x, y: float): float = quantize(x, y)
 lift2(`%%`)
 
 const silence* = 0.0
+
+func hush*(x: float): float = 0.0
+lift1(hush)

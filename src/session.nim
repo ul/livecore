@@ -66,7 +66,7 @@ proc audio*(s: var State, cc: var Controllers, n: var Notes,
 
   let instruments = {
     0: proc(note: Note): float =
-      let x = note.value.fm_osc(ppp, 1/2)
+      let x = note.value.fm_osc(ppp, 1/2) + pink_noise().mul(0.1)
       let a = atk.min(0.5*note.duration.max(1/64))
       let d = 0.5*a
       let sus = 0.8
@@ -86,7 +86,7 @@ proc audio*(s: var State, cc: var Controllers, n: var Notes,
     ,
 
     2: proc(note: Note): float =
-      let x = note.value.fm_bl_triangle(ppp, 1/2)
+      let x = note.value.fm_bl_triangle(ppp, 1/2) + pink_noise().mul(0.1)
       let a = atk.min(0.5*note.duration.max(1/64))
       let d = 0.5*a
       let sus = 0.8
@@ -107,13 +107,14 @@ proc audio*(s: var State, cc: var Controllers, n: var Notes,
   }
 
   let choir = s.cycler.sing(s.voices, instruments)
-  let sig = choir.mul(0.2)
 
-  sig
-    .add(sig.delay((8/cycle_dur).osc.biscale(0.0, cycle_dur/32)).bitcrush(8, SAMPLE_RATE / 16).mul(0.2))
+  choir
+    .add(choir.delay((8/cycle_dur).osc.biscale(0.0, cycle_dur/32)).bitcrush(8, SAMPLE_RATE / 16).mul(0.2))
     .ff(cycle_dur.tline(cycle_dur/8), cc/0x1F, s.looong)
-    .bqhpf(30 + c7*(cc/0x39), 0.7071)
     .wp_korg35(c7*(cc/0x3D), 0.95, 1.0)
+    .bqnotch_bw(315.0, 0.5)
+    .bqnotch_bw(640.0, 1.0)
+    .bqhpf(30 + c7*(cc/0x39), 0.7071)
     .zita_rev(level=0)
     .mul(cc/0x3E)
     .simple_saturator
