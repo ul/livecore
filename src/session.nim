@@ -37,11 +37,11 @@ proc control*(s: var State, cc: var Controllers, n: var Notes,
 
   let p = [
     [ 0.c4, 0.e4, 2.g4, O, 2.c5, O, 1.e5, 0.e4 ].sequence,
-    [ 1.c3, O, 1.e3, O, 1.g3 ].struct([o, x, x, x]).fast(4),
-    [ D, O ].sequence.euclid(7, 12).fast(6)
+    [ 1.c3, O, 1.e3, O, 1.g3 ].euclid(8, 12).fast(2),
+    [ D, O ].euclid(7, 12).fast(6)
   ].poly
 
-  let micro_pat = [!(1/2), 1/3, 1/5, 1/2, 1/3].euclid(3, 4)
+  let micro_pat = [!(1/2), 1/3, 1/5, 2/1, 3/1].euclid(3, 4)
 
   s.voices = p.voices(s.cycler)
   s.parampat = micro_pat.voices(s.micro_cycler)
@@ -102,7 +102,7 @@ proc audio*(s: var State, cc: var Controllers, n: var Notes,
       note.gate
         .impulse(a)
         .mul(x)
-        .mul(2.0)
+        .mul(1.0)
     ,
   }
 
@@ -111,10 +111,10 @@ proc audio*(s: var State, cc: var Controllers, n: var Notes,
   choir
     .add(choir.delay((8/cycle_dur).osc.biscale(0.0, cycle_dur/32)).bitcrush(8, SAMPLE_RATE / 16).mul(0.2))
     .ff(cycle_dur.tline(cycle_dur/8), cc/0x1F, s.looong)
-    .wp_korg35(c7*(cc/0x3D), 0.95, 1.0)
+    .wp_korg35(c7 - c7.pow(1 - cc/0x3D), 0.95, 1.0)
     .bqnotch_bw(315.0, 0.5)
     .bqnotch_bw(640.0, 1.0)
-    .bqhpf(30 + c7*(cc/0x39), 0.7071)
+    .bqhpf(30 + c7.pow(cc/0x39), 0.7071)
     .zita_rev(level=0)
     .mul(cc/0x3E)
     .simple_saturator
