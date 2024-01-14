@@ -33,15 +33,16 @@ proc control*(s: var State, cc: var Controllers, n: var Notes,
   const x = 1.0
 
   let O = -1.o
-  let D = 3.o
+
+  let ch1 = [0.c4, 0.e4, 0.g4].stack
+  let ch2 = [2.e4, 2.g4, 2.c5].stack
 
   let p = [
-    [ 0.c4, 0.e4, 2.g4, O, 2.c5, O, 1.e5, 0.e4 ].sequence,
-    [ 1.c3, O, 1.e3, O, 1.g3 ].euclid(8, 12).fast(2),
-    [ D, O ].euclid(7, 12).fast(6)
+    [ (1//1, ch1), (23//1, O), (1//1, ch2), (23//1, O) ].cat,
+    [ 3.c2, 1.c6, 3.e2, 1.e6, 3.g2, 1.c6, 3.e2, 1.e6 ].fast(6)
   ].poly
 
-  let micro_pat = [!(1/2), 1/3, 1/5, 2/1, 3/1].euclid(3, 4)
+  let micro_pat = [!(1/2), 1/3, 2/3].euclid(3, 4)
 
   s.voices = p.voices(s.cycler)
   s.parampat = micro_pat.voices(s.micro_cycler)
@@ -53,7 +54,7 @@ proc audio*(s: var State, cc: var Controllers, n: var Notes,
   s.pool.init
   let cycle_dur = 20.0 * 8.pow(cc/0x1B) # seconds
   s.cycler.tick(60.0 / cycle_dur)
-  let micro_cycle_dur = 0.005 * cycle_dur * 10.pow(cc/0x13)  # seconds
+  let micro_cycle_dur = 1/32 * cycle_dur * 16.pow(cc/0x13)  # seconds
   s.micro_cycler.tick(60.0 / micro_cycle_dur)
 
   var ppp: float = 0.0
@@ -66,10 +67,10 @@ proc audio*(s: var State, cc: var Controllers, n: var Notes,
 
   let instruments = {
     0: proc(note: Note): float =
-      let x = note.value.fm_osc(ppp, 1/2) + pink_noise().mul(0.1)
+      let x = note.value.fm_osc(ppp, 1/5) + pink_noise().mul(0.1)
       let a = atk.min(0.5*note.duration.max(1/64))
-      let d = 0.5*a
-      let sus = 0.8
+      let d = 0.25*a
+      let sus = 0.5
       note.gate
         .adsr(a, d, sus, atk)
         .mul(x)
@@ -77,19 +78,19 @@ proc audio*(s: var State, cc: var Controllers, n: var Notes,
     ,
 
     1: proc(note: Note): float =
-      let x = note.value.osc * note.value.saw
-      let a = atk.min(0.5*note.duration.max(1/64))
+      let a = atk.min(0.5*note.duration.max(1/64)).min(1/32)
+      let x = white_noise().bqhpf(note.value, 0.7071).ff(0.5*a, 0.2).bqlpf(2*note.value, 0.7071)
       note.gate
         .impulse(a)
         .mul(x)
-        .mul(1.0)
+        .mul(0.4)
     ,
 
     2: proc(note: Note): float =
-      let x = note.value.fm_bl_triangle(ppp, 1/2) + pink_noise().mul(0.1)
+      let x = note.value.fm_bl_triangle(ppp, 1/5) + pink_noise().mul(0.1)
       let a = atk.min(0.5*note.duration.max(1/64))
-      let d = 0.5*a
-      let sus = 0.8
+      let d = 0.25*a
+      let sus = 0.5
       note.gate
         .adsr(a, d, sus, atk)
         .mul(x)
@@ -98,18 +99,18 @@ proc audio*(s: var State, cc: var Controllers, n: var Notes,
 
     3: proc(note: Note): float =
       let a = atk.min(0.5*note.duration.max(1/64)).min(1/4)
-      let x = white_noise().mul(110.osc).bqlpf(110.0, 0.7071).fb(0.5*a, 0.25).sin
+      let x = white_noise().mul(note.value.osc).bqlpf(2*note.value, 0.7071).ff(0.5*a, 0.25).sin
       note.gate
         .impulse(a)
         .mul(x)
-        .mul(1.0)
+        .mul(1.2)
     ,
   }
 
   let choir = s.cycler.sing(s.voices, instruments)
 
   choir
-    .add(choir.delay((8/cycle_dur).osc.biscale(0.0, cycle_dur/32)).bitcrush(8, SAMPLE_RATE / 16).mul(0.2))
+    .add(choir.delay((8/cycle_dur).osc.biscale(0.0, cycle_dur/32)).bitcrush(8, SAMPLE_RATE / 16).mul(0.1))
     .ff(cycle_dur.tline(cycle_dur/8), cc/0x1F, s.looong)
     .wp_korg35(c7 - c7.pow(1 - cc/0x3D), 0.95, 1.0)
     .bqnotch_bw(315.0, 0.5)
