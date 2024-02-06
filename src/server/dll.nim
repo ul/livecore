@@ -1,8 +1,6 @@
 import
-  atomics,
-  context,
-  dynlib,
-  os
+  std/[atomics, dynlib, os],
+  context
 
 proc load_session*(ctx: ptr Context, new_path: string) =
   let new_lib = new_path.load_lib
@@ -32,7 +30,7 @@ proc load_session*(ctx: ptr Context, new_path: string) =
   # `audio` call.
   while ctx.in_process.load: discard
 
-  ctx.stats.sum = 0.0
+  ctx.stats.avg = 0.0
   ctx.stats.min = Inf
   ctx.stats.max = 0.0
   ctx.stats.n = 0

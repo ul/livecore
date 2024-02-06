@@ -9,12 +9,11 @@ proc audio_init(channels, sample_rate, dac_idx, adc_idx: cint,
 proc audio_start(device: pointer): int {.importc, header: "audio.h".}
 
 import
-  std/atomics,
-  context,
+  std/[atomics, monotimes],
   ../dsp/frame,
-  std/monotimes
+  context
 
-proc now(): float64 = get_mono_time().ticks.float64 / 1e6 # milliseconds
+proc now(): float64 = get_mono_time().ticks.float64 / 1e9 # seconds
 
 proc data_callback(device, output, input: pointer,
     frame_count: cuint) {.cdecl.} =
@@ -44,11 +43,11 @@ proc data_callback(device, output, input: pointer,
           channel)*(sizeof float32))
       ptr_sample[] = samples[channel].float32.min(1.0).max(-1.0)
 
-  let t = now() - start
-  ctx.stats.sum += t
+  let t = (now() - start).seconds / frame_count.float64
+  ctx.stats.n.inc
+  ctx.stats.avg += (t - ctx.stats.avg) / ctx.stats.n.to_float
   ctx.stats.min = min(ctx.stats.min, t)
   ctx.stats.max = max(ctx.stats.max, t)
-  ctx.stats.n.inc
   ctx.in_process.store(false)
 
 proc start_audio*(ctx: ptr Context, dac_idx, adc_idx: int) =

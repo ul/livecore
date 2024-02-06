@@ -1,9 +1,8 @@
 import
+  std/[math, os],
   context,
   dll,
-  ffi/fswatch,
-  math,
-  os
+  ffi/fswatch
 
 const TARGET_PATH = "./target"
 const SESSION_FILTER = "session\\.so\\.[0-9]+$"
@@ -17,14 +16,12 @@ proc find_newest_session(): string =
       result = path
 
 proc fms(x: float): string =
-  $round(x, 3) & "ms"
+  $round(100.0 * x, 1) & "%"
 
 proc load_newest_session(ctx: ptr Context) =
   let path = find_newest_session()
   if path != "":
-    if ctx.stats.n > 0:
-      echo ">", fms(ctx.stats.min), " ", fms(ctx.stats.sum / ctx.stats.n.float),
-          " ", fms(ctx.stats.max), "<"
+    echo ">", fms(ctx.stats.min), " ", fms(ctx.stats.avg), " ", fms(ctx.stats.max), "<"
     ctx.load_session(path)
     echo "<= ", path.extract_filename
 

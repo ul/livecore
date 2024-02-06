@@ -1,7 +1,6 @@
 import
-  std/atomics,
-  ../dsp/frame,
-  dynlib
+  std/[atomics, dynlib],
+  ../dsp/frame
 
 type
   Audio* = proc(arena: pointer, cc: var Controllers, n: var Notes,
@@ -13,7 +12,7 @@ type
   Stats* = object
     min*: float
     max*: float
-    sum*: float
+    avg*: float
     n*: int
   Context* = object
     audio*: Atomic[Audio]
