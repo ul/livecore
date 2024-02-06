@@ -34,13 +34,13 @@ proc control*(s: var State, cc: var Controllers, n: var Notes,
 
   let O = -1.o
 
-  let ch1 = [0.c4, 0.e4, 0.g4].stack
-  let ch2 = [2.e4, 2.g4, 2.c5].stack
+  let ch1 = //[0.c4, --[O, 0.e4], --[O, O, 0.g4]]
+  let ch2 = //[2.e4, --[O, 2.g4], --[O, O, 2.c5]]
 
-  let p = [
-    [ (1//1, ch1), (23//1, O), (1//1, ch2), (23//1, O) ].cat,
-    [ 3.c2, 1.c6, 3.e2, 1.e6, 3.g2, 1.c6, 3.e2, 1.e6 ].fast(6)
-  ].poly
+  let p = //[
+    --[ ch1, O/23, ch2, O/23 ],
+    --[ 3.c2, 1.c6, 3.e2, 1.e6, 3.g2, 1.c6, 3.e2, 1.e6 ] * 6
+  ]
 
   let micro_pat = [!(1/2), 1/3, 2/3].euclid(3, 4)
 
@@ -68,13 +68,13 @@ proc audio*(s: var State, cc: var Controllers, n: var Notes,
   let instruments = {
     0: proc(note: Note): float =
       let x = note.value.fm_osc(ppp, 1/5) + pink_noise().mul(0.1)
-      let a = atk.min(0.5*note.duration.max(1/64))
-      let d = 0.25*a
+      let a = atk.min(0.2*note.duration.max(1/64))
+      let d = 2*a
       let sus = 0.5
       note.gate
-        .adsr(a, d, sus, atk)
+        .adsr(a, d, sus, d)
         .mul(x)
-        .mul(0.5)
+        .mul(1.0)
     ,
 
     1: proc(note: Note): float =
@@ -83,18 +83,18 @@ proc audio*(s: var State, cc: var Controllers, n: var Notes,
       note.gate
         .impulse(a)
         .mul(x)
-        .mul(0.4)
+        .mul(0.8)
     ,
 
     2: proc(note: Note): float =
       let x = note.value.fm_bl_triangle(ppp, 1/5) + pink_noise().mul(0.1)
-      let a = atk.min(0.5*note.duration.max(1/64))
-      let d = 0.25*a
+      let a = atk.min(0.2*note.duration.max(1/64))
+      let d = 2*a
       let sus = 0.5
       note.gate
-        .adsr(a, d, sus, atk)
+        .adsr(a, d, sus, d)
         .mul(x)
-        .mul(0.5)
+        .mul(1.0)
     ,
 
     3: proc(note: Note): float =
@@ -103,7 +103,7 @@ proc audio*(s: var State, cc: var Controllers, n: var Notes,
       note.gate
         .impulse(a)
         .mul(x)
-        .mul(1.2)
+        .mul(2.4)
     ,
   }
 
