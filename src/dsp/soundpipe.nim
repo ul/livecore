@@ -1,6 +1,9 @@
 ## https://pbat.ch/proj/soundpipe.html
 
-import frame, random, ffi/soundpipe
+import
+  std/random,
+  frame,
+  ffi/soundpipe
 
 type SP = soundpipe.data
 

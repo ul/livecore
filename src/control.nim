@@ -1,6 +1,9 @@
 ## Sugar for external control.
 
-import dsp/frame, atomics, pool
+import
+  std/atomics,
+  dsp/frame,
+  pool
 
 proc `/`*(cc: var Controllers, idx: int): float {.inline.} =
   ## Within the `audio` with the global memory pool allows sugar like `cc/0x36`

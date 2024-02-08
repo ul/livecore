@@ -1,6 +1,8 @@
 ## UPOLS FFT convolution.
 
-import math, ffi/mufft/fft
+import
+  std/math,
+  ffi/mufft/fft
 
 template defFIR*(name: untyped, block_size: static[Natural], ir_path: static[string]) =
   ## `block_size` must be a power of two.

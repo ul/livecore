@@ -3,7 +3,9 @@
 ## buggy things in SoundGarden and LiveCore it's capable of producing
 ## interesting sounds.
 
-import math, ffi/mufft/fft
+import
+  std/math,
+  ffi/mufft/fft
 
 template defBadFFT*(window_size: static[Natural], hop_size: static[Natural]) =
   const window = hann(window_size)

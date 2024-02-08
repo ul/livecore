@@ -1,4 +1,6 @@
-import frame, std/macros
+import
+  std/macros,
+  frame
 
 macro defnotes() =
   result = nnk_stmt_list.new_tree

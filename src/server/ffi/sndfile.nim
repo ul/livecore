@@ -157,8 +157,8 @@ const
   SFC_RAW_DATA_NEEDS_ENDSWAP* = 0x00001110  ##  Support for Wavex Ambisonics Format
   SFC_WAVEX_SET_AMBISONIC* = 0x00001200
   SFC_WAVEX_GET_AMBISONIC* = 0x00001201     ##
-                                          ## * RF64 files can be set so that on-close, writable files that have less
-                                          ## * than 4GB of data in them are converted to RIFF/WAV, as per EBU
+                                            ## * RF64 files can be set so that on-close, writable files that have less
+                                            ## * than 4GB of data in them are converted to RIFF/WAV, as per EBU
                                             ## * recommendations.
                                             ##
   SFC_RF64_AUTO_DOWNGRADE* = 0x00001210
@@ -230,27 +230,27 @@ const
 const
   SF_CHANNEL_MAP_INVALID* = 0
   SF_CHANNEL_MAP_MONO* = 1
-  SF_CHANNEL_MAP_LEFT* = 2                  ##  Apple calls this 'Left'
-  SF_CHANNEL_MAP_RIGHT* = 3                 ##  Apple calls this 'Right'
-  SF_CHANNEL_MAP_CENTER* = 4                ##  Apple calls this 'Center'
+  SF_CHANNEL_MAP_LEFT* = 2                   ##  Apple calls this 'Left'
+  SF_CHANNEL_MAP_RIGHT* = 3                  ##  Apple calls this 'Right'
+  SF_CHANNEL_MAP_CENTER* = 4                 ##  Apple calls this 'Center'
   SF_CHANNEL_MAP_FRONT_LEFT* = 5
   SF_CHANNEL_MAP_FRONT_RIGHT* = 6
   SF_CHANNEL_MAP_FRONT_CENTER* = 7
-  SF_CHANNEL_MAP_REAR_CENTER* = 8 ##  Apple calls this 'Center Surround', Msft calls this 'Back Center'
-  SF_CHANNEL_MAP_REAR_LEFT* = 9 ##  Apple calls this 'Left Surround', Msft calls this 'Back Left'
-  SF_CHANNEL_MAP_REAR_RIGHT* = 10 ##  Apple calls this 'Right Surround', Msft calls this 'Back Right'
-  SF_CHANNEL_MAP_LFE* = 11 ##  Apple calls this 'LFEScreen', Msft calls this 'Low Frequency'
-  SF_CHANNEL_MAP_FRONT_LEFT_OF_CENTER* = 12 ##  Apple calls this 'Left Center'
-  SF_CHANNEL_MAP_FRONT_RIGHT_OF_CENTER * = 13 ##  Apple calls this 'Right Center
-  SF_CHANNEL_MAP_SIDE_LEFT* = 14            ##  Apple calls this 'Left Surround Direct'
-  SF_CHANNEL_MAP_SIDE_RIGHT* = 15           ##  Apple calls this 'Right Surround Direct'
-  SF_CHANNEL_MAP_TOP_CENTER* = 16           ##  Apple calls this 'Top Center Surround'
-  SF_CHANNEL_MAP_TOP_FRONT_LEFT* = 17       ##  Apple calls this 'Vertical Height Left'
-  SF_CHANNEL_MAP_TOP_FRONT_RIGHT* = 18      ##  Apple calls this 'Vertical Height Right'
-  SF_CHANNEL_MAP_TOP_FRONT_CENTER* = 19     ##  Apple calls this 'Vertical Height Center'
-  SF_CHANNEL_MAP_TOP_REAR_LEFT* = 20        ##  Apple and MS call this 'Top Back Left'
-  SF_CHANNEL_MAP_TOP_REAR_RIGHT* = 21       ##  Apple and MS call this 'Top Back Right'
-  SF_CHANNEL_MAP_TOP_REAR_CENTER* = 22      ##  Apple and MS call this 'Top Back Center'
+  SF_CHANNEL_MAP_REAR_CENTER* = 8            ##  Apple calls this 'Center Surround', Msft calls this 'Back Center'
+  SF_CHANNEL_MAP_REAR_LEFT* = 9              ##  Apple calls this 'Left Surround', Msft calls this 'Back Left'
+  SF_CHANNEL_MAP_REAR_RIGHT* = 10            ##  Apple calls this 'Right Surround', Msft calls this 'Back Right'
+  SF_CHANNEL_MAP_LFE* = 11                   ##  Apple calls this 'LFEScreen', Msft calls this 'Low Frequency'
+  SF_CHANNEL_MAP_FRONT_LEFT_OF_CENTER* = 12  ##  Apple calls this 'Left Center'
+  SF_CHANNEL_MAP_FRONT_RIGHT_OF_CENTER* = 13 ##  Apple calls this 'Right Center
+  SF_CHANNEL_MAP_SIDE_LEFT* = 14             ##  Apple calls this 'Left Surround Direct'
+  SF_CHANNEL_MAP_SIDE_RIGHT* = 15            ##  Apple calls this 'Right Surround Direct'
+  SF_CHANNEL_MAP_TOP_CENTER* = 16            ##  Apple calls this 'Top Center Surround'
+  SF_CHANNEL_MAP_TOP_FRONT_LEFT* = 17        ##  Apple calls this 'Vertical Height Left'
+  SF_CHANNEL_MAP_TOP_FRONT_RIGHT* = 18       ##  Apple calls this 'Vertical Height Right'
+  SF_CHANNEL_MAP_TOP_FRONT_CENTER* = 19      ##  Apple calls this 'Vertical Height Center'
+  SF_CHANNEL_MAP_TOP_REAR_LEFT* = 20         ##  Apple and MS call this 'Top Back Left'
+  SF_CHANNEL_MAP_TOP_REAR_RIGHT* = 21        ##  Apple and MS call this 'Top Back Right'
+  SF_CHANNEL_MAP_TOP_REAR_CENTER* = 22       ##  Apple and MS call this 'Top Back Center'
   SF_CHANNEL_MAP_AMBISONIC_B_W* = 23
   SF_CHANNEL_MAP_AMBISONIC_B_X* = 24
   SF_CHANNEL_MAP_AMBISONIC_B_Y* = 25
@@ -401,14 +401,14 @@ type
       bycopy.} = object
     time_sig_num* {.importc: "time_sig_num".}: cshort ##  any positive integer    > 0
     time_sig_den* {.importc: "time_sig_den".}: cshort ##  any positive power of 2 > 0
-    loop_mode* {.importc: "loop_mode".}: cint ##  see SF_LOOP enum
-    num_beats* {.importc: "num_beats".}: cint ##  this is NOT the amount of quarter notes !!!
-                                              ##  a full bar of 4/4 is 4 beats
-                                              ##  a full bar of 7/8 is 7 beats
-    bpm* {.importc: "bpm".}: cfloat ##  suggestion, as it can be calculated using other fields:
-                                      ##  file's length, file's sampleRate and our time_sig_den
-                                      ##  -> bpms are always the amount of _quarter notes_ per minute
-    root_key* {.importc: "root_key".}: cint   ##  MIDI note, or -1 for None
+    loop_mode* {.importc: "loop_mode".}: cint         ##  see SF_LOOP enum
+    num_beats* {.importc: "num_beats".}: cint         ##  this is NOT the amount of quarter notes !!!
+                                                      ##  a full bar of 4/4 is 4 beats
+                                                      ##  a full bar of 7/8 is 7 beats
+    bpm* {.importc: "bpm".}: cfloat                   ##  suggestion, as it can be calculated using other fields:
+                                                      ##  file's length, file's sampleRate and our time_sig_den
+                                                      ##  -> bpms are always the amount of _quarter notes_ per minute
+    root_key* {.importc: "root_key".}: cint           ##  MIDI note, or -1 for None
     future* {.importc: "future".}: array[6, cint]
 
   SF_CART_TIMER* {.importc: "SF_CART_TIMER", header: "sndfile.h",

@@ -1,6 +1,9 @@
 ## Envelope generators.
 
-import frame, math, events
+import
+  std/math,
+  events,
+  frame
 
 type
   Transition* = object

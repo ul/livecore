@@ -1,6 +1,8 @@
 ## OLS FFT transform.
 
-import math, ffi/mufft/fft
+import
+  std/math,
+  ffi/mufft/fft
 
 type Complex* = mufft_cpx
 
@@ -35,7 +37,7 @@ template defFFT*(window_size: static[Natural]) =
   ## family of types instead of a single generic type.
 
   const
-    overlap_factor = 16 # How many times to transform within a window?
+    overlap_factor = 16                   # How many times to transform within a window?
     hop_size = window_size div overlap_factor
     # Lower half of the spectrum. The upper half is just
     # the complex conjugate and does not contain any unique information.

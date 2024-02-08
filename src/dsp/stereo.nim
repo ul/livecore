@@ -1,6 +1,9 @@
 ## (Cross-)channel manipulation.
 
-import frame, math, delays
+import
+  std/math,
+  delays,
+  frame
 
 proc pan*(x: Frame, c: float): Frame =
   let l = x[0]

@@ -15,7 +15,7 @@ type
   fsw_handle* = ptr object
   fsw_event_flag* {.size: sizeof(cint).} = enum
     NoOp = 0                    # No event has occurred
-    PlatformSpecific = 1 shl 0 # Platform-specific placeholder for event type that cannot currently be mapped
+    PlatformSpecific = 1 shl 0  # Platform-specific placeholder for event type that cannot currently be mapped
     Created = 1 shl 1           # An object was created
     Updated = 1 shl 2           # An object was updated
     Removed = 1 shl 3           # An object was removed

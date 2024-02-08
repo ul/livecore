@@ -1,5 +1,6 @@
 ## Pooling makes state management easier when you don't need to micromanage state
 ## continuity.
+## TODO Pinned overloads that allow to provide a specific index to use.
 
 import
   dsp/[

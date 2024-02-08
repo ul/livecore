@@ -1,6 +1,8 @@
 ## Feedback delay lines.
 
-import frame, math
+import
+  std/math,
+  frame
 
 proc prime*(x: float, s: var float): float =
   result = s

@@ -1,6 +1,7 @@
-import std/[atomics, strutils]
-import context
-import rtmidi/rtmidi
+import
+  std/[atomics, strutils],
+  context,
+  rtmidi/rtmidi
 
 var the_ctx: ptr Context
 var devices: seq[MidiIn]
@@ -10,7 +11,7 @@ proc midi_in_callback(timestamp: float64; m: openArray[byte]) =
   case m[0]
   of 0xB0: # cc
     the_ctx.controllers[m[1]].store(m[2].float / 0x7F)
-    echo  "cc/0x", m[1].to_hex, " = ", m[2].float / 0x7F
+    echo "cc/0x", m[1].to_hex, " = ", m[2].float / 0x7F
   # notes are encoded as uint16 to atomically update both pitch and velocity
   # lower byte is pitch, and higher one is velocity
   of 0x90: # note on
@@ -24,7 +25,7 @@ proc midi_in_callback(timestamp: float64; m: openArray[byte]) =
         the_ctx.notes[j].store(m[1].uint16)
         break
   else: discard
-  # TODO log into file to be committed as a part of session
+  # TODO log into a file to be committed as a part of session
   echo "0x", m[0].to_hex, " 0x", m[1].to_hex, " 0x", m[2].to_hex
 
 proc start_midi*(ctx: ptr Context) =

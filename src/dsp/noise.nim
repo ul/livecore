@@ -1,6 +1,8 @@
 ## White, pink, brown...
 
-import frame, random
+import
+  std/random,
+  frame
 
 proc white_noise*(): float = rand(1.0)
 lift0(white_noise)

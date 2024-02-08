@@ -1,6 +1,5 @@
 import
-  parseopt,
-  strutils
+  std/[parseopt, strutils]
 
 type Params* = object
   dac_id*: int

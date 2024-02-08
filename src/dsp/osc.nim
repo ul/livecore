@@ -1,6 +1,9 @@
 ## If it cycles enough, it sounds.
 
-import frame, math, soundpipe
+import
+  std/math,
+  frame,
+  soundpipe
 
 proc saw*(freq: float, phase: var float): float =
   result = phase

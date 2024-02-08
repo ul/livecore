@@ -1,6 +1,9 @@
 ## Filters. Nuff said.
 
-import frame, math, delays
+import
+  std/math,
+  delays,
+  frame
 
 proc lpf*(x, freq: float, s: var float): float =
   ## Simple IIR filter from Wikipedia

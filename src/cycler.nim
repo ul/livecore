@@ -21,8 +21,8 @@ type Voice*[T] = object
   spans*: seq[FastTimeSpan]
   value*: T
 
-type Note* = object
-  value*: float
+type Note*[T] = object
+  value*: T
   gate*: float
   duration*: float
 
@@ -103,15 +103,15 @@ proc gate*(e: FastHap, s: var Cycler): float = e.span.gate(s)
 
 proc gate*(e: Voice, s: var Cycler): float = e.current_span(s).gate(s)
 
-proc note*[T](e: Voice[tuple[i: T, v: float]], s: var Cycler): Note =
-  Note(
+proc note*[I, V](e: Voice[tuple[i: I, v: V]], s: var Cycler): Note[V] =
+  Note[V](
     value: e.value[1],
     gate: e.gate(s),
     duration: e.duration(s)
   )
 
-proc sing*[T](s: var Cycler, voices: seq[Voice[tuple[i: T, v: float]]], instruments: openArray[(T, proc(n: Note): float)]): float =
+proc sing*[I, V](s: var Cycler, voices: seq[Voice[tuple[i: I, v: V]]], instruments: openArray[(I, proc(n: Note[V]): float)]): float =
   for voice in voices:
-    for instrument in instruments:
-      if voice.value[0] == instrument[0]:
-        result = result + instrument[1](voice.note(s))
+    for (i, f) in instruments:
+      if voice.value[0] == i:
+        result += voice.note(s).f

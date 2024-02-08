@@ -1,4 +1,11 @@
-import math, parseopt, session, strutils, times, dsp/frame, server/ffi/sndfile, server/context
+# TODO Provide a way to specify controllers and notes from the command line.
+
+import
+  std/[math, parseopt, strutils, times],
+  dsp/frame,
+  server/ffi/sndfile,
+  server/context,
+  session
 
 let t0 = epoch_time()
 

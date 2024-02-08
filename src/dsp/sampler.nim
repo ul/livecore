@@ -1,6 +1,8 @@
 ## Interpolating table reader/writer.
 
-import frame, math
+import
+  std/math,
+  frame
 
 template defSampler*(max_duration: static[Natural]) =
   ## Nim's array generics are PITA as they don't play nice with type inference

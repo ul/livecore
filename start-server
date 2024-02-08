@@ -6,7 +6,7 @@
 # on restarting server manually.
 while true; do
 	# --dac:N is output device index, defaults to the system's one.
-	# --adc:N is input device index
+	# --adc:N is input device index.
 	# Server lists indexed devices upon start.
 	nim c -r -o:target/livecore src/server.nim $@
 	sleep 1

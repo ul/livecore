@@ -1,7 +1,10 @@
 ## Anything reacting to triggers to produce something discrete/stable.
 ## This module needs a better name.
 
-import frame, delays, random
+import
+  std/random,
+  delays,
+  frame
 
 proc sample_and_hold*(x, t: float, y: var float): float =
   ## Smooth version of sample & hold borrowed from Faust.
