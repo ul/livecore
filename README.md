@@ -17,15 +17,14 @@ WIP with
 - [Nim](https://nim-lang.org) 2.0.0
 - [fswatch](http://emcrisostomo.github.io/fswatch/) 1.17.1
 - [libsndfile](http://www.mega-nerd.com/libsndfile/) 1.1.0
-- [liblo](http://liblo.sourceforge.net/) 0.31
 - [LLD](https://lld.llvm.org)
 
 On macOS:
 
 ```
-$ brew install fswatch libsndfile liblo
+$ brew install fswatch libsndfile
 or
-$ port install fswatch libsndfile liblo
+$ port install fswatch libsndfile
 ```
 
 For Nim try [choosenim](https://github.com/dom96/choosenim#choosenim).

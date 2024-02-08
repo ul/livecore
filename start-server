@@ -7,7 +7,6 @@
 while true; do
 	# --dac:N is output device index, defaults to the system's one.
 	# --adc:N is input device index
-	# --osc:PORT listen for OSC messages on port, defaults to 7770
 	# Server lists indexed devices upon start.
 	nim c -r -o:target/livecore src/server.nim $@
 	sleep 1
