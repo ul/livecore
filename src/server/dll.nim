@@ -29,6 +29,7 @@ proc load_session*(ctx: ptr Context, new_path: string) =
   # Spin-lock to ensure that we don't try to unload old lib in the middle of old
   # `audio` call.
   while ctx.in_process.load: discard
+  while ctx.in_process.load: discard
 
   ctx.stats.avg = 0.0
   ctx.stats.min = Inf

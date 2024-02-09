@@ -21,13 +21,13 @@ type Hap*[T] = object
 func duration*(e: Hap): Fraction = e.whole.get.duration
 
 func whole_or_part*(e: Hap): TimeSpan =
-  if e.whole.isSome: e.whole.get else: e.part
+  if e.whole.is_some: e.whole.get else: e.part
 
 proc with_span*(e: Hap, f: TimeSpan -> TimeSpan): Hap =
   Hap(whole: e.whole.map(f), part: f(e.part), value: e.value)
 
-proc with_value*[T](e: Hap, f: T -> T): Hap =
-  Hap(whole: e.whole, part: e.part, value: f(e.value))
+proc with_value*[T, U](e: Hap[T], f: T -> U): Hap[U] =
+  Hap[U](whole: e.whole, part: e.part, value: f(e.value))
 
 when isMainModule:
   import std/unittest

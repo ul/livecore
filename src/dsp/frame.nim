@@ -16,6 +16,12 @@ proc seconds*(t: Natural): Natural =
 proc seconds*(t: float): float =
   t * SAMPLE_RATE
 
+proc to_seconds*(samples: float): float =
+  samples * SAMPLE_PERIOD
+
+proc to_seconds*(samples: Natural): float =
+  samples.to_float.to_seconds
+
 type
   Frame* = array[CHANNELS, float]
   Controllers* = array[0x100, Atomic[float]]
@@ -197,3 +203,6 @@ const silence* = 0.0
 
 func hush*(x: float): float = 0.0
 lift1(hush)
+
+template `^`*(x: untyped): pointer =
+  cast[pointer](x)

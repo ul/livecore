@@ -1,6 +1,6 @@
 import std/[options, sequtils, sugar]
-import state, hap, euclid
-export hap
+import state, controls, hap, euclid
+export hap, controls
 
 type Query*[T] = State -> seq[Hap[T]]
 
@@ -31,11 +31,10 @@ func with_query_span[T](p: Pattern[T], f: TimeSpan -> TimeSpan): Pattern[T] =
   result.query = proc(s: State): seq[Hap[T]] =
     p.query(s.with_span(f))
 
-func with_query_span_maybe[T](p: Pattern[T], f: TimeSpan -> Option[
-    TimeSpan]): Pattern[T] =
+func with_query_span_maybe[T](p: Pattern[T], f: TimeSpan -> Option[TimeSpan]): Pattern[T] =
   result.query = proc(s: State): seq[Hap[T]] =
     let new_span = f(s.span)
-    if new_span.isSome:
+    if new_span.is_some:
       let new_state = s.set_span(new_span.get)
       p.query(new_state)
     else:
@@ -162,8 +161,7 @@ func sequence*[T](pats: openArray[Pattern[T]]): Pattern[T] = fastcat(pats)
 func pure*[T](value: T): Pattern[T] =
   ## A discrete value that repeats once per cycle.
   result.query = proc(s: State): seq[Hap[T]] =
-    s.span.span_cycles.map_it(Hap[T](whole: some(it.begin.whole_cycle),
-        part: it, value: value))
+    s.span.span_cycles.map_it(Hap[T](whole: some(it.begin.whole_cycle), part: it, value: value))
 
 func stack*[T](ps: openArray[Pattern[T]]): Pattern[T] =
   let pats = ps.to_seq
@@ -187,25 +185,24 @@ func time_cat*[T](ps: openArray[(Fraction, Pattern[T])]): Pattern[T] =
 
 func cat*[T](ps: openArray[(Fraction, Pattern[T])]): Pattern[T] = time_cat(ps)
 
-func struct*[T](p: Pattern[T], s: Pattern[float]): Pattern[T] =
+# FIXME T = Controls at the moment
+func struct*[T](p: Pattern[T], s: Pattern[int]): Pattern[T] =
   ## Apply the given structure to the pattern.
   ## `s` must consist of 0s and 1s only.
-  # TODO relying on zeros as a marker for non-events is sketchy
-  # we should filter out these events completely instead
-  # This is essentially app_right but with a func hardcoded.
   result.query = proc(st: State): seq[Hap[T]] =
     for s_hap in s.query(st):
       for p_hap in p.query(st.set_span(s_hap.whole_or_part)):
         let new_whole = s_hap.whole
         let new_part = p_hap.part.intersection(s_hap.part)
         if new_part.is_some:
-          # `*` is the hardcoded func here if you want to generalise it later
-          let new_value = p_hap.value * s_hap.value
-          result.add(Hap[T](whole: new_whole, part: new_part.get,
-              value: new_value))
+          let new_value = if s_hap.value > 0: p_hap.value else: Controls(rest: true)
+          result.add(Hap[T](whole: new_whole, part: new_part.get, value: new_value))
 
 converter to_pattern*(value: float): Pattern[float] = pure(value)
 func to_pattern*(xs: openArray[float]): Pattern[float] = xs.map(pure).sequence
+
+converter to_pattern*(value: pointer): Pattern[pointer] = pure(value)
+func to_pattern*(xs: openArray[pointer]): Pattern[pointer] = xs.map(pure).sequence
 
 # These symbols are available in Nim for operators.
 # We can use them as the alternative to Strudel's mini notation.
@@ -252,6 +249,24 @@ converter `--`*(xs: array[0..13, float]): Pattern[float] = xs.to_pattern
 converter `--`*(xs: array[0..14, float]): Pattern[float] = xs.to_pattern
 converter `--`*(xs: array[0..15, float]): Pattern[float] = xs.to_pattern
 converter `--`*(xs: array[0..16, float]): Pattern[float] = xs.to_pattern
+
+func `--`*(xs: openArray[pointer]): Pattern[pointer] = xs.to_pattern
+converter `--`*(xs: array[0..1, pointer]): Pattern[pointer] = xs.to_pattern
+converter `--`*(xs: array[0..2, pointer]): Pattern[pointer] = xs.to_pattern
+converter `--`*(xs: array[0..3, pointer]): Pattern[pointer] = xs.to_pattern
+converter `--`*(xs: array[0..4, pointer]): Pattern[pointer] = xs.to_pattern
+converter `--`*(xs: array[0..5, pointer]): Pattern[pointer] = xs.to_pattern
+converter `--`*(xs: array[0..6, pointer]): Pattern[pointer] = xs.to_pattern
+converter `--`*(xs: array[0..7, pointer]): Pattern[pointer] = xs.to_pattern
+converter `--`*(xs: array[0..8, pointer]): Pattern[pointer] = xs.to_pattern
+converter `--`*(xs: array[0..9, pointer]): Pattern[pointer] = xs.to_pattern
+converter `--`*(xs: array[0..10, pointer]): Pattern[pointer] = xs.to_pattern
+converter `--`*(xs: array[0..11, pointer]): Pattern[pointer] = xs.to_pattern
+converter `--`*(xs: array[0..12, pointer]): Pattern[pointer] = xs.to_pattern
+converter `--`*(xs: array[0..13, pointer]): Pattern[pointer] = xs.to_pattern
+converter `--`*(xs: array[0..14, pointer]): Pattern[pointer] = xs.to_pattern
+converter `--`*(xs: array[0..15, pointer]): Pattern[pointer] = xs.to_pattern
+converter `--`*(xs: array[0..16, pointer]): Pattern[pointer] = xs.to_pattern
 
 func `*`*[T](p: Pattern[T], factor: Fraction): Pattern[T] = p.fast(factor)
 func `/`*[T](p: Pattern[T], factor: Fraction): Pattern[T] = p.slow(factor)
@@ -325,11 +340,52 @@ func euclid*[T](p: Pattern[T], pulses, steps: int, rotation: int = 0): Pattern[T
   ## They were described in 2004 by Godfried Toussaint, a canadian computer scientist.
   ## Euclidian rhythms are really useful for computer/algorithmic music because they can accurately
   ## describe a large number of rhythms used in the most important music world traditions.
-  p.struct(euclid.euclid(pulses, steps, rotation).map_it(
-      it.to_float.pure).sequence)
+  p.struct(euclid.euclid(pulses, steps, rotation).map_it(it.pure).sequence)
 
-proc query_values*[T](p: Pattern[T], s: State): seq[T] =
+func query_values*[T](p: Pattern[T], s: State): seq[T] =
   p.query(s).map_it(it.value)
+
+func `>>`*(left: Pattern[Controls], right: Pattern[Controls]): Pattern[Controls] =
+  ## Take the structure from the left pattern, and merge controls from the left to right.
+  result.query = proc(st: State): seq[Hap[Controls]] =
+    for hap_left in left.query(st):
+      for hap_right in right.query(st.set_span(hap_left.whole_or_part)):
+        let new_whole = hap_left.whole
+        let new_part = hap_left.part.intersection(hap_right.part)
+        if new_part.is_some:
+          let new_value = hap_left.value.right_merge(hap_right.value)
+          result.add(Hap[Controls](whole: new_whole, part: new_part.get, value: new_value))
+
+func `<<`*(left: Pattern[Controls], right: Pattern[Controls]): Pattern[Controls] =
+  ## Take the structure from the right pattern, and merge controls from the left to right.
+  ## Note that we can't express it as right >> left due to the value merge direction.
+  result.query = proc(st: State): seq[Hap[Controls]] =
+    for hap_right in right.query(st):
+      for hap_left in left.query(st.set_span(hap_right.whole_or_part)):
+        let new_whole = hap_right.whole
+        let new_part = hap_right.part.intersection(hap_left.part)
+        if new_part.is_some:
+          let new_value = hap_left.value.right_merge(hap_right.value)
+          result.add(Hap[Controls](whole: new_whole, part: new_part.get, value: new_value))
+
+func `><`*(left: Pattern[Controls], right: Pattern[Controls]): Pattern[Controls] =
+  ## Take the structure from both patterns, and merge controls from the left to right.
+  result.query = proc(st: State): seq[Hap[Controls]] =
+    for hap_left in left.query(st):
+      for hap_right in right.query(st):
+        let new_part = hap_left.part.intersection(hap_right.part)
+        if hap_left.whole.is_some and hap_right.whole.is_some and new_part.is_some:
+          let new_whole = hap_left.whole.get.intersection(hap_right.whole.get)
+          let new_value = hap_left.value.right_merge(hap_right.value)
+          result.add(Hap[Controls](whole: new_whole, part: new_part.get, value: new_value))
+
+template ctrl(attr: untyped, T: typedesc) =
+  func attr*(p: Pattern[T]): Pattern[Controls] =
+    p.with_value(func(x: T): Controls = Controls(attr: some(x)))
+
+ctrl(sound, pointer)
+ctrl(note, float)
+ctrl(gain, float)
 
 when isMainModule:
   import std/unittest
