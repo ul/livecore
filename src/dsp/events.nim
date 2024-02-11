@@ -26,6 +26,14 @@ proc timer*(s: var float): float =
   s += SAMPLE_PERIOD
 lift0(timer, float)
 
+proc trig_on_change*(x: float, s: var float): float =
+  ## Trigger when `x` changes.
+  if unlikely(x != s):
+    s = x
+    return 1.0
+  return 0.0
+lift1(trig_on_change, float)
+
 proc stopwatch*(t: float, s: var float): float =
   if unlikely(t > 0.0):
     s = 0.0

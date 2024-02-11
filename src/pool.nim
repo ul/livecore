@@ -52,6 +52,7 @@ type
     sequence: array[medium_pool, int]
     transition: array[medium_pool, Transition]
     wpkorg35: array[medium_pool, WPKorg35]
+    fadeout: array[medium_pool, FadeOut]
     zitarev: array[medium_pool, ZitaRev]
   Index = object
     sample,
@@ -91,6 +92,7 @@ type
       sequence,
       transition,
       wpkorg35,
+      fadeout,
       zitarev: int
   Pool* = object
     data: Data
@@ -164,6 +166,7 @@ def1(saw, sample)
 def1(tri, sample)
 def1(square, sample)
 def1(zero_cross_up, sample)
+def1(trig_on_change, sample)
 def2(blsquare)
 def2(chaos_noise)
 def2(detune_osc, fms)
@@ -202,6 +205,7 @@ def3(fm_blsaw)
 def3(fm_bltriangle)
 def3(fm_blsquare)
 def3(gaussian, sample)
+def3(fadeout)
 def4(autowah)
 def4(conv)
 def4(peaklim)
