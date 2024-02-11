@@ -99,11 +99,11 @@ proc schedule*(s: var Cycler, p: Pattern[Controls], Δt: float, max_cps: float =
     selected.sort(by_begin)
     s.pending_events.add(selected)
 
-proc process*(s: var Cycler, state: pointer): Frame =
+proc process*[T](s: var Cycler, state: T): Frame =
   for e in s.pending_events.mitems:
     if e.value.sound.is_none or e.value.sound.get.is_nil:
       continue
     e.value.duration = e.duration(s)
     e.value.gate = e.gate(s)
-    let f = cast[proc(event: Controls, state: pointer): Frame {.nimcall.}](e.value.sound.get)
+    let f = cast[proc(event: Controls, state: T): Frame {.nimcall.}](e.value.sound.get)
     result = result + f(e.value, state)
