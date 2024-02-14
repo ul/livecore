@@ -22,7 +22,7 @@ template prolly_echo(p: float, s: untyped) =
     echo s
 
 proc inst0(e: Controls, s: var State): Frame =
-  let x = e.note.get(silence).osc
+  let x = e.note.get(silence).osc * pink_noise().cheb2
   let a = e.attack.get(1/64).tline(0.001).min(0.25*e.duration).max(1/64)
   let d = 2*a
   let sus = 0.5
@@ -32,7 +32,7 @@ proc inst0(e: Controls, s: var State): Frame =
     .mul(e.gain.get(1.0))
 
 proc inst1(e: Controls, s: var State): Frame =
-  let x = e.note.get(silence).fm_osc(1/3, 1/3)
+  let x = e.note.get(silence).fm_osc(1/3, 1/3) * pink_noise().cheb2
   let a = e.attack.get(1/64).tline(0.001).min(0.5*e.duration).max(1/64)
   e.gate
     .impulse(a)
@@ -73,8 +73,8 @@ proc audio*(s: var State, m: var Midi, input: Frame): Frame {.nimcall, exportc, 
   let choir = process[var State](s.cycler, s).fadeout(s.fdt.to_float.trig_on_change, 0.01)
 
   choir
-    .ff(( cycle_dur * 1.5 ) %% 1/4, 0.5, s.looong)
-    .ff(( cycle_dur * 2.25) %% 1/8, 0.5, s.looong) # deliberately reusing delay memory for moar strangeness
+    .ff(( cycle_dur * 4.pow(m/0x13) ) %% 1/32, 0.5, s.looong)
+    .ff(( cycle_dur * 2 * 4.pow(m/0x17)) %% 1/16, 0.5, s.looong) # deliberately reusing delay memory for moar strangeness
     .wp_korg35(c6, 0.95, 1.0)
     .bqnotch_bw(315.0, 0.5)
     .bqnotch_bw(640.0, 1.0)

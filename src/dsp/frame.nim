@@ -205,3 +205,61 @@ lift1(hush)
 
 template `^`*(x: untyped): pointer =
   cast[pointer](x)
+
+func cheb2*(x: float): float =
+  ## T_2(x) = 2x^2 - 1
+  2.0*x*x - 1.0
+
+func cheb3*(x: float): float =
+  ## T_3(x) = 4x^3 - 3x
+  4.0*x*x*x - 3.0*x
+
+func cheb4*(x: float): float =
+  ## T_4(x) = 8x^4 - 8x^2 + 1
+  8.0*x*x * (x*x - 1.0) + 1.0
+
+func cheb5*(x: float): float =
+  ## T_5(x) = 16x^5 - 20x^3 + 5x
+  let x2 = x*x
+  let x3 = x2*x
+  16.0*x3*x2 - 20.0*x3 + 5.0*x
+
+func cheb6*(x: float): float =
+  ## T_6(x) = 32x^6 - 48x^4 + 18x^2 - 1
+  let x2 = x*x
+  let x4 = x2*x2
+  32.0*x4*x2 - 48.0*x4 + 18.0*x2 - 1.0
+
+func cheb7*(x: float): float =
+  ## T_7(x) = 64x^7 - 112x^5 + 56x^3 - 7x
+  let x2 = x*x
+  let x3 = x2*x
+  let x5 = x3*x2
+  let x7 = x5*x2
+  64.0*x7 - 112.0*x5 + 56.0*x3 - 7.0*x
+
+func cheb8*(x: float): float =
+  ## T_8(x) = 128x^8 - 256x^6 + 160x^4 - 32x^2 + 1
+  let x2 = x*x
+  let x4 = x2*x2
+  let x6 = x4*x2
+  let x8 = x4*x4
+  128.0*x8 - 256.0*x6 + 160.0*x4 - 32.0*x2 + 1.0
+
+func cheb9*(x: float): float =
+  ## T_9(x) = 256x^9 - 576x^7 + 432x^5 - 120x^3 + 9x
+  let x2 = x*x
+  let x3 = x2*x
+  let x5 = x3*x2
+  let x7 = x5*x2
+  let x9 = x7*x2
+  256.0*x9 - 576.0*x7 + 432.0*x5 - 120.0*x3 + 9.0*x
+
+lift1(cheb2)
+lift1(cheb3)
+lift1(cheb4)
+lift1(cheb5)
+lift1(cheb6)
+lift1(cheb7)
+lift1(cheb8)
+lift1(cheb9)
