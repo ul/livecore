@@ -15,7 +15,7 @@ type
     cycler: Cycler
     looong: array[CHANNELS, Delay300]
     atk: float
-    fdt: float
+    fdt: int
 
 template prolly_echo(p: float, s: untyped) =
   if rand(1.0) < p:
@@ -31,6 +31,14 @@ proc inst0(e: Controls, s: var State): Frame =
     .mul(x)
     .mul(e.gain.get(1.0))
 
+proc inst1(e: Controls, s: var State): Frame =
+  let x = e.note.get(silence).bl_triangle * white_noise()
+  let a = e.attack.get(1/64).min(0.2*e.duration).max(1/64)
+  e.gate
+    .impulse(a)
+    .mul(x)
+    .mul(e.gain.get(1.0))
+
 proc control*(s: var State, m: Midi, frame_count: int) {.nimcall, exportc, dynlib.} =
   ## This is called each block before the audio is rendered.
   ## Many audio functions can be used here but keep in mind ×frame_count slowdown.
@@ -39,24 +47,27 @@ proc control*(s: var State, m: Midi, frame_count: int) {.nimcall, exportc, dynli
   let b = (frame_count/23).osc.biscale(1/32, 1)
   let c = (frame_count/13).osc.biscale(1/32, 1)
 
+  let insts = [^inst0, ^inst1]
+
+  if rand(1.0) < 0.005:
+    s.fdt += 1
+
   let p1 = [
     note(c4) >> attack(a),
-    note(e4) >> attack(b),
+    note([e4, e5]) >> attack(b),
     note(g4) >> attack(c),
   ]
-  let p = [p1.euclid(3, 8), p1.stack.euclid(3, 4)].stack >> sound(^inst0) >> gain(0.8)
-
-  s.fdt = 1
-  s.cycler.schedule(p, frame_count.to_seconds, 5.0)
+  let p = [p1.euclid(3, 8), p1.stack.euclid(3, 9)].stack >> sound(insts[s.fdt mod insts.len]) >> gain(0.8)
+  s.cycler.schedule(p, frame_count.to_seconds, 1.0)
 
 proc audio*(s: var State, m: Midi, input: Frame): Frame {.nimcall, exportc, dynlib.} =
   ## This is called each frame to render the audio.
   s.pool.reset
 
-  let cycle_dur = (1/60).osc.biscale(1.0, 5.0) # seconds
+  let cycle_dur = (1/60).tri.biscale(2.0, 10.0) # seconds
   s.cycler.tick(cycle_dur.recip)
 
-  let choir = process[var State](s.cycler, s).fadeout(s.fdt.trig_on_change, 0.01)
+  let choir = process[var State](s.cycler, s).fadeout(s.fdt.to_float.trig_on_change, 0.01)
 
   choir
     .ff(cycle_dur * 1.5, 0.5, s.looong)
