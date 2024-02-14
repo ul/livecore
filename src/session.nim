@@ -40,7 +40,7 @@ proc inst1(e: Controls, s: var State): Frame =
     .mul(0.5)
     .mul(e.gain.get(1.0))
 
-proc control*(s: var State, m: Midi, frame_count: int) {.nimcall, exportc, dynlib.} =
+proc control*(s: var State, m: var Midi, frame_count: int) {.nimcall, exportc, dynlib.} =
   ## This is called each block before the audio is rendered.
   ## Many audio functions can be used here but keep in mind ×frame_count slowdown.
 
@@ -63,7 +63,7 @@ proc control*(s: var State, m: Midi, frame_count: int) {.nimcall, exportc, dynli
   let p = p1.euclid(3, 8) >> sound(insts[s.fdt mod insts.len]) >> gain(0.2)
   s.cycler.schedule(p, frame_count.to_seconds, 1.0)
 
-proc audio*(s: var State, m: Midi, input: Frame): Frame {.nimcall, exportc, dynlib.} =
+proc audio*(s: var State, m: var Midi, input: Frame): Frame {.nimcall, exportc, dynlib.} =
   ## This is called each frame to render the audio.
   s.pool.reset
 

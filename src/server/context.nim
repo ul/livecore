@@ -3,8 +3,8 @@ import
   ../dsp/frame
 
 type
-  Audio* = proc(arena: pointer, m: Midi, input: Frame): Frame {.nimcall.}
-  Control* = proc(arena: pointer, m: Midi, frame_count: int) {.nimcall.}
+  Audio* = proc(arena: pointer, m: var Midi, input: Frame): Frame {.nimcall.}
+  Control* = proc(arena: pointer, m: var Midi, frame_count: int) {.nimcall.}
   Load* = proc(arena: pointer) {.nimcall.}
   Unload* = proc(arena: pointer) {.nimcall.}
   Stats* = object
@@ -22,9 +22,9 @@ type
     lib*: LibHandle
     stats*: Stats
 
-proc default_audio*(arena: pointer, m: Midi, input: Frame): Frame = 0.0
+proc default_audio*(arena: pointer, m: var Midi, input: Frame): Frame = 0.0
 
-proc default_control*(arena: pointer, m: Midi, frame_count: int) =
+proc default_control*(arena: pointer, m: var Midi, frame_count: int) =
   discard
 
 proc new_context*(arena_mb: int): ptr Context =
