@@ -101,7 +101,7 @@ proc schedule*(s: var Cycler, p: Pattern[Controls], Δt: float, max_cps: float =
 
 proc process*[T](s: var Cycler, state: T): Frame =
   for e in s.pending_events.mitems:
-    if e.value.sound.is_none or e.value.sound.get.is_nil:
+    if e.value.rest or e.value.sound.is_none or e.value.sound.get.is_nil:
       continue
     e.value.duration = e.duration(s)
     e.value.gate = e.gate(s)

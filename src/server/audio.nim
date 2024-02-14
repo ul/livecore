@@ -27,7 +27,7 @@ proc data_callback(device, output, input: pointer, frame_count: cuint) {.cdecl.}
   let ptr_output = cast[int](output)
   let ptr_input = cast[int](input)
 
-  control(arena, ctx.controllers, ctx.notes, cast[int](frame_count))
+  control(arena, ctx.midi, cast[int](frame_count))
 
   for frame in 0..<frame_count.int:
     var input_frame: array[CHANNELS, float]
@@ -35,7 +35,7 @@ proc data_callback(device, output, input: pointer, frame_count: cuint) {.cdecl.}
       for channel in 0..<CHANNELS:
         input_frame[channel] = cast[ptr float32](ptr_input + (frame*CHANNELS + channel)*(sizeof float32))[]
 
-    let samples = audio(arena, ctx.controllers, ctx.notes, input_frame)
+    let samples = audio(arena, ctx.midi, input_frame)
     for channel in 0..<CHANNELS:
       var ptr_sample = cast[ptr float32](ptr_output + (frame*CHANNELS + channel)*(sizeof float32))
       ptr_sample[] = samples[channel].float32.min(1.0).max(-1.0)

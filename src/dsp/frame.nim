@@ -24,8 +24,7 @@ proc to_seconds*(samples: Natural): float =
 
 type
   Frame* = array[CHANNELS, float]
-  Controllers* = array[0x100, Atomic[float]]
-  Notes* = array[0x100, Atomic[float]]
+  Midi* = array[0x100, Atomic[float]]
 
 converter to_frame*(x: float): Frame =
   for i in 0..<CHANNELS:

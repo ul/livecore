@@ -102,6 +102,8 @@ var pool: ptr Pool
 
 proc init*(s: var Pool) =
   pool = s.addr
+
+proc reset*(s: var Pool) =
   s.index.addr.zero_mem(Index.size_of)
 
 template def0(op, t) =

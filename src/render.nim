@@ -1,4 +1,4 @@
-# TODO Provide a way to specify controllers and notes from the command line.
+# TODO Provide a way to specify midi from the command line.
 
 import
   std/[math, parseopt, strutils, times],
@@ -48,8 +48,7 @@ cast[Load](load)(state)
 const frames_chunk = 60 * SAMPLE_RATE_INT
 let buffer = alloc0(frames_chunk * CHANNELS * cdouble.sizeof)
 
-var cc: Controllers
-var notes: Notes
+var midi: Midi
 var input: Frame
 
 var frames_left = frames
@@ -60,8 +59,8 @@ while frames_left > 0:
   var frames_to_write = min(frames_left, frames_chunk)
   for frame in 0..<frames_to_write:
     if frame mod control_frame_count == 0:
-      cast[Control](control)(state, cc, notes, control_frame_count)
-    let data = cast[Audio](audio)(state, cc, notes, input)
+      cast[Control](control)(state, midi, control_frame_count)
+    let data = cast[Audio](audio)(state, midi, input)
     for channel in 0..<CHANNELS:
       let i = (channel + frame * CHANNELS).int
       let offset = cast[int](buffer) + i * cdouble.sizeof

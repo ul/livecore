@@ -7,19 +7,16 @@ var the_ctx: ptr Context
 var devices: seq[MidiIn]
 
 proc midi_in_callback(timestamp: float64; m: openArray[byte]) =
-  let n = the_ctx.notes.len
   case m[0]
   of 0xB0: # cc
-    the_ctx.controllers[m[1]].store(m[2].float / 0x7F)
-    echo "cc/0x", m[1].to_hex, " = ", m[2].float / 0x7F
-  # notes are encoded as uint16 to atomically update both pitch and velocity
-  # lower byte is pitch, and higher one is velocity
+    the_ctx.midi[m[1]].store(m[2].float / 0x7F)
+    echo "m.0x", m[1].to_hex, " = ", m[2].float / 0x7F
   of 0x90: # note on
-    the_ctx.notes[m[1]].store(1)
-    echo "n[0x", m[1].to_hex, "] = 1"
+    the_ctx.midi[m[1]].store(1)
+    echo "m[0x", m[1].to_hex, "] = 1"
   of 0x80: # note off
-    the_ctx.notes[m[1]].store(0)
-    echo "n[0x", m[1].to_hex, "] = 0"
+    the_ctx.midi[m[1]].store(0)
+    echo "m[0x", m[1].to_hex, "] = 0"
   else: discard
   # TODO log into a file to be committed as a part of session
   echo "0x", m[0].to_hex, " 0x", m[1].to_hex, " 0x", m[2].to_hex

@@ -386,6 +386,7 @@ template ctrl(attr: untyped, T: typedesc) =
 ctrl(sound, pointer)
 ctrl(note, float)
 ctrl(gain, float)
+ctrl(attack, float)
 
 when isMainModule:
   import std/unittest
