@@ -16,8 +16,9 @@ type
     looong: array[CHANNELS, Delay300]
     atk: float
     fdt: int
+    fft: array[CHANNELS, FFT4096]
 
-template prolly_echo(p: float, s: untyped) =
+template prolly_echo(p: float, s: varargs[untyped]) =
   if rand(1.0) < p:
     echo s
 
@@ -58,7 +59,7 @@ proc control*(s: var State, m: var Midi, frame_count: int) {.nimcall, exportc, d
     !Controls(rest: true),
     note([!e4, c5].stack) >> attack(b),
     !Controls(rest: true),
-    note(g4) >> attack(c),
+    note([!g4, e5].stack) >> attack(c),
   ]
   let p = p1.euclid(3, 8) >> sound(insts[s.fdt mod insts.len]) >> gain(0.2)
   s.cycler.schedule(p, frame_count.to_seconds, 1.0)
@@ -70,14 +71,32 @@ proc audio*(s: var State, m: var Midi, input: Frame): Frame {.nimcall, exportc, 
   let cycle_dur = (1/120).saw.biscale(10.0, 30.0) # seconds
   s.cycler.tick(cycle_dur.recip)
 
-  let choir = process[var State](s.cycler, s).fadeout(s.fdt.to_float.trig_on_change, 0.01)
+  let k = (m/0x1B)
 
-  choir
-    .ff(( cycle_dur * 4.pow(m/0x13) ) %% 1/32, 0.5, s.looong)
-    .ff(( cycle_dur * 2 * 4.pow(m/0x17)) %% 1/16, 0.5, s.looong) # deliberately reusing delay memory for moar strangeness
-    .wp_korg35(c6, 0.95, 1.0)
-    .bqnotch_bw(315.0, 0.5)
-    .bqnotch_bw(640.0, 1.0)
+  let choir = process[var State](s.cycler, s)
+    .fadeout(s.fdt.to_float.trig_on_change, 0.01)
+    # .wp_korg35(c7, 0.95, 1.0)
+    # .bqhpf(100.0, 0.7071)
+    # .bqhpf(30.0, 0.7071)
+    .ff(( cycle_dur * 4.pow(m/0x13) ).quantize(1/32).tline(1/8), k, s.looong)
+    .ff(( cycle_dur * 2 * 4.pow(m/0x17)).quantize(1/16).tline(1/8), k, s.looong) # deliberately reusing delay memory for moar strangeness
+
+  var signal: Frame = choir
+
+  # for i in 0..CHANNELS-1:
+  #   signal[i] = choir[i].resynth(s.fft[i]):
+  #     for f in synthesis_frequencies.mitems:
+  #       f += f.mul(0.5).osc.mul(f/128)
+  #     var sum = 0.0
+  #     for a in synthesis_magnitudes:
+  #       sum += a
+  #     prolly_echo(0.001, "sum: ", sum)
+  #     if sum > 1000.0:
+  #       for a in synthesis_magnitudes.mitems:
+  #         a = a.sqrt
+
+  signal
+    .wp_korg35(c7, 0.95, 1.0)
     .bqhpf(100.0, 0.7071)
     .bqhpf(30.0, 0.7071)
     .zita_rev(level = 0)
@@ -93,6 +112,8 @@ proc load*(s: var State) {.nimcall, exportc, dynlib.} =
   # s.addr.zero_mem(State.size_of)
   s.pool.init
   sp_create()
+  for i in 0..CHANNELS-1:
+    s.fft[i].init
 
 # Clean up any garbage allocated outside of the State arena.
 # Beware access to the state is not guarded and may happen simultaneously with `control` or `audio`.

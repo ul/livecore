@@ -9,8 +9,8 @@ import
   ]
 
 const
-  large_pool = 0x100
-  medium_pool = 0x80
+  large_pool = 0x400
+  medium_pool = 0x100
   small_pool = 0x40
 
 type
