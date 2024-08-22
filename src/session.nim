@@ -10,9 +10,12 @@ import
   pool,
   control
 
+defDelay(300)
+
 type State* = object
   pool: Pool
-  convos: array[0x10, Conv8192x64]
+  convos: array[0x04, Conv8192x64]
+  delays: array[0x08, Delay300]
 
 proc sum(xs: openArray[float]): float =
   for x in xs:
@@ -50,7 +53,7 @@ proc audio*(
       sig.mul(env)
 
   # let root = (1 / 512).osc.add((1 / 300).osc).mul(0.5).biscale(12.0, 48.0).quantize(8.0)
-  let root = rline(30.0).scale(24.0, 48.0).quantize(4.0)
+  let root = rline(30.0).scale(36.0, 72.0).quantize(4.0)
 
   let voices = [
     voice(
@@ -115,7 +118,12 @@ proc audio*(
   .mul(0.25)
   .process(pinknoise().decim(0.95).mul(0.05), s.convos[0])
   .process(k1, s.convos[2])
-  .long_ff((1 / 120).tri.biscale(6, 30), 0.25)
+  # .fb(root.recip.tri.scale(1, 8), 0.3, s.delays[7]) # turn it on some time later
+  .ff(13, 0.4, s.delays[4])
+  .ff(29, 0.4, s.delays[3])
+  .ff(59, 0.4, s.delays[2])
+  .ff(127, 0.4, s.delays[1])
+  .ff(257, 0.4, s.delays[0])
   #
   .dc_block
   .bigverb(0.8, @(root + 48.0))
