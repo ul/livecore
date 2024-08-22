@@ -121,7 +121,7 @@ proc audio*(
   .mul(0.25)
   .process(pinknoise().decim(0.95).mul(0.05), s.convos[0])
   .process(k1, s.convos[2])
-  # .fb(root.recip.tri.scale(1, 8), 0.3, s.delays[6])
+  # .layer(it.fb(root.recip.tri.scale(1, 8), 0.3, s.delays[6]))
   # .layer(it.fb(root.mul(2).recip.tri.scale(1 / 8, 120), 0.3, s.delays[7]))
   # .ff(13, 0.3, s.delays[4])
   # .mul(0.9)
