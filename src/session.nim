@@ -12,6 +12,10 @@ import
 
 defDelay(300)
 
+template layer(x, f): float =
+  let it {.inject.} = x
+  it.add(f)
+
 type State* = object
   pool: Pool
   convos: array[0x04, Conv8192x64]
@@ -117,8 +121,7 @@ proc audio*(
   .mul(0.25)
   .process(pinknoise().decim(0.95).mul(0.05), s.convos[0])
   .process(k1, s.convos[2])
-  # .fb(root.recip.tri.scale(1, 8), 0.3, s.delays[7]) # turn it on some time later
-  # .fb(root.mul(2).recip.tri.scale(1 / 8, 300), 0.5, s.delays[7]) # turn it on some time later
+  .layer(it.fb(root.mul(2).recip.tri.scale(1 / 8, 120), 0.3, s.delays[7]))
   .ff(13, 0.4, s.delays[4])
   .mul(0.8)
   .ff(29, 0.4, s.delays[3])
