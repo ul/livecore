@@ -46,7 +46,6 @@ proc audio*(
       let durc = durs.choose(cycle.dmetro)
       let dm = durc.mul(4.0).dmetro.maytrig(0.5)
       let dur = durc.sh(dm)
-      # let env = dm.adsr(0.1*dur, 0.1*dur, 0.9, 0.8*dur)
       let env = dm.gaussian(0.5 * dur, (1 / 40).saw.mul(1 / 32).osc.biscale(0.05, 0.2))
       sig.mul(env)
 
@@ -109,11 +108,6 @@ proc audio*(
     .mul(whitenoise().scale(1.0, 3.0).dmetro.impulse(0.02))
     .mul(0.001)
 
-  let k2 = @(root + 12.0)
-    .tline(1.0).tri
-    .mul(whitenoise().scale(0.30, 0.45).dmetro.impulse(0.05))
-    .mul(0.001)
-
   silence
   .add(voices[0])
   .add(voices[1])
@@ -121,7 +115,8 @@ proc audio*(
   .mul(0.25)
   .process(pinknoise().decim(0.95).mul(0.05), s.convos[0])
   .process(k1, s.convos[2])
-  # .process(k2, s.convos[1])
+  .long_ff((1 / 120).tri.biscale(6, 30), 0.25)
+  #
   .dc_block
   .bigverb(0.8, @(root + 48.0))
   .wpkorg35(@(root + 36.0), 0.95, 0.5)
