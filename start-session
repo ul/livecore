@@ -42,7 +42,7 @@ echo "All set, make sure server is running and edit src/session.nim to make some
 # too. We also have to randomize the naming and remove unloaded libs to
 # make it work.
 
-fswatch -o src | while read num; do
+fswatch --event=Created --event=Updated -e flycheck -o src | while read num; do
 	rm target/session.so.*
 	nim c --app:lib -o:target/session.so.$RANDOM src/session.nim && git commit -am "$(date)"
 done

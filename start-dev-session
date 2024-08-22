@@ -13,7 +13,7 @@
 rm target/session.so.*
 nim c --app:lib -o:target/session.so.$RANDOM src/session.nim
 
-fswatch -o src | while read num; do
+fswatch --event=Created --event=Updated -e flycheck -o src | while read num; do
 	rm target/session.so.*
 	nim c --app:lib -o:target/session.so.$RANDOM src/session.nim
 done

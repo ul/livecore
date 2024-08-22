@@ -6,7 +6,6 @@ import
 
 const TARGET_PATH = "./target"
 const SESSION_FILTER = "session\\.so\\.[0-9]+$"
-const ALL_FILTER = ".*"
 const SESSION_GLOB = TARGET_PATH & "/session.so.*"
 
 proc find_newest_session(): string =
@@ -34,12 +33,8 @@ proc watch_session*(ctx: ptr Context) =
   if fsw.fsw_add_path(TARGET_PATH) != 0:
     quit "Failed to add target to watch paths."
 
-  var fsw_filter1 = fsw_cmonitor_filter(text: SESSION_FILTER, filter_type: fsw_filter_type.filter_include, case_sensitive: false, extended: true)
-  if fsw.fsw_add_filter(fsw_filter1) != 0:
-    quit "Failed to add watch filter."
-
-  var fsw_filter2 = fsw_cmonitor_filter(text: ALL_FILTER, filter_type: fsw_filter_type.filter_exclude, case_sensitive: false, extended: true)
-  if fsw.fsw_add_filter(fsw_filter2) != 0:
+  var fsw_filter = fsw_cmonitor_filter(text: SESSION_FILTER, filter_type: fsw_filter_type.filter_include, case_sensitive: false, extended: true)
+  if fsw.fsw_add_filter(fsw_filter) != 0:
     quit "Failed to add watch filter."
 
   ctx.load_newest_session
