@@ -52,7 +52,7 @@ proc audio*(
       let env = dm.gaussian(0.5 * dur, (1 / 40).saw.mul(1 / 32).osc.biscale(0.05, 0.2))
       sig.mul(env)
 
-  let root = rline(30.0).scale(36.0, 72.0).quantize(4.0)
+  let root = rline(30.0).scale(36.0, 60.0).quantize(4.0)
 
   let voices = [
     voice(
