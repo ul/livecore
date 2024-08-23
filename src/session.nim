@@ -57,7 +57,7 @@ proc audio*(
       let env = dm.gaussian(0.5 * dur, (1 / 40).saw.mul(1 / 32).osc.biscale(0.05, 0.2))
       sig.mul(env)
 
-  let root = rline(30.0).scale(36.0, 60.0).quantize(4.0)
+  let root = rline(30.0).scale(36.0, 72.0).quantize(4.0)
 
   let voices = [
     voice(
@@ -120,27 +120,31 @@ proc audio*(
   .add(voices[1])
   .add(voices[2])
   .mul(0.2)
-  # .process(pinknoise().decim(0.95).mul(0.05), s.convos[0])
-  # .process(k1, s.convos[2])
+  .layer(
+    it
+    .process(pinknoise().decim(0.95).mul(0.05), s.convos[0])
+    .process(k1, s.convos[2])
+    .mul(0.5)
+  )
   .add(
     whitenoise()
-    .mul(90.osc)
-    .mul(80.saw)
-    .bqlpf(100, 0.7071)
-    .mul(2.0)
-    .mul((1 / 120).osc.biscale(4, 32).dmetro.impulse(1 / 8))
+    .add(@(root - 12).saw)
+    .mul(@(root - 12).osc)
+    .bqlpf(@(root - 8), 0.7071)
+    .mul(0.30)
+    .mul((1 / 120).osc.biscale(4, 32).dmetro.adsr(1 / 16, 0, 1.0, 1 / 8))
     .fb(1 / 16, 0.7071)
     .fb(1 / 2, 0.7071)
   )
   .add(
     whitenoise()
     .bqhpf(@(root + 36), 0.7071)
-    .mul(0.5)
+    .mul(0.87)
     .mul(30.rline.scale(8, 16).dmetro.impulse(0.01))
-    .long_fb(30.rline.scale(4, 20), 0.9)
+    .long_fb(30.rline.scale(4, 20), 0.95)
   )
-  # .layer(it.fb(root.recip.mul(5).tri.biscale(1, 8), 0.5, s.delays[6]))
-  # .layer(it.fb(root.mul(2).recip.tri.biscale(1 / 8, 120), 0.5, s.delays[7]))
+  # .layer(it.fb(root.recip.mul(5).tri.biscale(1, 8), 0.5, s.delays[6]).mul(0.4))
+  # .layer(it.fb(root.recip.tri.biscale(1 / 8, 120), 0.5, s.delays[7]).mul(0.5))
   # .ff(13, 0.5, s.delays[4])
   # .mul(0.87)
   # .ff(29, 0.5, s.delays[3])
