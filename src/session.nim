@@ -119,7 +119,7 @@ proc audio*(
   .add(voices[0])
   .add(voices[1])
   .add(voices[2])
-  .mul(0.25)
+  .mul(0.2)
   .process(pinknoise().decim(0.95).mul(0.05), s.convos[0])
   .process(k1, s.convos[2])
   .add(
@@ -134,7 +134,7 @@ proc audio*(
   )
   .add(
     whitenoise()
-    .bqhpf(@(root + 24), 0.7071)
+    .bqhpf(@(root + 36), 0.7071)
     .mul(0.5)
     .mul(30.rline.scale(8, 16).dmetro.impulse(0.01))
     .long_fb(30.rline.scale(4, 20), 0.9)
