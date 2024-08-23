@@ -13,8 +13,9 @@ import
 defDelay(300)
 
 template layer(x, f): float =
-  let it {.inject.} = x
-  it.add(f)
+  block:
+    let it {.inject.} = x
+    it.add(f)
 
 type State* = object
   pool: Pool
