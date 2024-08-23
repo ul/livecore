@@ -124,7 +124,7 @@ proc audio*(
     it
     .process(pinknoise().decim(0.95).mul(0.05), s.convos[0])
     .process(k1, s.convos[2])
-    .mul(0.5)
+    .mul(0.2)
   )
   .add(
     whitenoise()
@@ -139,7 +139,7 @@ proc audio*(
   .add(
     whitenoise()
     .bqhpf(@(root + 36), 0.7071)
-    .mul(0.87)
+    .mul(0.5)
     .mul(30.rline.scale(8, 16).dmetro.impulse(0.01))
     .long_fb(30.rline.scale(4, 20), 0.95)
   )
@@ -151,10 +151,8 @@ proc audio*(
   # .mul(0.87)
   # .ff(59, 0.5, s.delays[2])
   # .mul(0.87)
-  .ff(127, 0.5, s.delays[1])
-  .mul(0.87)
-  .ff(257, 0.5, s.delays[0])
-  .mul(0.87)
+  .layer(it.fb(127, 0.5, s.delays[1]).mul(0.5))
+  .layer(it.fb(257, 0.5, s.delays[0]).mul(0.5))
   #
   .dc_block
   .bigverb(0.8, @(root + 48.0))
